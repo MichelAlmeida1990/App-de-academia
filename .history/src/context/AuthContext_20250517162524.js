@@ -1,13 +1,11 @@
-import React, { createContext, useState, useEffect } from 'react';
+// src/context/AuthContext.js
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import LocalStorageService from '../services/LocalStorageService';
 
-// Criar o contexto
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-// Hook personalizado para usar o contexto
-export const useAuth = () => React.useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);
 
-// Provedor do contexto
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [user, setUser] = useState(null);
@@ -93,7 +91,7 @@ export const AuthProvider = ({ children }) => {
       const { password: _, ...userWithoutPassword } = newUser;
       
       // Salvar usuário atual no localStorage
-      LocalStorageService.setCurrentUser(userWithoutPassword);
+      LocalStorageService.setUser(userWithoutPassword);
       
       return userWithoutPassword;
     } catch (err) {
@@ -121,7 +119,7 @@ export const AuthProvider = ({ children }) => {
       const { password: _, ...userWithoutPassword } = user;
       
       // Salvar usuário atual no localStorage
-      LocalStorageService.setCurrentUser(userWithoutPassword);
+      LocalStorageService.setUser(userWithoutPassword);
       
       return userWithoutPassword;
     } catch (err) {
@@ -208,7 +206,7 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(updatedUser);
       
       // Atualizar o usuário atual no localStorage
-      LocalStorageService.setCurrentUser(updatedUser);
+      LocalStorageService.setUser(updatedUser);
       
       return true;
     } catch (err) {

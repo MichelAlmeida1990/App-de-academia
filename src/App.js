@@ -1,16 +1,12 @@
-// src/App.js
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+﻿import React from 'react';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { WorkoutProvider } from './context/WorkoutContext';
 import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-
 import Layout from './components/layout/Layout';
 import ConnectionStatus from './components/ui/ConnectionStatus';
-
-// Páginas
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import WorkoutsPage from './pages/WorkoutsPage';
@@ -22,26 +18,21 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
 import ProgressPage from './pages/ProgressPage';
-
-// Componentes que precisamos criar como páginas
-// Vamos criar esses arquivos
 import ActiveWorkout from './components/workout/ActiveWorkout';
 import AuthPage from './pages/AuthPage';
 
-// Página ActiveWorkoutPage usando o componente existente
 const ActiveWorkoutPage = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className='container mx-auto px-4 py-8'>
       <ActiveWorkout />
     </div>
   );
 };
 
-// Página EditWorkoutPage
 const EditWorkoutPage = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Editar Treino</h1>
+    <div className='container mx-auto px-4 py-8'>
+      <h1 className='text-2xl font-bold mb-6'>Editar Treino</h1>
       {/* Formulário de edição será implementado aqui */}
     </div>
   );
@@ -55,14 +46,11 @@ function App() {
           <WorkoutProvider>
             <Router>
               <Routes>
-                {/* Rotas públicas */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                
-                {/* Rotas protegidas com Layout */}
+                <Route path='/' element={<HomePage />} />
+                <Route path='/auth' element={<AuthPage />} />
                 <Route element={<Layout />}>
                   <Route
-                    path="/dashboard"
+                    path='/dashboard'
                     element={
                       <ProtectedRoute>
                         <DashboardPage />
@@ -70,16 +58,15 @@ function App() {
                     }
                   />
                   <Route
-                    path="/workouts"
+                    path='/workouts'
                     element={
                       <ProtectedRoute>
                         <WorkoutsPage />
                       </ProtectedRoute>
                     }
                   />
-                  {/* Rota específica para novo treino */}
                   <Route
-                    path="/workout/new"
+                    path='/workout/new'
                     element={
                       <ProtectedRoute>
                         <NewWorkoutPage />
@@ -87,7 +74,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/workout/:id"
+                    path='/workout/:id'
                     element={
                       <ProtectedRoute>
                         <WorkoutDetailPage />
@@ -95,16 +82,15 @@ function App() {
                     }
                   />
                   <Route
-                    path="/workout/:id/edit"
+                    path='/workout/:id/edit'
                     element={
                       <ProtectedRoute>
                         <EditWorkoutPage />
                       </ProtectedRoute>
                     }
                   />
-                  {/* Nova rota para treino ativo */}
                   <Route
-                    path="/workout/:id/active"
+                    path='/workout/:id/active'
                     element={
                       <ProtectedRoute>
                         <ActiveWorkoutPage />
@@ -112,7 +98,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/exercises"
+                    path='/exercises'
                     element={
                       <ProtectedRoute>
                         <ExercisesPage />
@@ -120,7 +106,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/exercise/:id"
+                    path='/exercise/:id'
                     element={
                       <ProtectedRoute>
                         <ExerciseDetailPage />
@@ -128,7 +114,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/profile"
+                    path='/profile'
                     element={
                       <ProtectedRoute>
                         <ProfilePage />
@@ -136,7 +122,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/settings"
+                    path='/settings'
                     element={
                       <ProtectedRoute>
                         <SettingsPage />
@@ -144,7 +130,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/stats"
+                    path='/stats'
                     element={
                       <ProtectedRoute>
                         <StatsPage />
@@ -152,7 +138,7 @@ function App() {
                     }
                   />
                   <Route
-                    path="/progress"
+                    path='/progress'
                     element={
                       <ProtectedRoute>
                         <ProgressPage />
@@ -160,11 +146,8 @@ function App() {
                     }
                   />
                 </Route>
-
-                {/* Rota de fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path='*' element={<Navigate to='/' replace />} />
               </Routes>
-
               <ConnectionStatus />
             </Router>
           </WorkoutProvider>

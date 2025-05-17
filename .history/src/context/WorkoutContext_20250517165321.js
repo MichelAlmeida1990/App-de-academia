@@ -49,14 +49,11 @@ export const WorkoutProvider = ({ children }) => {
         throw new Error("Usuário não autenticado");
       }
 
-      // Gerar um ID único usando string para evitar problemas de tipo
-      const workoutId = `workout_${Date.now()}`;
-      
       // Inicializar propriedades de progresso
       const workoutWithUser = {
         ...workout,
         userId: currentUser.uid,
-        id: workoutId, // Usar o ID gerado como string
+        id: Date.now(), // Garantir que um ID único seja gerado
         createdAt: new Date().toISOString(),
         progress: 0,
         exercises: workout.exercises.map((exercise, index) => ({
@@ -65,23 +62,11 @@ export const WorkoutProvider = ({ children }) => {
         }))
       };
       
-      console.log("ID gerado:", workoutId);
-      
       // Salvar no localStorage
       const newWorkout = LocalStorageService.addWorkout(workoutWithUser);
       
-      console.log("Treino salvo:", newWorkout);
-      console.log("ID após salvar:", newWorkout.id);
-      
-      // Verificar se o ID foi mantido corretamente
-      if (!newWorkout || !newWorkout.id) {
-        throw new Error("Erro ao gerar ID para o treino");
-      }
-      
       // Atualizar o estado
       setWorkouts(prev => [...prev, newWorkout]);
-      
-      // Retornar o objeto com o ID correto
       return newWorkout;
     } catch (error) {
       console.error('Erro ao adicionar treino:', error);
@@ -138,11 +123,7 @@ export const WorkoutProvider = ({ children }) => {
   };
 
   const getWorkoutById = (id) => {
-    console.log("Buscando treino com ID:", id);
-    console.log("Treinos disponíveis:", workouts);
-    const workout = workouts.find(workout => workout.id === id);
-    console.log("Treino encontrado:", workout);
-    return workout || null;
+    return workouts.find(workout => workout.id === id) || null;
   };
 
   const getWeeklyWorkouts = () => {

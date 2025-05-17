@@ -289,7 +289,7 @@ const NewWorkoutPage = () => {
     });
   };
 
-  const removeExercise = (index) => {
+    const removeExercise = (index) => {
     setWorkoutData(prev => ({
       ...prev,
       exercises: prev.exercises.filter((_, i) => i !== index)
@@ -312,8 +312,6 @@ const NewWorkoutPage = () => {
     try {
       setIsSubmitting(true);
       
-      console.log("Enviando dados para criação de treino:", workoutData);
-      
       // Adicionar treino com o contexto
       const newWorkout = await addWorkout({
         ...workoutData,
@@ -324,19 +322,11 @@ const NewWorkoutPage = () => {
         image: workoutData.image || 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
       });
       
-      console.log("Treino criado com sucesso:", newWorkout);
-      
-      // Verificar se o ID existe antes de redirecionar
-      if (newWorkout && newWorkout.id) {
-        showToast('Sucesso', 'Treino criado com sucesso!', 'success');
-        console.log("Redirecionando para:", `/workout/${newWorkout.id}`);
-        navigate(`/workout/${newWorkout.id}`);
-      } else {
-        throw new Error("Treino criado sem ID válido");
-      }
+      showToast('Sucesso', 'Treino criado com sucesso!', 'success');
+      navigate(`/workout/${newWorkout.id}`);
     } catch (error) {
       console.error('Erro ao criar treino:', error);
-      showToast('Erro', `Não foi possível criar o treino: ${error.message}`, 'error');
+      showToast('Erro', 'Não foi possível criar o treino. Tente novamente.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -622,3 +612,4 @@ const NewWorkoutPage = () => {
 };
 
 export default NewWorkoutPage;
+

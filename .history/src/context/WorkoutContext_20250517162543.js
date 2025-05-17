@@ -1,3 +1,4 @@
+// src/context/WorkoutContext.js
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import LocalStorageService from '../services/LocalStorageService';
 import { useAuth } from './AuthContext';
@@ -10,7 +11,6 @@ export const WorkoutProvider = ({ children }) => {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [completedWorkouts, setCompletedWorkouts] = useState({});
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -25,11 +25,6 @@ export const WorkoutProvider = ({ children }) => {
         setLoading(true);
         const workoutData = LocalStorageService.getWorkouts(currentUser.uid);
         setWorkouts(workoutData);
-        
-        // Carregar dados de treinos concluídos
-        const completedData = LocalStorageService.getCompletedWorkouts(currentUser.uid);
-        setCompletedWorkouts(completedData || {});
-        
         setError(null);
       } catch (error) {
         console.error('Erro ao buscar treinos:', error);
@@ -49,39 +44,16 @@ export const WorkoutProvider = ({ children }) => {
         throw new Error("Usuário não autenticado");
       }
 
-      // Gerar um ID único usando string para evitar problemas de tipo
-      const workoutId = `workout_${Date.now()}`;
-      
       // Inicializar propriedades de progresso
       const workoutWithUser = {
         ...workout,
         userId: currentUser.uid,
-        id: workoutId, // Usar o ID gerado como string
         createdAt: new Date().toISOString(),
-        progress: 0,
-        exercises: workout.exercises.map((exercise, index) => ({
-          ...exercise,
-          id: index // Adicionar ID para cada exercício
-        }))
+        progress: 0
       };
       
-      console.log("ID gerado:", workoutId);
-      
-      // Salvar no localStorage
       const newWorkout = LocalStorageService.addWorkout(workoutWithUser);
-      
-      console.log("Treino salvo:", newWorkout);
-      console.log("ID após salvar:", newWorkout.id);
-      
-      // Verificar se o ID foi mantido corretamente
-      if (!newWorkout || !newWorkout.id) {
-        throw new Error("Erro ao gerar ID para o treino");
-      }
-      
-      // Atualizar o estado
       setWorkouts(prev => [...prev, newWorkout]);
-      
-      // Retornar o objeto com o ID correto
       return newWorkout;
     } catch (error) {
       console.error('Erro ao adicionar treino:', error);
@@ -138,11 +110,7 @@ export const WorkoutProvider = ({ children }) => {
   };
 
   const getWorkoutById = (id) => {
-    console.log("Buscando treino com ID:", id);
-    console.log("Treinos disponíveis:", workouts);
-    const workout = workouts.find(workout => workout.id === id);
-    console.log("Treino encontrado:", workout);
-    return workout || null;
+    return workouts.find(workout => workout.id === id) || null;
   };
 
   const getWeeklyWorkouts = () => {
@@ -167,7 +135,7 @@ export const WorkoutProvider = ({ children }) => {
       return [];
     }
     
-    return workouts.filter(workout => completedWorkouts[workout.id]);
+    return workouts.filter(workout => workout.completedAt);
   };
 
   // Função para obter treinos em andamento
@@ -181,105 +149,38 @@ export const WorkoutProvider = ({ children }) => {
     );
   };
 
-  // Função para marcar um treino como concluído/não concluído
-  const toggleWorkoutCompletion = (workoutId, completed) => {
-    try {
-      if (!currentUser) {
-        throw new Error("Usuário não autenticado");
-      }
-
-      const newCompletedWorkouts = { ...completedWorkouts };
-      
-      if (completed) {
-        newCompletedWorkouts[workoutId] = true;
-      } else {
-        delete newCompletedWorkouts[workoutId];
-      }
-      
-      // Atualizar o estado
-      setCompletedWorkouts(newCompletedWorkouts);
-      
-      // Salvar no localStorage
-      LocalStorageService.saveCompletedWorkouts(currentUser.uid, newCompletedWorkouts);
-      
-      return true;
-    } catch (error) {
-      console.error('Erro ao atualizar status de conclusão:', error);
-      throw error;
-    }
-  };
-
   // Função para marcar um exercício como concluído/não concluído
-  const toggleExerciseCompletion = (workoutId, exerciseIndex, completed) => {
+  const toggleExerciseCompletion = async (workoutId, exerciseId, completed) => {
     try {
       if (!currentUser) {
         throw new Error("Usuário não autenticado");
       }
 
-      // Obter o progresso atual do treino
-      const workoutProgress = LocalStorageService.getWorkoutProgress(currentUser.uid, workoutId) || {
-        exercises: {},
-        overallProgress: 0,
-        lastUpdated: null
-      };
-      
-      // Atualizar o status do exercício
-      const updatedExercises = { ...workoutProgress.exercises };
-      updatedExercises[exerciseIndex] = completed;
-      
-      // Calcular o progresso geral
       const workout = workouts.find(w => w.id === workoutId);
-      let overallProgress = 0;
       
-      if (workout && workout.exercises && workout.exercises.length > 0) {
-        const totalExercises = workout.exercises.length;
-        const completedExercises = Object.values(updatedExercises).filter(Boolean).length;
-        overallProgress = Math.round((completedExercises / totalExercises) * 100);
+      if (!workout) {
+        throw new Error("Treino não encontrado");
       }
       
-      // Criar objeto de progresso atualizado
-      const updatedProgress = {
-        exercises: updatedExercises,
-        overallProgress,
-        lastUpdated: new Date().toISOString()
+      if (workout.userId !== currentUser.uid) {
+        throw new Error("Você não tem permissão para editar este treino");
+      }
+      
+      const updatedExercises = workout.exercises.map(exercise => 
+        exercise.id === exerciseId 
+          ? { ...exercise, completed } 
+          : exercise
+      );
+      
+      const updatedWorkout = {
+        ...workout,
+        exercises: updatedExercises
       };
       
-      // Salvar no localStorage
-      LocalStorageService.saveWorkoutProgress(currentUser.uid, workoutId, updatedProgress);
-      
-      return updatedProgress;
+      return await updateWorkout(updatedWorkout);
     } catch (error) {
       console.error('Erro ao atualizar exercício:', error);
       throw error;
-    }
-  };
-
-  // Função para verificar se um exercício está concluído
-  const isExerciseCompleted = (workoutId, exerciseIndex) => {
-    try {
-      if (!currentUser) return false;
-      
-      const workoutProgress = LocalStorageService.getWorkoutProgress(currentUser.uid, workoutId);
-      return workoutProgress && workoutProgress.exercises && workoutProgress.exercises[exerciseIndex] === true;
-    } catch (error) {
-      console.error('Erro ao verificar status do exercício:', error);
-      return false;
-    }
-  };
-
-  // Função para obter o progresso de um treino
-  const getWorkoutProgress = (workoutId) => {
-    try {
-      if (!currentUser) return null;
-      
-      return LocalStorageService.getWorkoutProgress(currentUser.uid, workoutId) || {
-        exercises: {},
-        overallProgress: 0,
-        lastUpdated: null
-      };
-    } catch (error) {
-      console.error('Erro ao obter progresso do treino:', error);
-      return null;
     }
   };
 
@@ -289,7 +190,6 @@ export const WorkoutProvider = ({ children }) => {
         workouts, 
         loading, 
         error,
-        completedWorkouts,
         addWorkout, 
         updateWorkout, 
         deleteWorkout,
@@ -297,10 +197,7 @@ export const WorkoutProvider = ({ children }) => {
         getWeeklyWorkouts,
         getCompletedWorkouts,
         getInProgressWorkouts,
-        toggleWorkoutCompletion,
-        toggleExerciseCompletion,
-        isExerciseCompleted,
-        getWorkoutProgress
+        toggleExerciseCompletion
       }}
     >
       {children}
