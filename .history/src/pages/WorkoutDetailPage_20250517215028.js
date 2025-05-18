@@ -34,9 +34,6 @@ const ExerciseItem = memo(({
               isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600'
             }`}
             onClick={handleToggleClick}
-            role="button"
-            tabIndex={0}
-            aria-label={isCompleted ? "Desmarcar exercício" : "Marcar exercício como concluído"}
           >
             {isCompleted && <FaCheck size={12} />}
           </div>
@@ -95,11 +92,10 @@ const WorkoutDetailPage = () => {
   const [workout, setWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedExercise, setExpandedExercise] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   
   const { 
-    workouts = [], 
-    completedWorkouts = {},
+    workouts, 
+    completedWorkouts,
     toggleWorkoutCompletion,
     toggleExerciseCompletion,
     isExerciseCompleted,
@@ -109,84 +105,45 @@ const WorkoutDetailPage = () => {
 
   // Encontrar o treino com useEffect para evitar recálculos
   useEffect(() => {
-    if (workouts && workouts.length > 0) {
-      // Converter o id para string para garantir comparação correta
-      const workoutId = String(id);
+    if (workouts) {
+      const foundWorkout = workouts.find(w => 
+        w.id === id || 
+        w.id === String(id) || 
+        String(w.id) === id
+      );
       
-      const foundWorkout = workouts.find(w => String(w.id) === workoutId);
       setWorkout(foundWorkout);
       setLoading(false);
     }
   }, [workouts, id]);
 
-  // Verificar se o treino está completo
-  const isCompleted = completedWorkouts[id] || false;
+  const isCompleted = completedWorkouts && id ? completedWorkouts[id] : false;
   
   // Calcular o progresso apenas quando necessário
-  const workoutProgress = getWorkoutProgress ? 
-    getWorkoutProgress(id) : 
-    { overallProgress: 0 };
+  const workoutProgress = getWorkoutProgress ? getWorkoutProgress(id) : { overallProgress: 0 };
 
-  // Função para excluir treino com tratamento de erro
-  const handleDeleteWorkout = useCallback(async () => {
+  // Funções memoizadas para evitar recriações em cada renderização
+  const handleDeleteWorkout = useCallback(() => {
     if (window.confirm("Tem certeza que deseja excluir este treino?")) {
-      try {
-        setIsDeleting(true);
-        
-        // Verificar se deleteWorkout é uma função antes de chamar
-        if (typeof deleteWorkout === 'function') {
-          await deleteWorkout(id);
-          navigate('/');
-        } else {
-          console.error("A função deleteWorkout não está disponível");
-          alert("Não foi possível excluir o treino. Tente novamente mais tarde.");
-        }
-      } catch (error) {
-        console.error("Erro ao excluir treino:", error);
-        alert("Erro ao excluir treino: " + (error.message || "Erro desconhecido"));
-      } finally {
-        setIsDeleting(false);
-      }
+      deleteWorkout(id);
+      navigate('/');
     }
   }, [deleteWorkout, id, navigate]);
 
-  // Função otimizada para alternar o estado de conclusão do treino
   const handleToggleComplete = useCallback(() => {
-    if (typeof toggleWorkoutCompletion === 'function') {
-      // Usar uma função de callback para garantir o estado mais recente
-      toggleWorkoutCompletion(id, !isCompleted);
-    }
+    toggleWorkoutCompletion(id, !isCompleted);
   }, [toggleWorkoutCompletion, id, isCompleted]);
 
-  // Função otimizada para alternar o estado de conclusão de um exercício
   const handleToggleExercise = useCallback((exerciseIndex) => {
-    if (typeof toggleExerciseCompletion === 'function' && typeof isExerciseCompleted === 'function') {
-      const isCurrentlyCompleted = isExerciseCompleted(id, exerciseIndex);
-      
-      // Implementar uma pequena otimização para evitar atrasos na UI
-      const exerciseElement = document.querySelector(`[data-exercise-index="${exerciseIndex}"]`);
-      if (exerciseElement) {
-        if (isCurrentlyCompleted) {
-          exerciseElement.classList.remove('bg-green-50', 'border-green-200');
-          exerciseElement.classList.add('bg-white', 'border-gray-200');
-        } else {
-          exerciseElement.classList.remove('bg-white', 'border-gray-200');
-          exerciseElement.classList.add('bg-green-50', 'border-green-200');
-        }
-      }
-      
-      // Chamar a função de toggle com um pequeno atraso para não bloquear a UI
-      setTimeout(() => {
-        toggleExerciseCompletion(id, exerciseIndex, !isCurrentlyCompleted);
-      }, 10);
-    }
+    const isCurrentlyCompleted = isExerciseCompleted ? isExerciseCompleted(id, exerciseIndex) : false;
+    toggleExerciseCompletion(id, exerciseIndex, !isCurrentlyCompleted);
   }, [toggleExerciseCompletion, isExerciseCompleted, id]);
 
   const handleExpandExercise = useCallback((index) => {
     setExpandedExercise(prev => prev === index ? null : index);
   }, []);
 
-  // Função para formatar data
+  // Função simples para formatar data
   const formatDate = useCallback((dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -244,7 +201,6 @@ const WorkoutDetailPage = () => {
                   ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' 
                   : 'bg-green-600 text-white'
               }`}
-              disabled={!toggleWorkoutCompletion}
             >
               {isCompleted ? <FaUndo className="mr-1" /> : <FaCheck className="mr-1" />}
               {isCompleted ? 'Desmarcar' : 'Concluído'}
@@ -260,10 +216,8 @@ const WorkoutDetailPage = () => {
             <button
               onClick={handleDeleteWorkout}
               className="px-3 py-2 bg-red-600 text-white rounded-md flex items-center text-sm"
-              disabled={isDeleting || !deleteWorkout}
             >
-              <FaTrash className="mr-1" /> 
-              {isDeleting ? 'Excluindo...' : 'Excluir'}
+              <FaTrash className="mr-1" /> Excluir
             </button>
           </div>
         </div>
@@ -281,20 +235,18 @@ const WorkoutDetailPage = () => {
         {workout.exercises && workout.exercises.length > 0 ? (
           <div className="space-y-4">
             {workout.exercises.map((exercise, index) => {
-              const exerciseCompleted = typeof isExerciseCompleted === 'function' ? 
-                isExerciseCompleted(id, index) : false;
+              const exerciseCompleted = isExerciseCompleted ? isExerciseCompleted(id, index) : false;
               
               return (
-                <div key={`${index}-${exercise.name}`} data-exercise-index={index}>
-                  <ExerciseItem
-                    exercise={exercise}
-                    index={index}
-                    isCompleted={exerciseCompleted}
-                    isExpanded={expandedExercise === index}
-                    onToggle={handleToggleExercise}
-                    onExpand={() => handleExpandExercise(index)}
-                  />
-                </div>
+                <ExerciseItem
+                  key={`${index}-${exerciseCompleted}`}
+                  exercise={exercise}
+                  index={index}
+                  isCompleted={exerciseCompleted}
+                  isExpanded={expandedExercise === index}
+                  onToggle={handleToggleExercise}
+                  onExpand={() => handleExpandExercise(index)}
+                />
               );
             })}
           </div>

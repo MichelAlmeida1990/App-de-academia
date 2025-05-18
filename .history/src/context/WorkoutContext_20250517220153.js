@@ -115,51 +115,21 @@ export const WorkoutProvider = ({ children }) => {
     }
   };
 
-  // Função corrigida para excluir treino
   const deleteWorkout = async (workoutId) => {
     try {
       if (!currentUser) {
         throw new Error("Usuário não autenticado");
       }
 
-      // Converter IDs para string para garantir comparação correta
-      const workoutIdStr = String(workoutId);
-      
-      // Buscar o treino usando comparação de strings
-      const workout = workouts.find(w => String(w.id) === workoutIdStr);
-      
-      // Log para depuração
-      console.log("Tentando excluir treino:", workoutIdStr);
-      console.log("Treino encontrado:", workout);
-      console.log("ID do usuário atual:", currentUser.uid);
-      console.log("ID do usuário do treino:", workout?.userId);
-      
-      // Verificar se o treino existe e pertence ao usuário
-      if (!workout) {
-        throw new Error("Treino não encontrado");
-      }
-      
-      // Verificar permissão apenas se o treino tiver um userId definido
-      if (workout.userId && workout.userId !== currentUser.uid) {
+      // Verificar se o treino pertence ao usuário atual
+      const workout = workouts.find(w => w.id === workoutId);
+      if (!workout || workout.userId !== currentUser.uid) {
         throw new Error("Você não tem permissão para excluir este treino");
       }
 
-      // Excluir o treino
-      LocalStorageService.deleteWorkout(workoutIdStr);
+      LocalStorageService.deleteWorkout(workoutId);
       
-      // Atualizar o estado usando comparação de strings
-      setWorkouts(prev => prev.filter(w => String(w.id) !== workoutIdStr));
-      
-      // Limpar dados de progresso e conclusão relacionados ao treino
-      const updatedCompletedWorkouts = { ...completedWorkouts };
-      delete updatedCompletedWorkouts[workoutIdStr];
-      setCompletedWorkouts(updatedCompletedWorkouts);
-      
-      // Salvar os dados atualizados de treinos concluídos
-      if (currentUser) {
-        LocalStorageService.saveCompletedWorkouts(currentUser.uid, updatedCompletedWorkouts);
-      }
-      
+      setWorkouts(prev => prev.filter(workout => workout.id !== workoutId));
       return true;
     } catch (error) {
       console.error('Erro ao excluir treino:', error);
@@ -170,11 +140,7 @@ export const WorkoutProvider = ({ children }) => {
   const getWorkoutById = (id) => {
     console.log("Buscando treino com ID:", id);
     console.log("Treinos disponíveis:", workouts);
-    
-    // Converter para string para garantir comparação correta
-    const idStr = String(id);
-    const workout = workouts.find(workout => String(workout.id) === idStr);
-    
+    const workout = workouts.find(workout => workout.id === id);
     console.log("Treino encontrado:", workout);
     return workout || null;
   };
@@ -222,14 +188,12 @@ export const WorkoutProvider = ({ children }) => {
         throw new Error("Usuário não autenticado");
       }
 
-      // Converter para string para garantir consistência
-      const workoutIdStr = String(workoutId);
       const newCompletedWorkouts = { ...completedWorkouts };
       
       if (completed) {
-        newCompletedWorkouts[workoutIdStr] = true;
+        newCompletedWorkouts[workoutId] = true;
       } else {
-        delete newCompletedWorkouts[workoutIdStr];
+        delete newCompletedWorkouts[workoutId];
       }
       
       // Atualizar o estado
@@ -252,11 +216,8 @@ export const WorkoutProvider = ({ children }) => {
         throw new Error("Usuário não autenticado");
       }
 
-      // Converter para string para garantir consistência
-      const workoutIdStr = String(workoutId);
-      
       // Obter o progresso atual do treino
-      const workoutProgress = LocalStorageService.getWorkoutProgress(currentUser.uid, workoutIdStr) || {
+      const workoutProgress = LocalStorageService.getWorkoutProgress(currentUser.uid, workoutId) || {
         exercises: {},
         overallProgress: 0,
         lastUpdated: null
@@ -267,7 +228,7 @@ export const WorkoutProvider = ({ children }) => {
       updatedExercises[exerciseIndex] = completed;
       
       // Calcular o progresso geral
-      const workout = workouts.find(w => String(w.id) === workoutIdStr);
+      const workout = workouts.find(w => w.id === workoutId);
       let overallProgress = 0;
       
       if (workout && workout.exercises && workout.exercises.length > 0) {
@@ -284,7 +245,7 @@ export const WorkoutProvider = ({ children }) => {
       };
       
       // Salvar no localStorage
-      LocalStorageService.saveWorkoutProgress(currentUser.uid, workoutIdStr, updatedProgress);
+      LocalStorageService.saveWorkoutProgress(currentUser.uid, workoutId, updatedProgress);
       
       return updatedProgress;
     } catch (error) {
@@ -298,10 +259,7 @@ export const WorkoutProvider = ({ children }) => {
     try {
       if (!currentUser) return false;
       
-      // Converter para string para garantir consistência
-      const workoutIdStr = String(workoutId);
-      
-      const workoutProgress = LocalStorageService.getWorkoutProgress(currentUser.uid, workoutIdStr);
+      const workoutProgress = LocalStorageService.getWorkoutProgress(currentUser.uid, workoutId);
       return workoutProgress && workoutProgress.exercises && workoutProgress.exercises[exerciseIndex] === true;
     } catch (error) {
       console.error('Erro ao verificar status do exercício:', error);
@@ -314,10 +272,7 @@ export const WorkoutProvider = ({ children }) => {
     try {
       if (!currentUser) return null;
       
-      // Converter para string para garantir consistência
-      const workoutIdStr = String(workoutId);
-      
-      return LocalStorageService.getWorkoutProgress(currentUser.uid, workoutIdStr) || {
+      return LocalStorageService.getWorkoutProgress(currentUser.uid, workoutId) || {
         exercises: {},
         overallProgress: 0,
         lastUpdated: null

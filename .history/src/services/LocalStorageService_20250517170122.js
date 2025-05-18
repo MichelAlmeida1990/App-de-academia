@@ -64,13 +64,11 @@ class LocalStorageService {
       // Garantir que temos um array de treinos
       const workouts = this.getWorkouts(workout.userId) || [];
       
-      // Garantir que o ID seja uma string para consistência
+      // Adicionar o novo treino
       const newWorkout = {
         ...workout,
-        id: String(workout.id || Date.now()) // Converter para string
+        id: workout.id || Date.now() // Usar o ID fornecido ou gerar um novo
       };
-      
-      console.log("Adicionando treino com ID:", newWorkout.id);
       
       workouts.push(newWorkout);
       
@@ -89,35 +87,22 @@ class LocalStorageService {
     try {
       const workouts = this.getWorkouts(updatedWorkout.userId);
       
-      // Converter IDs para string para comparação consistente
-      const workoutIdStr = String(updatedWorkout.id);
-      
       const updatedWorkouts = workouts.map(workout => 
-        String(workout.id) === workoutIdStr ? {
-          ...updatedWorkout,
-          id: workoutIdStr // Garantir que o ID permaneça como string
-        } : workout
+        workout.id === updatedWorkout.id ? updatedWorkout : workout
       );
       
       localStorage.setItem(`workouts_${updatedWorkout.userId}`, JSON.stringify(updatedWorkouts));
       
-      return {
-        ...updatedWorkout,
-        id: workoutIdStr // Retornar com ID como string
-      };
+      return updatedWorkout;
     } catch (error) {
       console.error("Erro ao atualizar treino:", error);
       throw error;
     }
   }
 
-  // Excluir um treino - CORRIGIDO
+  // Excluir um treino
   deleteWorkout(workoutId) {
     try {
-      // Converter para string para garantir comparação consistente
-      const workoutIdStr = String(workoutId);
-      console.log("Tentando excluir treino com ID:", workoutIdStr);
-      
       // Primeiro, precisamos encontrar o treino para saber o userId
       let userId = null;
       let allWorkouts = [];
@@ -125,16 +110,12 @@ class LocalStorageService {
       // Buscar em todos os itens do localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('workouts_')) {
+        if (key.startsWith('workouts_')) {
           const tempUserId = key.replace('workouts_', '');
           const userWorkouts = this.getWorkouts(tempUserId);
           
-          console.log(`Verificando treinos do usuário ${tempUserId}:`, userWorkouts);
-          
-          // Usar comparação de strings para encontrar o treino
-          const workout = userWorkouts.find(w => String(w.id) === workoutIdStr);
+          const workout = userWorkouts.find(w => w.id === workoutId);
           if (workout) {
-            console.log("Treino encontrado:", workout);
             userId = tempUserId;
             allWorkouts = userWorkouts;
             break;
@@ -143,26 +124,17 @@ class LocalStorageService {
       }
       
       if (!userId) {
-        console.error("Nenhum treino encontrado com ID:", workoutIdStr);
         throw new Error("Treino não encontrado");
       }
       
-      // Filtrar o treino a ser removido usando comparação de strings
-      const updatedWorkouts = allWorkouts.filter(workout => String(workout.id) !== workoutIdStr);
-      
-      // Verificar se algum treino foi removido
-      if (updatedWorkouts.length === allWorkouts.length) {
-        console.error("Nenhum treino foi removido. IDs não correspondem.");
-        throw new Error("Treino não encontrado");
-      }
-      
-      console.log("Treinos após remoção:", updatedWorkouts);
+      // Filtrar o treino a ser removido
+      const updatedWorkouts = allWorkouts.filter(workout => workout.id !== workoutId);
       
       // Salvar os treinos atualizados
       localStorage.setItem(`workouts_${userId}`, JSON.stringify(updatedWorkouts));
       
       // Remover também os dados de progresso
-      localStorage.removeItem(`workout_progress_${userId}_${workoutIdStr}`);
+      localStorage.removeItem(`workout_progress_${userId}_${workoutId}`);
       
       return true;
     } catch (error) {
@@ -196,10 +168,7 @@ class LocalStorageService {
   // Obter progresso de um treino específico
   getWorkoutProgress(userId, workoutId) {
     try {
-      // Converter para string para garantir consistência
-      const workoutIdStr = String(workoutId);
-      
-      const progressData = localStorage.getItem(`workout_progress_${userId}_${workoutIdStr}`);
+      const progressData = localStorage.getItem(`workout_progress_${userId}_${workoutId}`);
       return progressData ? JSON.parse(progressData) : null;
     } catch (error) {
       console.error("Erro ao buscar progresso do treino:", error);
@@ -210,10 +179,7 @@ class LocalStorageService {
   // Salvar progresso de um treino
   saveWorkoutProgress(userId, workoutId, progressData) {
     try {
-      // Converter para string para garantir consistência
-      const workoutIdStr = String(workoutId);
-      
-      localStorage.setItem(`workout_progress_${userId}_${workoutIdStr}`, JSON.stringify(progressData));
+      localStorage.setItem(`workout_progress_${userId}_${workoutId}`, JSON.stringify(progressData));
       return true;
     } catch (error) {
       console.error("Erro ao salvar progresso do treino:", error);
@@ -233,7 +199,7 @@ class LocalStorageService {
       // Remover todos os progressos de treino
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith(`workout_progress_${userId}_`)) {
+        if (key.startsWith(`workout_progress_${userId}_`)) {
           localStorage.removeItem(key);
         }
       }
@@ -243,23 +209,6 @@ class LocalStorageService {
       console.error("Erro ao limpar dados do usuário:", error);
       throw error;
     }
-  }
-  
-  // Método auxiliar para depuração - listar todos os itens do localStorage
-  debugStorage() {
-    const items = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        try {
-          items[key] = JSON.parse(localStorage.getItem(key));
-        } catch (e) {
-          items[key] = localStorage.getItem(key);
-        }
-      }
-    }
-    console.log("Conteúdo do localStorage:", items);
-    return items;
   }
 }
 
