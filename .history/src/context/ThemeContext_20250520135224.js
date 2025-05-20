@@ -1,16 +1,7 @@
-// src/context/ThemeContext.js
-import React, { createContext, useState, useEffect, useContext } from 'react';
+// src/context/ThemeContext.js (Versão Atualizada)
+import React, { createContext, useState, useEffect } from 'react';
 
 export const ThemeContext = createContext();
-
-// Hook personalizado para usar o ThemeContext
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme deve ser usado dentro de um ThemeProvider');
-  }
-  return context;
-};
 
 export const ThemeProvider = ({ children }) => {
   // Verifica preferência do sistema ou configuração salva
@@ -56,9 +47,6 @@ export const ThemeProvider = ({ children }) => {
     setDarkMode(!darkMode);
   };
 
-  // Alias para toggleDarkMode para compatibilidade com o código existente
-  const toggleTheme = toggleDarkMode;
-
   const changeAccentColor = (color) => {
     setAccentColor(color);
   };
@@ -66,8 +54,7 @@ export const ThemeProvider = ({ children }) => {
   return (
     <ThemeContext.Provider value={{ 
       darkMode, 
-      toggleDarkMode,
-      toggleTheme, // Adicionando alias para compatibilidade
+      toggleDarkMode, 
       accentColor, 
       changeAccentColor 
     }}>

@@ -56,9 +56,6 @@ export const ThemeProvider = ({ children }) => {
     setDarkMode(!darkMode);
   };
 
-  // Alias para toggleDarkMode para compatibilidade com o código existente
-  const toggleTheme = toggleDarkMode;
-
   const changeAccentColor = (color) => {
     setAccentColor(color);
   };
@@ -66,8 +63,7 @@ export const ThemeProvider = ({ children }) => {
   return (
     <ThemeContext.Provider value={{ 
       darkMode, 
-      toggleDarkMode,
-      toggleTheme, // Adicionando alias para compatibilidade
+      toggleDarkMode, 
       accentColor, 
       changeAccentColor 
     }}>
