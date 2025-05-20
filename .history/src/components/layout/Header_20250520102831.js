@@ -31,18 +31,21 @@ const Header = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? `${darkMode ? 'bg-gray-900/40 border-b border-gray-800/50' : 'bg-white/40'}` 
-          : `${darkMode ? 'bg-gray-900/40 border-b border-gray-800/50' : 'bg-gradient-to-r from-blue-500/50 to-purple-600/50'}`
+          ? `${darkMode ? 'bg-gray-900/40 backdrop-blur-sm' : 'bg-white/40 backdrop-blur-sm'}` 
+          : `${darkMode ? 'bg-transparent' : 'bg-gradient-to-r from-blue-500/50 to-purple-600/50 backdrop-blur-[2px]'}`
       }`}
     >
-      <div className="max-w-6xl mx-auto px-3 py-0.5">
-        <div className="flex justify-between items-center h-10">
+      <div className="max-w-6xl mx-auto px-3 py-1.5">
+        <div className="flex justify-between items-center">
           {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
             <Link to="/" className="flex items-center space-x-1.5">
+              <div className="bg-black p-1 rounded">
+                
+              </div>
               <span className={`font-bold text-lg ${scrolled && !darkMode ? 'text-gray-800' : 'text-white'} tracking-tight`}>
                 Fitness<span className="text-blue-300 font-extrabold">Tracker</span>
               </span>
@@ -56,7 +59,7 @@ const Header = () => {
                 <NavLink 
                   to="/dashboard" 
                   className={({ isActive }) => 
-                    `px-2 py-0.5 rounded-full flex items-center space-x-1 text-xs font-medium transition-all duration-300 ${
+                    `px-2.5 py-1 rounded-full flex items-center space-x-1 text-xs font-medium transition-all duration-300 ${
                       isActive 
                         ? (darkMode ? 'bg-blue-600/60 text-white' : 'bg-white/60 text-blue-700')
                         : (darkMode 
@@ -72,7 +75,7 @@ const Header = () => {
                 <NavLink 
                   to="/workouts" 
                   className={({ isActive }) => 
-                    `px-2 py-0.5 rounded-full flex items-center space-x-1 text-xs font-medium transition-all duration-300 ${
+                    `px-2.5 py-1 rounded-full flex items-center space-x-1 text-xs font-medium transition-all duration-300 ${
                       isActive 
                         ? (darkMode ? 'bg-blue-600/60 text-white' : 'bg-white/60 text-blue-700')
                         : (darkMode 
@@ -88,7 +91,7 @@ const Header = () => {
                 <NavLink 
                   to="/stats" 
                   className={({ isActive }) => 
-                    `px-2 py-0.5 rounded-full flex items-center space-x-1 text-xs font-medium transition-all duration-300 ${
+                    `px-2.5 py-1 rounded-full flex items-center space-x-1 text-xs font-medium transition-all duration-300 ${
                       isActive 
                         ? (darkMode ? 'bg-blue-600/60 text-white' : 'bg-white/60 text-blue-700')
                         : (darkMode 
@@ -105,7 +108,7 @@ const Header = () => {
                 <div className="relative ml-1.5">
                   <motion.button 
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-xs font-medium transition-all duration-300 ${
+                    className={`flex items-center space-x-1.5 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
                       darkMode 
                         ? 'bg-gray-800/40 text-white hover:bg-gray-700/40' 
                         : scrolled ? 'bg-gray-100/50 text-gray-800 hover:bg-gray-200/50' : 'bg-white/10 text-white hover:bg-white/20'
@@ -114,10 +117,10 @@ const Header = () => {
                     whileTap={{ scale: 0.95 }}
                   >
                     <span className="hidden md:inline">{user?.name || 'Michel'}</span>
-                    <div className={`h-4 w-4 rounded-full flex items-center justify-center ${
+                    <div className={`h-5 w-5 rounded-full flex items-center justify-center ${
                       darkMode ? 'bg-blue-600/60' : 'bg-blue-500/60'
                     }`}>
-                      <FaUser className="text-white text-[8px]" />
+                      <FaUser className="text-white text-[10px]" />
                     </div>
                   </motion.button>
                   
@@ -167,7 +170,7 @@ const Header = () => {
             ) : (
               <Link 
                 to="/auth" 
-                className={`px-3 py-0.5 rounded-full text-xs font-medium transition-all duration-300 ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
                   darkMode 
                     ? 'bg-blue-600/60 text-white hover:bg-blue-700/60' 
                     : scrolled ? 'bg-blue-600/60 text-white hover:bg-blue-700/60' : 'bg-white/60 text-blue-600 hover:bg-blue-50/70'
@@ -194,7 +197,7 @@ const Header = () => {
       </div>
       
       {/* Espaçamento mínimo para evitar que o conteúdo fique sob o header */}
-      <div className="h-8"></div>
+      <div className="h-10"></div>
     </header>
   );
 };

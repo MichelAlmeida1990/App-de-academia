@@ -6,6 +6,7 @@ import { ThemeContext } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
+  // Corrigido para usar toggleDarkMode em vez de toggleTheme
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -31,8 +32,8 @@ const Header = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? `${darkMode ? 'bg-gray-900/40 border-b border-gray-800/50' : 'bg-white/40'}` 
-          : `${darkMode ? 'bg-gray-900/40 border-b border-gray-800/50' : 'bg-gradient-to-r from-blue-500/50 to-purple-600/50'}`
+          ? `${darkMode ? 'bg-gray-900/40' : 'bg-white/40'}` 
+          : `${darkMode ? 'bg-transparent' : 'bg-gradient-to-r from-blue-500/50 to-purple-600/50'}`
       }`}
     >
       <div className="max-w-6xl mx-auto px-3 py-0.5">

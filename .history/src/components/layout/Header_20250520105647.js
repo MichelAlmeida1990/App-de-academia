@@ -31,8 +31,8 @@ const Header = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? `${darkMode ? 'bg-gray-900/40 border-b border-gray-800/50' : 'bg-white/40'}` 
-          : `${darkMode ? 'bg-gray-900/40 border-b border-gray-800/50' : 'bg-gradient-to-r from-blue-500/50 to-purple-600/50'}`
+          ? `${darkMode ? 'bg-gray-900 border-b border-gray-800' : 'bg-white/40'}` 
+          : `${darkMode ? 'bg-gray-900 border-b border-gray-800' : 'bg-gradient-to-r from-blue-500/50 to-purple-600/50'}`
       }`}
     >
       <div className="max-w-6xl mx-auto px-3 py-0.5">
