@@ -1,4 +1,4 @@
-// src/pages/StatsPage.js - Versão corrigida para usar a data atual do sistema
+// src/pages/StatsPage.js - Versão corrigida para usar apenas dados reais
 import React, { useState, useContext, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -7,7 +7,7 @@ import {
 import { WorkoutContext } from '../context/WorkoutContext';
 import { ThemeContext } from '../context/ThemeContext';
 import ProgressTracker from '../components/workout/ProgressTracker';
-import { format, parseISO, getDaysInMonth, startOfMonth, getDate, isValid, subDays } from 'date-fns';
+import { format, parseISO, getDaysInMonth, startOfMonth, getDate, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const StatsPage = () => {
@@ -46,67 +46,102 @@ const StatsPage = () => {
     processMonthlyData();
   }, [timeFrame, workouts, completedWorkouts]);
   
-  // Função para processar dados do gráfico mensal usando a data atual
+  // Função para processar dados do gráfico mensal
   const processMonthlyData = () => {
-    // Obter treinos concluídos
+    // Obter TODOS os treinos concluídos diretamente, sem filtrar por período
+    // para garantir que temos os dados mais completos
     const allCompletedWorkouts = getCompletedWorkouts();
     
-    // Usar a data atual do sistema
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    const currentDay = currentDate.getDate();
+    console.log("Todos os treinos concluídos:", allCompletedWorkouts);
     
-    console.log(`Data atual: ${currentDay}/${currentMonth + 1}/${currentYear}`);
+    // Definir a data de referência como 21 de maio de 2025
+    const referenceYear = 2025;
+    const referenceMonth = 4; // 0-indexed (0=janeiro, 4=maio)
+    const referenceDay = 21;
     
-    // Obter o número de dias no mês atual
-    const daysInMonth = getDaysInMonth(currentDate);
+    const referenceDate = new Date(referenceYear, referenceMonth, referenceDay);
+    console.log("Data de referência:", referenceDate);
+    
+    const daysInMonth = getDaysInMonth(referenceDate);
     
     // Inicializar dados mensais (um item para cada dia do mês)
     const monthData = Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1;
       return { 
         day: day, 
-        date: new Date(currentYear, currentMonth, day),
+        date: new Date(referenceYear, referenceMonth, day),
         workouts: 0,
         minutes: 0
       };
     });
     
-    // Processar cada treino
-    allCompletedWorkouts.forEach(workout => {
+    // Log para depuração - verificar se temos treinos para o dia 21
+    const day21Workouts = allCompletedWorkouts.filter(workout => {
       try {
-        if (!workout.date && !workout.completedAt) return;
+        const dateStr = workout.completedAt || workout.date;
+        if (!dateStr) return false;
         
-        const workoutDate = new Date(workout.completedAt || workout.date);
-        
-        if (!isValid(workoutDate)) return;
-        
-        // Verificar se o treino é do mês atual
-        if (workoutDate.getFullYear() === currentYear && workoutDate.getMonth() === currentMonth) {
-          const day = workoutDate.getDate();
-          
-          if (day >= 1 && day <= daysInMonth) {
-            monthData[day - 1].workouts += 1;
-            monthData[day - 1].minutes += workout.duration || 30; // Usar 30 minutos como padrão se não houver duração
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao processar treino:", error);
+        const date = new Date(dateStr);
+        return (
+          date.getFullYear() === referenceYear && 
+          date.getMonth() === referenceMonth && 
+          date.getDate() === referenceDay
+        );
+      } catch (e) {
+        return false;
       }
     });
     
-    // Se não houver dados para o dia atual, vamos garantir que pelo menos um treino seja mostrado
-    // para fins de demonstração (apenas se não houver nenhum treino real no mês)
-    const hasRealWorkouts = monthData.some(data => data.workouts > 0);
+    console.log(`Treinos encontrados para o dia ${referenceDay}:`, day21Workouts);
     
-    if (!hasRealWorkouts) {
-      // Adicionar um treino para o dia atual
-      monthData[currentDay - 1].workouts = 1;
-      monthData[currentDay - 1].minutes = 50;
-      console.log(`Nenhum treino real encontrado. Adicionando treino de exemplo para hoje (${currentDay}).`);
-    }
+    // Contar treinos por dia do mês
+    allCompletedWorkouts.forEach(workout => {
+      try {
+        // Usar a data de conclusão se disponível, caso contrário usar a data normal
+        const dateStr = workout.completedAt || workout.date;
+        
+        if (!dateStr) {
+          console.warn("Treino sem data:", workout);
+          return;
+        }
+        
+        // Converter para objeto Date
+        const date = new Date(dateStr);
+        
+        if (!isValid(date)) {
+          console.warn("Data inválida:", dateStr);
+          return;
+        }
+        
+        // Log detalhado para depuração
+        console.log(`Processando treino:`, {
+          id: workout.id,
+          date: dateStr,
+          parsedDate: date,
+          year: date.getFullYear(),
+          month: date.getMonth(),
+          day: date.getDate(),
+          isTargetMonth: date.getMonth() === referenceMonth && date.getFullYear() === referenceYear
+        });
+        
+        // Verificar se o treino é do mês de referência (maio de 2025)
+        if (date.getMonth() === referenceMonth && date.getFullYear() === referenceYear) {
+          // Obter o dia do mês (1-31)
+          const dayOfMonth = date.getDate();
+          
+          // Incrementar contador para este dia (índice é dia-1)
+          if (dayOfMonth >= 1 && dayOfMonth <= daysInMonth) {
+            console.log(`Incrementando dados para dia ${dayOfMonth}:`, workout);
+            monthData[dayOfMonth - 1].workouts += 1;
+            monthData[dayOfMonth - 1].minutes += workout.duration || 0;
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao processar data do treino:", error, workout);
+      }
+    });
     
+    console.log("Dados mensais processados:", monthData);
     setMonthlyData(monthData);
   };
   
@@ -122,10 +157,6 @@ const StatsPage = () => {
   const formatTooltipDate = (date) => {
     return format(new Date(date), "d 'de' MMMM", { locale: ptBR });
   };
-  
-  // Obter a data atual para destacar no gráfico
-  const today = new Date();
-  const currentDay = today.getDate();
 
   return (
     <div className="space-y-6">
@@ -174,7 +205,7 @@ const StatsPage = () => {
           </div>
           
           <div className={`p-6 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h2 className="text-xl font-semibold mb-4">Treinos de {format(new Date(), 'MMMM/yyyy', { locale: ptBR })}</h2>
+            <h2 className="text-xl font-semibold mb-4">Treinos de Maio/2025</h2>
             
             <div className="h-64">
               {monthlyData.length > 0 ? (
@@ -221,7 +252,7 @@ const StatsPage = () => {
                       {monthlyData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
-                          fill={entry.day === currentDay ? '#FF6B6B' : '#3B82F6'} 
+                          fill={entry.day === 21 ? '#FF6B6B' : '#3B82F6'} 
                         />
                       ))}
                     </Bar>
@@ -276,8 +307,8 @@ const StatsPage = () => {
                         <circle 
                           cx={cx} 
                           cy={cy} 
-                          r={payload.day === currentDay ? 6 : 4} 
-                          fill={payload.day === currentDay ? '#FF6B6B' : '#10B981'} 
+                          r={payload.day === 21 ? 6 : 4} 
+                          fill={payload.day === 21 ? '#FF6B6B' : '#10B981'} 
                         />
                       )}
                       activeDot={{ r: 6 }}

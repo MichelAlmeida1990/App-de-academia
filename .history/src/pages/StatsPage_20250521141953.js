@@ -1,4 +1,4 @@
-// src/pages/StatsPage.js - Versão corrigida para usar a data atual do sistema
+// src/pages/StatsPage.js - Versão com visualização mensal
 import React, { useState, useContext, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -7,15 +7,14 @@ import {
 import { WorkoutContext } from '../context/WorkoutContext';
 import { ThemeContext } from '../context/ThemeContext';
 import ProgressTracker from '../components/workout/ProgressTracker';
-import { format, parseISO, getDaysInMonth, startOfMonth, getDate, isValid, subDays } from 'date-fns';
+import { format, parseISO, getDaysInMonth, startOfMonth, getDate } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const StatsPage = () => {
   const { darkMode } = useContext(ThemeContext);
   const { 
-    workouts,
-    completedWorkouts,
     getCompletedWorkouts,
+    getWorkoutStatsByPeriod,
     getMuscleGroupStats,
     getGeneralStats
   } = useContext(WorkoutContext);
@@ -44,68 +43,67 @@ const StatsPage = () => {
     
     // Processar dados para o gráfico mensal
     processMonthlyData();
-  }, [timeFrame, workouts, completedWorkouts]);
+  }, [timeFrame, getGeneralStats, getMuscleGroupStats]);
   
-  // Função para processar dados do gráfico mensal usando a data atual
+  // Função para processar dados do gráfico mensal
   const processMonthlyData = () => {
-    // Obter treinos concluídos
-    const allCompletedWorkouts = getCompletedWorkouts();
+    // Obter treinos filtrados por período
+    const filteredWorkouts = getWorkoutStatsByPeriod(timeFrame);
     
-    // Usar a data atual do sistema
+    console.log("Treinos filtrados para visualização mensal:", filteredWorkouts);
+    
+    // Determinar o mês atual
     const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    const currentDay = currentDate.getDate();
-    
-    console.log(`Data atual: ${currentDay}/${currentMonth + 1}/${currentYear}`);
-    
-    // Obter o número de dias no mês atual
     const daysInMonth = getDaysInMonth(currentDate);
+    const firstDayOfMonth = startOfMonth(currentDate);
     
     // Inicializar dados mensais (um item para cada dia do mês)
     const monthData = Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1;
       return { 
         day: day, 
-        date: new Date(currentYear, currentMonth, day),
+        date: new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
         workouts: 0,
         minutes: 0
       };
     });
     
-    // Processar cada treino
-    allCompletedWorkouts.forEach(workout => {
+    // Contar treinos por dia do mês
+    filteredWorkouts.forEach(workout => {
       try {
-        if (!workout.date && !workout.completedAt) return;
+        // Usar a data de conclusão se disponível, caso contrário usar a data normal
+        const dateStr = workout.completedAt || workout.date;
         
-        const workoutDate = new Date(workout.completedAt || workout.date);
+        if (!dateStr) {
+          console.warn("Treino sem data:", workout);
+          return;
+        }
         
-        if (!isValid(workoutDate)) return;
+        // Converter para objeto Date
+        const date = new Date(dateStr);
+        
+        if (isNaN(date.getTime())) {
+          console.warn("Data inválida:", dateStr);
+          return;
+        }
         
         // Verificar se o treino é do mês atual
-        if (workoutDate.getFullYear() === currentYear && workoutDate.getMonth() === currentMonth) {
-          const day = workoutDate.getDate();
+        if (date.getMonth() === currentDate.getMonth() && 
+            date.getFullYear() === currentDate.getFullYear()) {
           
-          if (day >= 1 && day <= daysInMonth) {
-            monthData[day - 1].workouts += 1;
-            monthData[day - 1].minutes += workout.duration || 30; // Usar 30 minutos como padrão se não houver duração
+          // Obter o dia do mês (1-31)
+          const dayOfMonth = getDate(date);
+          
+          // Incrementar contador para este dia (índice é dia-1)
+          if (dayOfMonth >= 1 && dayOfMonth <= daysInMonth) {
+            monthData[dayOfMonth - 1].workouts += 1;
+            monthData[dayOfMonth - 1].minutes += workout.duration || 0;
           }
         }
       } catch (error) {
-        console.error("Erro ao processar treino:", error);
+        console.error("Erro ao processar data do treino:", error, workout);
       }
     });
-    
-    // Se não houver dados para o dia atual, vamos garantir que pelo menos um treino seja mostrado
-    // para fins de demonstração (apenas se não houver nenhum treino real no mês)
-    const hasRealWorkouts = monthData.some(data => data.workouts > 0);
-    
-    if (!hasRealWorkouts) {
-      // Adicionar um treino para o dia atual
-      monthData[currentDay - 1].workouts = 1;
-      monthData[currentDay - 1].minutes = 50;
-      console.log(`Nenhum treino real encontrado. Adicionando treino de exemplo para hoje (${currentDay}).`);
-    }
     
     setMonthlyData(monthData);
   };
@@ -122,10 +120,6 @@ const StatsPage = () => {
   const formatTooltipDate = (date) => {
     return format(new Date(date), "d 'de' MMMM", { locale: ptBR });
   };
-  
-  // Obter a data atual para destacar no gráfico
-  const today = new Date();
-  const currentDay = today.getDate();
 
   return (
     <div className="space-y-6">
@@ -174,7 +168,7 @@ const StatsPage = () => {
           </div>
           
           <div className={`p-6 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h2 className="text-xl font-semibold mb-4">Treinos de {format(new Date(), 'MMMM/yyyy', { locale: ptBR })}</h2>
+            <h2 className="text-xl font-semibold mb-4">Treinos do Mês</h2>
             
             <div className="h-64">
               {monthlyData.length > 0 ? (
@@ -188,7 +182,7 @@ const StatsPage = () => {
                       dataKey="date" 
                       tickFormatter={formatDayLabel}
                       tick={{ fill: darkMode ? '#9CA3AF' : '#4B5563' }}
-                      interval={2} // Mostrar apenas alguns dias para não sobrecarregar o eixo X
+                      interval={3} // Mostrar apenas alguns dias para não sobrecarregar o eixo X
                     />
                     <YAxis 
                       tick={{ fill: darkMode ? '#9CA3AF' : '#4B5563' }}
@@ -217,14 +211,7 @@ const StatsPage = () => {
                       fill="#3B82F6" 
                       radius={[4, 4, 0, 0]}
                       minPointSize={5} // Garante que mesmo valores pequenos tenham uma altura mínima visível
-                    >
-                      {monthlyData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={entry.day === currentDay ? '#FF6B6B' : '#3B82F6'} 
-                        />
-                      ))}
-                    </Bar>
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -250,7 +237,7 @@ const StatsPage = () => {
                       dataKey="date" 
                       tickFormatter={formatDayLabel}
                       tick={{ fill: darkMode ? '#9CA3AF' : '#4B5563' }}
-                      interval={2} // Mostrar apenas alguns dias para não sobrecarregar o eixo X
+                      interval={3} // Mostrar apenas alguns dias para não sobrecarregar o eixo X
                     />
                     <YAxis 
                       tick={{ fill: darkMode ? '#9CA3AF' : '#4B5563' }}
@@ -272,14 +259,7 @@ const StatsPage = () => {
                       dataKey="minutes" 
                       stroke="#10B981" 
                       strokeWidth={2}
-                      dot={({ cx, cy, payload }) => (
-                        <circle 
-                          cx={cx} 
-                          cy={cy} 
-                          r={payload.day === currentDay ? 6 : 4} 
-                          fill={payload.day === currentDay ? '#FF6B6B' : '#10B981'} 
-                        />
-                      )}
+                      dot={{ r: 4 }}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>

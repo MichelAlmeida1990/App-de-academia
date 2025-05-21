@@ -195,43 +195,18 @@ export const WorkoutProvider = ({ children }) => {
     });
   };
 
-  // Função modificada para criar treinos de exemplo para demonstração
+  // Função para criar treinos de exemplo para demonstração
   const createDemoWorkouts = () => {
+    const today = new Date();
     const demoWorkouts = [];
     
-    // Definir a data de referência como 21 de maio de 2025
-    const referenceDate = new Date(2025, 4, 21); // Mês é 0-indexed (0=janeiro, 4=maio)
-    
-    // Criar um treino específico para o dia 21 de maio de 2025
-    demoWorkouts.push({
-      id: `demo_fixed_21`,
-      name: `Treino D - Ombros e Abdômen`,
-      category: 'Ombros e Abdômen',
-      date: referenceDate.toISOString(),
-      completedAt: referenceDate.toISOString(),
-      duration: 50, // 50 minutos, conforme mostrado na imagem
-      exercises: [
-        { id: 0, name: 'Desenvolvimento com halteres', sets: 3, reps: 12 },
-        { id: 1, name: 'Elevação lateral', sets: 3, reps: 15 },
-        { id: 2, name: 'Abdominal crunch', sets: 4, reps: 20 },
-        { id: 3, name: 'Prancha', sets: 3, reps: 30 }
-      ],
-      completed: true
-    });
-    
-    // Criar alguns outros treinos em datas diferentes para preencher o gráfico
-    // mas garantir que nenhum deles tenha mais treinos que o dia 21
-    for (let i = 0; i < 8; i++) {
-      // Gerar dias diferentes do mês, evitando o dia 21
-      let day;
-      do {
-        day = Math.floor(Math.random() * 31) + 1;
-      } while (day === 21);
+    // Criar 12 treinos de exemplo com datas nos últimos 14 dias
+    for (let i = 0; i < 12; i++) {
+      const daysAgo = Math.floor(Math.random() * 14);
+      const workoutDate = new Date(today);
+      workoutDate.setDate(today.getDate() - daysAgo);
       
-      const workoutDate = new Date(2025, 4, day); // Maio de 2025
-      
-      // Categorias possíveis
-      const categories = ['Peito', 'Costas', 'Pernas', 'Braços', 'Outros'];
+      const categories = ['Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Abdômen'];
       const category = categories[Math.floor(Math.random() * categories.length)];
       
       demoWorkouts.push({
@@ -240,11 +215,11 @@ export const WorkoutProvider = ({ children }) => {
         category: category,
         date: workoutDate.toISOString(),
         completedAt: workoutDate.toISOString(),
-        duration: Math.floor(Math.random() * 20) + 20, // 20-40 minutos
-        exercises: Array(Math.floor(Math.random() * 3) + 2).fill().map((_, j) => ({
+        duration: Math.floor(Math.random() * 30) + 30, // 30-60 minutos
+        exercises: Array(Math.floor(Math.random() * 5) + 3).fill().map((_, j) => ({
           id: j,
           name: `Exercício ${j+1}`,
-          sets: Math.floor(Math.random() * 2) + 2,
+          sets: Math.floor(Math.random() * 3) + 2,
           reps: Math.floor(Math.random() * 5) + 8
         })),
         completed: true

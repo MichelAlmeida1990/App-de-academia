@@ -113,56 +113,128 @@ const ProgressTracker = () => {
     weeklyActivity: []
   });
 
-  // Memoize a data atual para garantir consistência
-  const today = useMemo(() => new Date(), []);
-
   // Memoize a função getCompletedWorkouts para evitar re-renderizações
   const getCompletedWorkouts = useCallback(() => {
     if (!workouts || workouts.length === 0) return [];
     return workouts.filter(workout => workout.completed);
   }, [workouts]);
 
+  // Memoize a data atual para garantir consistência
+  const today = useMemo(() => new Date(), []);
+
   // Função para gerar dados de exemplo quando não há dados suficientes
-  const generateDemoData = useCallback(() => {
+  const generateDemoData = useCallback((realWorkouts) => {
+    const hasRealData = realWorkouts && realWorkouts.length > 0;
+    
     // Dados de atividade semanal (últimos 7 dias)
     const last7Days = eachDayOfInterval({
       start: subDays(today, 6),
       end: today
     });
     
-    // Dados simulados - usando valores determinísticos em vez de aleatórios
-    const weeklyActivity = last7Days.map((day, index) => {
-      const isToday = day.getDate() === today.getDate() && 
-                      day.getMonth() === today.getMonth() &&
-                      day.getFullYear() === today.getFullYear();
-                      
-      // Usar valor determinístico baseado no índice e no dia para evitar mudanças aleatórias
-      const deterministicCount = isToday ? 1 : ((index + day.getDate()) % 2);
+    let weeklyActivity = [];
+    
+    if (hasRealData) {
+      // Obter todos os treinos concluídos de uma vez
+      const allCompletedWorkouts = realWorkouts;
       
-      return {
-        date: format(day, 'dd/MM'),
-        day: format(day, 'EEE', { locale: ptBR }),
-        count: deterministicCount,
-        isToday: isToday
-      };
-    });
+      weeklyActivity = last7Days.map(day => {
+        // Filtrar os treinos para este dia específico
+        const dayWorkouts = allCompletedWorkouts.filter(workout => {
+          if (!workout.completedAt && !workout.date) return false;
+          
+          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
+          if (!workoutDate) return false;
+          
+          return workoutDate.getFullYear() === day.getFullYear() &&
+                workoutDate.getMonth() === day.getMonth() &&
+                workoutDate.getDate() === day.getDate();
+        });
+        
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: dayWorkouts.length,
+          isToday: day.getDate() === today.getDate() && 
+                  day.getMonth() === today.getMonth() &&
+                  day.getFullYear() === today.getFullYear()
+        };
+      });
+    } else {
+      // Dados simulados - usando valores determinísticos em vez de aleatórios
+      weeklyActivity = last7Days.map((day, index) => {
+        const isToday = day.getDate() === today.getDate() && 
+                         day.getMonth() === today.getMonth() &&
+                         day.getFullYear() === today.getFullYear();
+                         
+        // Usar valor determinístico baseado no índice e no dia para evitar mudanças aleatórias
+        const deterministicCount = isToday ? 1 : ((index + day.getDate()) % 2);
+        
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: deterministicCount,
+          isToday: isToday
+        };
+      });
+    }
     
-    // Distribuição por grupo muscular - usando valores determinísticos
-    const bodyPartDistribution = WORKOUT_CATEGORIES.map((category, index) => ({
-      name: category,
-      // Valor determinístico baseado no índice
-      value: Math.max(1, (index % 5) + 1)
-    })).filter(item => item.value > 0);
+    // Distribuição por grupo muscular
+    let bodyPartDistribution = [];
     
-    // Valores fixos para dados de demonstração
+    if (hasRealData) {
+      const bodyPartCounts = {};
+      realWorkouts.forEach(workout => {
+        const category = workout.category || 'Outros';
+        bodyPartCounts[category] = (bodyPartCounts[category] || 0) + 1;
+      });
+      
+      bodyPartDistribution = Object.entries(bodyPartCounts).map(([name, value]) => ({
+        name,
+        value
+      }));
+    } else {
+      // Dados simulados - usando valores determinísticos
+      bodyPartDistribution = WORKOUT_CATEGORIES.map((category, index) => ({
+        name: category,
+        // Valor determinístico baseado no índice
+        value: Math.max(1, (index % 5) + 1)
+      })).filter(item => item.value > 0);
+    }
+    
+    // Calcular valores determinísticos para evitar mudanças aleatórias
+    const weeklyWorkouts = hasRealData 
+      ? weeklyActivity.reduce((sum, day) => sum + day.count, 0) 
+      : 3;
+    
+    const streakDays = hasRealData 
+      ? (weeklyActivity.find(d => d.isToday)?.count > 0 ? 2 : 0) 
+      : 2;
+    
+    const totalCompleted = hasRealData 
+      ? realWorkouts.length 
+      : 12;
+    
+    const weeklyTrend = hasRealData 
+      ? ['up', 'stable', 'down'][Math.floor(totalCompleted % 3)] 
+      : 'up';
+    
+    const completionRate = hasRealData 
+      ? Math.round((realWorkouts.length / (realWorkouts.length + 4)) * 100) 
+      : 75;
+    
+    const monthlyProgress = hasRealData 
+      ? Math.min(100, Math.round((weeklyWorkouts / 20) * 100)) 
+      : 65;
+    
     return {
-      weeklyWorkouts: 3,
+      weeklyWorkouts,
       weeklyGoal: 5,
-      monthlyProgress: 65,
-      streakDays: 2,
-      totalCompleted: 12,
-      weeklyTrend: 'up',
-      completionRate: 75,
+      monthlyProgress,
+      streakDays,
+      totalCompleted,
+      weeklyTrend,
+      completionRate,
       bodyPartDistribution,
       weeklyActivity
     };
@@ -178,7 +250,7 @@ const ProgressTracker = () => {
       
       // Se não houver dados suficientes, usar dados de demonstração
       if (!hasData) {
-        setProgress(generateDemoData());
+        setProgress(generateDemoData([]));
         return;
       }
       
@@ -375,7 +447,7 @@ const ProgressTracker = () => {
       
       // Criar um novo array com os valores atualizados em vez de modificar diretamente
       const updatedWeeklyActivity = weeklyActivity.map(day => 
-        day.isToday && day.count === 0 
+        day.isToday && day.count === 0 && !hasData 
           ? {...day, count: 1} 
           : day
       );
@@ -394,18 +466,18 @@ const ProgressTracker = () => {
     } catch (error) {
       console.error("Erro ao calcular progresso:", error);
       // Em caso de erro, usar dados de demonstração
-      setProgress(generateDemoData());
+      setProgress(generateDemoData([]));
     }
   }, [workouts, loading, generateDemoData, getCompletedWorkouts, today]);
 
-  const renderTrendIcon = useCallback(() => {
+  const renderTrendIcon = () => {
     if (progress.weeklyTrend === 'up') {
       return <FaArrowUp className="text-green-500" />;
     } else if (progress.weeklyTrend === 'down') {
       return <FaArrowDown className="text-red-500" />;
     }
     return <FaEquals className="text-gray-500" />;
-  }, [progress.weeklyTrend]);
+  };
 
   // Memoize os dados dos gráficos para evitar re-renderizações desnecessárias
   const memoizedWeeklyActivity = useMemo(() => progress.weeklyActivity, [progress.weeklyActivity]);
@@ -456,218 +528,4 @@ const ProgressTracker = () => {
     >
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold dark:text-white">Seu Progresso</h3>
-          <div className="flex space-x-2">
-            <button 
-              onClick={() => setActiveTab('overview')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === 'overview' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              Visão Geral
-            </button>
-            <button 
-              onClick={() => setActiveTab('charts')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === 'charts' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              Gráficos
-            </button>
-          </div>
-        </div>
-        
-        <AnimatePresence mode="wait">
-          {activeTab === 'overview' ? (
-            <motion.div
-              key="overview"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <motion.div 
-                  whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 p-5 rounded-xl border border-blue-200 dark:border-blue-800"
-                >
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-800/50 rounded-lg mr-3">
-                      <FaCalendarCheck className="text-blue-500 dark:text-blue-400 text-xl" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Treinos esta semana</p>
-                    <div className="ml-auto flex items-center text-sm">
-                      {renderTrendIcon()}
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">{progress.weeklyWorkouts}</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-2">/ {progress.weeklyGoal}</span>
-                  </div>
-                  <div className="mt-3 bg-white/60 dark:bg-gray-700/50 rounded-full h-2.5 overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min((progress.weeklyWorkouts / progress.weeklyGoal) * 100, 100)}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className="bg-blue-500 h-2.5 rounded-full"
-                    ></motion.div>
-                  </div>
-                </motion.div>
-                
-                <motion.div 
-                  whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                  className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/20 p-5 rounded-xl border border-orange-200 dark:border-orange-800"
-                >
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-orange-100 dark:bg-orange-800/50 rounded-lg mr-3">
-                      <FaFire className="text-orange-500 dark:text-orange-400 text-xl" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Sequência atual</p>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-3xl font-bold text-orange-500 dark:text-orange-400">{progress.streakDays}</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-2">dias consecutivos</span>
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                    {progress.streakDays > 0 ? 'Continue treinando!' : 'Comece sua sequência hoje!'}
-                  </p>
-                </motion.div>
-              </div>
-              
-              <motion.div 
-                whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 p-5 rounded-xl border border-green-200 dark:border-green-800 mb-6"
-              >
-                <div className="flex items-center mb-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-800/50 rounded-lg mr-3">
-                    <FaChartLine className="text-green-500 dark:text-green-400 text-xl" />
-                  </div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Progresso mensal</p>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {format(today, "MMMM 'de' yyyy", { locale: ptBR })}
-                  </p>
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">{progress.monthlyProgress}%</p>
-                </div>
-                <div className="bg-white/60 dark:bg-gray-700/50 rounded-full h-3 overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress.monthlyProgress}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-green-500 h-3 rounded-full"
-                  ></motion.div>
-                </div>
-              </motion.div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <motion.div 
-                  whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                  className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/20 p-5 rounded-xl border border-purple-200 dark:border-purple-800"
-                >
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-800/50 rounded-lg mr-3">
-                      <FaTrophy className="text-purple-500 dark:text-purple-400 text-xl" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total concluído</p>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">{progress.totalCompleted}</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-2">treinos</span>
-                  </div>
-                </motion.div>
-                
-                <motion.div 
-                  whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                  className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/20 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800"
-                >
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-indigo-100 dark:bg-indigo-800/50 rounded-lg mr-3">
-                      <FaCalendarAlt className="text-indigo-500 dark:text-indigo-400 text-xl" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Taxa de conclusão</p>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{progress.completionRate}%</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-2">dos treinos planejados</span>
-                  </div>
-                </motion.div>
-              </div>
-              
-                            <div className="overflow-x-auto pb-2">
-                <div className="flex space-x-3 min-w-max">
-                  {progress.weeklyActivity.map((day, index) => (
-                    <motion.div 
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`flex flex-col items-center p-3 rounded-lg min-w-[70px] ${
-                        day.isToday 
-                          ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800' 
-                          : 'bg-gray-100 dark:bg-gray-800/50'
-                      }`}
-                    >
-                      <p className={`text-xs font-medium ${
-                        day.isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {day.day}
-                      </p>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 my-1">{day.date}</p>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        day.count > 0 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {day.count}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="charts"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">Atividade Semanal</h4>
-                <div className="h-64">
-                  <MemoizedBarChart data={memoizedWeeklyActivity} chartStyles={chartStyles} />
-                </div>
-              </div>
-              
-              {memoizedBodyPartDistribution.length > 0 && (
-                <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">Distribuição por Grupo Muscular</h4>
-                  <div className="h-64">
-                    <MemoizedPieChart data={memoizedBodyPartDistribution} chartStyles={chartStyles} />
-                  </div>
-                </div>
-              )}
-              
-              <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">Tendência de Progresso</h4>
-                <div className="h-64">
-                  <MemoizedLineChart data={memoizedProgressTrend} chartStyles={chartStyles} />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-};
-
-export default ProgressTracker;
-
+          <h3 className

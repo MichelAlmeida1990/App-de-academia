@@ -19,16 +19,6 @@ const WORKOUT_CATEGORIES = [
 // Cores para os gráficos
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
-// Função auxiliar para tratamento consistente de datas
-const parseWorkoutDate = (dateString) => {
-  try {
-    return new Date(dateString);
-  } catch (e) {
-    console.error("Data inválida:", dateString);
-    return null;
-  }
-};
-
 // Componentes memoizados para os gráficos
 const MemoizedBarChart = React.memo(({ data, chartStyles }) => (
   <ResponsiveContainer width="100%" height="100%">
@@ -97,7 +87,7 @@ const MemoizedLineChart = React.memo(({ data, chartStyles }) => (
 ));
 
 const ProgressTracker = () => {
-  const { workouts, loading } = useWorkout();
+  const { workouts, loading, getCompletedWorkouts } = useWorkout();
   const { darkMode } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState('overview');
   
@@ -113,60 +103,94 @@ const ProgressTracker = () => {
     weeklyActivity: []
   });
 
-  // Memoize a data atual para garantir consistência
-  const today = useMemo(() => new Date(), []);
-
-  // Memoize a função getCompletedWorkouts para evitar re-renderizações
-  const getCompletedWorkouts = useCallback(() => {
-    if (!workouts || workouts.length === 0) return [];
-    return workouts.filter(workout => workout.completed);
-  }, [workouts]);
-
   // Função para gerar dados de exemplo quando não há dados suficientes
-  const generateDemoData = useCallback(() => {
+  const generateDemoData = useCallback((realWorkouts) => {
+    // Usar a data atual do sistema
+    const today = new Date();
+    const hasRealData = realWorkouts && realWorkouts.length > 0;
+    
     // Dados de atividade semanal (últimos 7 dias)
     const last7Days = eachDayOfInterval({
       start: subDays(today, 6),
       end: today
     });
     
-    // Dados simulados - usando valores determinísticos em vez de aleatórios
-    const weeklyActivity = last7Days.map((day, index) => {
-      const isToday = day.getDate() === today.getDate() && 
-                      day.getMonth() === today.getMonth() &&
-                      day.getFullYear() === today.getFullYear();
-                      
-      // Usar valor determinístico baseado no índice e no dia para evitar mudanças aleatórias
-      const deterministicCount = isToday ? 1 : ((index + day.getDate()) % 2);
+    let weeklyActivity = [];
+    
+    if (hasRealData) {
+      // Obter todos os treinos concluídos de uma vez
+      const allCompletedWorkouts = realWorkouts;
       
-      return {
-        date: format(day, 'dd/MM'),
-        day: format(day, 'EEE', { locale: ptBR }),
-        count: deterministicCount,
-        isToday: isToday
-      };
-    });
+      weeklyActivity = last7Days.map(day => {
+        // Filtrar os treinos para este dia específico
+        const dayWorkouts = allCompletedWorkouts.filter(workout => {
+          if (!workout.completedAt && !workout.date) return false;
+          
+          const workoutDate = new Date(workout.completedAt || workout.date);
+          return workoutDate.getFullYear() === day.getFullYear() &&
+                workoutDate.getMonth() === day.getMonth() &&
+                workoutDate.getDate() === day.getDate();
+        });
+        
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: dayWorkouts.length,
+          isToday: day.getDate() === today.getDate() && 
+                  day.getMonth() === today.getMonth() &&
+                  day.getFullYear() === today.getFullYear()
+        };
+      });
+    } else {
+      // Dados simulados
+      weeklyActivity = last7Days.map(day => {
+        const isToday = day.getDate() === today.getDate() && 
+                         day.getMonth() === today.getMonth() &&
+                         day.getFullYear() === today.getFullYear();
+                         
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: isToday ? 1 : Math.floor(Math.random() * 2), // Garantir que hoje tenha pelo menos 1 treino
+          isToday: isToday
+        };
+      });
+    }
     
-    // Distribuição por grupo muscular - usando valores determinísticos
-    const bodyPartDistribution = WORKOUT_CATEGORIES.map((category, index) => ({
-      name: category,
-      // Valor determinístico baseado no índice
-      value: Math.max(1, (index % 5) + 1)
-    })).filter(item => item.value > 0);
+    // Distribuição por grupo muscular
+    let bodyPartDistribution = [];
     
-    // Valores fixos para dados de demonstração
+    if (hasRealData) {
+      const bodyPartCounts = {};
+      realWorkouts.forEach(workout => {
+        const category = workout.category || 'Outros';
+        bodyPartCounts[category] = (bodyPartCounts[category] || 0) + 1;
+      });
+      
+      bodyPartDistribution = Object.entries(bodyPartCounts).map(([name, value]) => ({
+        name,
+        value
+      }));
+    } else {
+      // Dados simulados
+      bodyPartDistribution = WORKOUT_CATEGORIES.map(category => ({
+        name: category,
+        value: Math.floor(Math.random() * 5) + (category === 'Outros' ? 0 : 1) // 1-5 treinos por categoria
+      })).filter(item => item.value > 0);
+    }
+    
     return {
-      weeklyWorkouts: 3,
+      weeklyWorkouts: hasRealData ? weeklyActivity.reduce((sum, day) => sum + day.count, 0) : 3,
       weeklyGoal: 5,
-      monthlyProgress: 65,
-      streakDays: 2,
-      totalCompleted: 12,
-      weeklyTrend: 'up',
-      completionRate: 75,
+      monthlyProgress: hasRealData ? Math.min(100, Math.round((weeklyActivity.reduce((sum, day) => sum + day.count, 0) / 20) * 100)) : 65,
+      streakDays: hasRealData ? (weeklyActivity.find(d => d.isToday)?.count > 0 ? Math.floor(Math.random() * 5) + 1 : 0) : 2,
+      totalCompleted: hasRealData ? realWorkouts.length : 12,
+      weeklyTrend: ['up', 'stable', 'down'][Math.floor(Math.random() * 3)],
+      completionRate: hasRealData ? Math.round((realWorkouts.length / (realWorkouts.length + Math.floor(Math.random() * 5))) * 100) : 75,
       bodyPartDistribution,
       weeklyActivity
     };
-  }, [today]);
+  }, []);
 
   // Calcular métricas de progresso
   useEffect(() => {
@@ -176,9 +200,12 @@ const ProgressTracker = () => {
       const completedWorkouts = getCompletedWorkouts();
       const hasData = completedWorkouts && completedWorkouts.length > 0;
       
+      // Usar a data atual do sistema
+      const today = new Date();
+      
       // Se não houver dados suficientes, usar dados de demonstração
       if (!hasData) {
-        setProgress(generateDemoData());
+        setProgress(generateDemoData([]));
         return;
       }
       
@@ -192,9 +219,7 @@ const ProgressTracker = () => {
         try {
           if (!workout.completedAt && !workout.date) return false;
           
-          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-          if (!workoutDate) return false;
-          
+          const workoutDate = new Date(workout.completedAt || workout.date);
           return isWithinInterval(workoutDate, { start: weekStart, end: weekEnd });
         } catch (error) {
           console.error("Erro ao processar data do treino:", error);
@@ -207,9 +232,7 @@ const ProgressTracker = () => {
         try {
           if (!workout.completedAt && !workout.date) return false;
           
-          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-          if (!workoutDate) return false;
-          
+          const workoutDate = new Date(workout.completedAt || workout.date);
           return isWithinInterval(workoutDate, { start: lastWeekStart, end: lastWeekEnd });
         } catch (error) {
           console.error("Erro ao processar data do treino:", error);
@@ -234,12 +257,8 @@ const ProgressTracker = () => {
             if (!a.completedAt && !a.date) return 1;
             if (!b.completedAt && !b.date) return -1;
             
-            const dateA = parseWorkoutDate(a.completedAt || a.date);
-            const dateB = parseWorkoutDate(b.completedAt || b.date);
-            
-            if (!dateA) return 1;
-            if (!dateB) return -1;
-            
+            const dateA = new Date(a.completedAt || a.date);
+            const dateB = new Date(b.completedAt || b.date);
             return dateB - dateA; // Mais recente primeiro
           } catch (error) {
             console.error("Erro ao ordenar treinos:", error);
@@ -248,36 +267,32 @@ const ProgressTracker = () => {
         });
         
         if (sortedWorkouts[0]) {
-          const latestWorkoutDate = parseWorkoutDate(sortedWorkouts[0].completedAt || sortedWorkouts[0].date);
+          const latestWorkoutDate = new Date(sortedWorkouts[0].completedAt || sortedWorkouts[0].date);
           
-          if (latestWorkoutDate) {
-            // Se o último treino foi hoje ou ontem, calcular sequência
-            const daysSinceLastWorkout = differenceInDays(today, latestWorkoutDate);
+          // Se o último treino foi hoje ou ontem, calcular sequência
+          const daysSinceLastWorkout = differenceInDays(today, latestWorkoutDate);
+          
+          if (daysSinceLastWorkout <= 1) {
+            // Começar a contar a sequência
+            let currentDate = latestWorkoutDate;
+            let consecutiveDays = 1;
             
-            if (daysSinceLastWorkout <= 1) {
-              // Começar a contar a sequência
-              let currentDate = latestWorkoutDate;
-              let consecutiveDays = 1;
+            // Verificar dias anteriores
+            for (let i = 1; i < sortedWorkouts.length; i++) {
+              if (!sortedWorkouts[i].completedAt && !sortedWorkouts[i].date) continue;
               
-              // Verificar dias anteriores
-              for (let i = 1; i < sortedWorkouts.length; i++) {
-                if (!sortedWorkouts[i].completedAt && !sortedWorkouts[i].date) continue;
-                
-                const prevWorkoutDate = parseWorkoutDate(sortedWorkouts[i].completedAt || sortedWorkouts[i].date);
-                if (!prevWorkoutDate) continue;
-                
-                const daysBetween = differenceInDays(currentDate, prevWorkoutDate);
-                
-                if (daysBetween === 1) {
-                  consecutiveDays++;
-                  currentDate = prevWorkoutDate;
-                } else if (daysBetween > 1) {
-                  break;
-                }
+              const prevWorkoutDate = new Date(sortedWorkouts[i].completedAt || sortedWorkouts[i].date);
+              const daysBetween = differenceInDays(currentDate, prevWorkoutDate);
+              
+              if (daysBetween === 1) {
+                consecutiveDays++;
+                currentDate = prevWorkoutDate;
+              } else if (daysBetween > 1) {
+                break;
               }
-              
-              streakDays = consecutiveDays;
             }
+            
+            streakDays = consecutiveDays;
           }
         }
       }
@@ -294,8 +309,7 @@ const ProgressTracker = () => {
         try {
           if (!workout.completedAt && !workout.date) return;
           
-          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-          if (!workoutDate) return;
+          const workoutDate = new Date(workout.completedAt || workout.date);
           
           if (workoutDate.getMonth() === today.getMonth() && 
               workoutDate.getFullYear() === today.getFullYear()) {
@@ -313,9 +327,7 @@ const ProgressTracker = () => {
         try {
           if (!workout.date) return false;
           
-          const workoutDate = parseWorkoutDate(workout.date);
-          if (!workoutDate) return false;
-          
+          const workoutDate = new Date(workout.date);
           return workoutDate <= today;
         } catch (error) {
           console.error("Erro ao processar data para taxa de conclusão:", error);
@@ -351,9 +363,7 @@ const ProgressTracker = () => {
           try {
             if (!workout.completedAt && !workout.date) return false;
             
-            const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-            if (!workoutDate) return false;
-            
+            const workoutDate = new Date(workout.completedAt || workout.date);
             return workoutDate.getFullYear() === day.getFullYear() &&
                   workoutDate.getMonth() === day.getMonth() &&
                   workoutDate.getDate() === day.getDate();
@@ -373,12 +383,12 @@ const ProgressTracker = () => {
         };
       });
       
-      // Criar um novo array com os valores atualizados em vez de modificar diretamente
-      const updatedWeeklyActivity = weeklyActivity.map(day => 
-        day.isToday && day.count === 0 
-          ? {...day, count: 1} 
-          : day
-      );
+      // Garantir que o dia atual tenha pelo menos um treino para demonstração
+      // se não houver nenhum treino real no dia atual
+      const todayActivity = weeklyActivity.find(day => day.isToday);
+      if (todayActivity && todayActivity.count === 0 && !hasData) {
+        todayActivity.count = 1;
+      }
       
       setProgress({
         weeklyWorkouts: weeklyWorkouts.length,
@@ -389,23 +399,23 @@ const ProgressTracker = () => {
         weeklyTrend: weeklyTrend,
         completionRate: completionRate,
         bodyPartDistribution: bodyPartDistribution,
-        weeklyActivity: updatedWeeklyActivity
+        weeklyActivity: weeklyActivity
       });
     } catch (error) {
       console.error("Erro ao calcular progresso:", error);
       // Em caso de erro, usar dados de demonstração
-      setProgress(generateDemoData());
+      setProgress(generateDemoData([]));
     }
-  }, [workouts, loading, generateDemoData, getCompletedWorkouts, today]);
+  }, [workouts, loading, generateDemoData, getCompletedWorkouts]);
 
-  const renderTrendIcon = useCallback(() => {
+  const renderTrendIcon = () => {
     if (progress.weeklyTrend === 'up') {
       return <FaArrowUp className="text-green-500" />;
     } else if (progress.weeklyTrend === 'down') {
       return <FaArrowDown className="text-red-500" />;
     }
     return <FaEquals className="text-gray-500" />;
-  }, [progress.weeklyTrend]);
+  };
 
   // Memoize os dados dos gráficos para evitar re-renderizações desnecessárias
   const memoizedWeeklyActivity = useMemo(() => progress.weeklyActivity, [progress.weeklyActivity]);
@@ -550,7 +560,7 @@ const ProgressTracker = () => {
                 </div>
                 <div className="flex justify-between mb-2">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {format(today, "MMMM 'de' yyyy", { locale: ptBR })}
+                    {format(new Date(), "MMMM 'de' yyyy", { locale: ptBR })}
                   </p>
                   <p className="text-sm font-medium text-green-600 dark:text-green-400">{progress.monthlyProgress}%</p>
                 </div>
@@ -582,92 +592,4 @@ const ProgressTracker = () => {
                 </motion.div>
                 
                 <motion.div 
-                  whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                  className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/20 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800"
-                >
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-indigo-100 dark:bg-indigo-800/50 rounded-lg mr-3">
-                      <FaCalendarAlt className="text-indigo-500 dark:text-indigo-400 text-xl" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Taxa de conclusão</p>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{progress.completionRate}%</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-2">dos treinos planejados</span>
-                  </div>
-                </motion.div>
-              </div>
-              
-                            <div className="overflow-x-auto pb-2">
-                <div className="flex space-x-3 min-w-max">
-                  {progress.weeklyActivity.map((day, index) => (
-                    <motion.div 
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`flex flex-col items-center p-3 rounded-lg min-w-[70px] ${
-                        day.isToday 
-                          ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800' 
-                          : 'bg-gray-100 dark:bg-gray-800/50'
-                      }`}
-                    >
-                      <p className={`text-xs font-medium ${
-                        day.isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {day.day}
-                      </p>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 my-1">{day.date}</p>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        day.count > 0 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {day.count}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="charts"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">Atividade Semanal</h4>
-                <div className="h-64">
-                  <MemoizedBarChart data={memoizedWeeklyActivity} chartStyles={chartStyles} />
-                </div>
-              </div>
-              
-              {memoizedBodyPartDistribution.length > 0 && (
-                <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">Distribuição por Grupo Muscular</h4>
-                  <div className="h-64">
-                    <MemoizedPieChart data={memoizedBodyPartDistribution} chartStyles={chartStyles} />
-                  </div>
-                </div>
-              )}
-              
-              <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">Tendência de Progresso</h4>
-                <div className="h-64">
-                  <MemoizedLineChart data={memoizedProgressTrend} chartStyles={chartStyles} />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-};
-
-export default ProgressTracker;
-
+                  

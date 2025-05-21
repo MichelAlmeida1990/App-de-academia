@@ -19,16 +19,6 @@ const WORKOUT_CATEGORIES = [
 // Cores para os gráficos
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
-// Função auxiliar para tratamento consistente de datas
-const parseWorkoutDate = (dateString) => {
-  try {
-    return new Date(dateString);
-  } catch (e) {
-    console.error("Data inválida:", dateString);
-    return null;
-  }
-};
-
 // Componentes memoizados para os gráficos
 const MemoizedBarChart = React.memo(({ data, chartStyles }) => (
   <ResponsiveContainer width="100%" height="100%">
@@ -97,7 +87,7 @@ const MemoizedLineChart = React.memo(({ data, chartStyles }) => (
 ));
 
 const ProgressTracker = () => {
-  const { workouts, loading } = useWorkout();
+  const { workouts, loading, getCompletedWorkouts } = useWorkout();
   const { darkMode } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState('overview');
   
@@ -113,60 +103,134 @@ const ProgressTracker = () => {
     weeklyActivity: []
   });
 
-  // Memoize a data atual para garantir consistência
-  const today = useMemo(() => new Date(), []);
+  // Função para diagnóstico de datas
+  const checkDateFormats = useCallback((completedWorkouts) => {
+    const today = new Date();
+    console.log('DEBUG_DATE_CHECK: ==========================================');
+    console.log('DEBUG_DATE_CHECK: Data atual (new Date()):', today);
+    console.log('DEBUG_DATE_CHECK: toISOString:', today.toISOString());
+    console.log('DEBUG_DATE_CHECK: toLocaleDateString:', today.toLocaleDateString('pt-BR'));
+    console.log('DEBUG_DATE_CHECK: format(today, "yyyy-MM-dd"):', format(today, 'yyyy-MM-dd'));
+    console.log('DEBUG_DATE_CHECK: format(today, "dd/MM"):', format(today, 'dd/MM'));
+    
+    // Verificar últimos 7 dias
+    const last7DaysCheck = Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date();
+      date.setDate(today.getDate() - (6 - i));
+      return {
+        date: date,
+        iso: date.toISOString(),
+        formatted: format(date, 'yyyy-MM-dd'),
+        shortFormat: format(date, 'dd/MM'),
+        weekday: format(date, 'EEE', { locale: ptBR })
+      };
+    });
+    console.log('DEBUG_DATE_CHECK: Últimos 7 dias:', JSON.stringify(last7DaysCheck, null, 2));
 
-  // Memoize a função getCompletedWorkouts para evitar re-renderizações
-  const getCompletedWorkouts = useCallback(() => {
-    if (!workouts || workouts.length === 0) return [];
-    return workouts.filter(workout => workout.completed);
-  }, [workouts]);
+    // Verificar treinos concluídos
+    console.log('DEBUG_DATE_CHECK: Treinos concluídos:', completedWorkouts.length);
+
+    completedWorkouts.forEach(workout => {
+      if (!workout.completedAt) return;
+      
+      const completedDate = new Date(workout.completedAt);
+      console.log('DEBUG_DATE_CHECK: Treino:', workout.name);
+      console.log('DEBUG_DATE_CHECK:   completedAt (original):', workout.completedAt);
+      console.log('DEBUG_DATE_CHECK:   new Date(completedAt):', completedDate);
+      console.log('DEBUG_DATE_CHECK:   format(parseISO):', format(parseISO(workout.completedAt), 'yyyy-MM-dd'));
+      console.log('DEBUG_DATE_CHECK:   format(parseISO, dd/MM):', format(parseISO(workout.completedAt), 'dd/MM'));
+
+      // Verificar correspondência com os últimos 7 dias
+      last7DaysCheck.forEach(day => {
+        const dayStr = format(day.date, 'yyyy-MM-dd');
+        const workoutStr = format(parseISO(workout.completedAt), 'yyyy-MM-dd');
+        if (dayStr === workoutStr) {
+          console.log('DEBUG_DATE_CHECK:   CORRESPONDÊNCIA ENCONTRADA com', day.weekday, day.shortFormat);
+        }
+      });
+    });
+    console.log('DEBUG_DATE_CHECK: ==========================================');
+  }, []);
 
   // Função para gerar dados de exemplo quando não há dados suficientes
-  const generateDemoData = useCallback(() => {
+  const generateDemoData = useCallback((realWorkouts) => {
+    const today = new Date();
+    const hasRealData = realWorkouts && realWorkouts.length > 0;
+    
     // Dados de atividade semanal (últimos 7 dias)
     const last7Days = eachDayOfInterval({
       start: subDays(today, 6),
       end: today
     });
     
-    // Dados simulados - usando valores determinísticos em vez de aleatórios
-    const weeklyActivity = last7Days.map((day, index) => {
-      const isToday = day.getDate() === today.getDate() && 
-                      day.getMonth() === today.getMonth() &&
-                      day.getFullYear() === today.getFullYear();
-                      
-      // Usar valor determinístico baseado no índice e no dia para evitar mudanças aleatórias
-      const deterministicCount = isToday ? 1 : ((index + day.getDate()) % 2);
+    let weeklyActivity = [];
+    
+    if (hasRealData) {
+      // Obter todos os treinos concluídos de uma vez
+      const allCompletedWorkouts = realWorkouts;
       
-      return {
-        date: format(day, 'dd/MM'),
-        day: format(day, 'EEE', { locale: ptBR }),
-        count: deterministicCount,
-        isToday: isToday
-      };
-    });
+      weeklyActivity = last7Days.map(day => {
+        // Filtrar os treinos para este dia específico
+        const dayWorkouts = allCompletedWorkouts.filter(workout => {
+          if (!workout.completedAt) return false;
+          
+          const workoutDate = parseISO(workout.completedAt);
+          return format(workoutDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
+        });
+        
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: dayWorkouts.length,
+          isToday: format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+        };
+      });
+    } else {
+      // Dados simulados
+      weeklyActivity = last7Days.map(day => {
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: Math.floor(Math.random() * 2), // 0 ou 1 treino por dia
+          isToday: format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+        };
+      });
+    }
     
-    // Distribuição por grupo muscular - usando valores determinísticos
-    const bodyPartDistribution = WORKOUT_CATEGORIES.map((category, index) => ({
-      name: category,
-      // Valor determinístico baseado no índice
-      value: Math.max(1, (index % 5) + 1)
-    })).filter(item => item.value > 0);
+    // Distribuição por grupo muscular
+    let bodyPartDistribution = [];
     
-    // Valores fixos para dados de demonstração
+    if (hasRealData) {
+      const bodyPartCounts = {};
+      realWorkouts.forEach(workout => {
+        const category = workout.category || 'Outros';
+        bodyPartCounts[category] = (bodyPartCounts[category] || 0) + 1;
+      });
+      
+      bodyPartDistribution = Object.entries(bodyPartCounts).map(([name, value]) => ({
+        name,
+        value
+      }));
+    } else {
+      // Dados simulados
+      bodyPartDistribution = WORKOUT_CATEGORIES.map(category => ({
+        name: category,
+        value: Math.floor(Math.random() * 5) + (category === 'Outros' ? 0 : 1) // 1-5 treinos por categoria
+      })).filter(item => item.value > 0);
+    }
+    
     return {
-      weeklyWorkouts: 3,
+      weeklyWorkouts: hasRealData ? weeklyActivity.reduce((sum, day) => sum + day.count, 0) : 3,
       weeklyGoal: 5,
-      monthlyProgress: 65,
-      streakDays: 2,
-      totalCompleted: 12,
-      weeklyTrend: 'up',
-      completionRate: 75,
+      monthlyProgress: hasRealData ? Math.min(100, Math.round((weeklyActivity.reduce((sum, day) => sum + day.count, 0) / 20) * 100)) : 65,
+      streakDays: hasRealData ? (weeklyActivity[6].count > 0 ? Math.floor(Math.random() * 5) + 1 : 0) : 2,
+      totalCompleted: hasRealData ? realWorkouts.length : 12,
+      weeklyTrend: ['up', 'stable', 'down'][Math.floor(Math.random() * 3)],
+      completionRate: hasRealData ? Math.round((realWorkouts.length / (realWorkouts.length + Math.floor(Math.random() * 5))) * 100) : 75,
       bodyPartDistribution,
       weeklyActivity
     };
-  }, [today]);
+  }, []);
 
   // Calcular métricas de progresso
   useEffect(() => {
@@ -176,45 +240,82 @@ const ProgressTracker = () => {
       const completedWorkouts = getCompletedWorkouts();
       const hasData = completedWorkouts && completedWorkouts.length > 0;
       
+      // Executar verificação de diagnóstico de datas
+      if (hasData) {
+        checkDateFormats(completedWorkouts);
+      }
+      
       // Se não houver dados suficientes, usar dados de demonstração
       if (!hasData) {
-        setProgress(generateDemoData());
+        setProgress(generateDemoData([]));
         return;
       }
       
+      const today = new Date();
       const weekStart = startOfWeek(today);
       const weekEnd = endOfWeek(today);
       const lastWeekStart = subDays(weekStart, 7);
       const lastWeekEnd = subDays(weekStart, 1);
       
-      // Treinos completados esta semana
-      const weeklyWorkouts = completedWorkouts.filter(workout => {
-        try {
-          if (!workout.completedAt && !workout.date) return false;
-          
-          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-          if (!workoutDate) return false;
-          
-          return isWithinInterval(workoutDate, { start: weekStart, end: weekEnd });
-        } catch (error) {
-          console.error("Erro ao processar data do treino:", error);
-          return false;
-        }
+      // CORREÇÃO: Últimos 7 dias incluindo hoje
+      const last7Days = Array.from({ length: 7 }).map((_, i) => {
+        const date = new Date();
+        date.setDate(today.getDate() - (6 - i));
+        // Zerar as horas para comparação apenas por data
+        date.setHours(0, 0, 0, 0);
+        return date;
       });
       
-      // Treinos completados semana passada
-      const lastWeekWorkouts = completedWorkouts.filter(workout => {
-        try {
-          if (!workout.completedAt && !workout.date) return false;
+      // Atividade semanal (últimos 7 dias) - CÓDIGO CORRIGIDO
+      const weeklyActivity = last7Days.map(day => {
+        // Converter a data base para string no formato YYYY-MM-DD para comparação
+        const dayString = format(day, 'yyyy-MM-dd');
+        
+        // Filtrar os treinos concluídos neste dia específico
+        const dayWorkouts = completedWorkouts.filter(workout => {
+          if (!workout.completedAt) return false;
           
-          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-          if (!workoutDate) return false;
+          // Converter a data do treino para o mesmo formato
+          const workoutDateString = format(parseISO(workout.completedAt), 'yyyy-MM-dd');
           
-          return isWithinInterval(workoutDate, { start: lastWeekStart, end: lastWeekEnd });
-        } catch (error) {
-          console.error("Erro ao processar data do treino:", error);
-          return false;
+          // Comparar as strings de data
+          return workoutDateString === dayString;
+        });
+        
+        // Log para depuração
+        console.log(`DEBUG: Dia ${dayString} - Encontrados ${dayWorkouts.length} treinos`);
+        if (dayWorkouts.length > 0) {
+          console.log(`DEBUG: Treinos do dia ${dayString}:`, dayWorkouts.map(w => w.name));
         }
+        
+        return {
+          date: format(day, 'dd/MM'),
+          day: format(day, 'EEE', { locale: ptBR }),
+          count: dayWorkouts.length,
+          isToday: dayString === format(today, 'yyyy-MM-dd')
+        };
+      });
+      
+      // Treinos completados esta semana - CÓDIGO CORRIGIDO
+      const weeklyWorkouts = completedWorkouts.filter(workout => {
+        if (!workout.completedAt) return false;
+        
+        const workoutDate = parseISO(workout.completedAt);
+        return isWithinInterval(workoutDate, { 
+          start: weekStart, 
+          end: weekEnd 
+        });
+      });
+      
+      // Treinos completados semana passada - CÓDIGO CORRIGIDO
+      const lastWeekWorkouts = completedWorkouts.filter(workout => {
+        if (!workout.completedAt) return false;
+        
+        const workoutDate = parseISO(workout.completedAt);
+        return isWithinInterval(workoutDate, { 
+          start: lastWeekStart, 
+          end: lastWeekEnd 
+        });
       });
       
       // Determinar tendência semanal
@@ -225,163 +326,102 @@ const ProgressTracker = () => {
         weeklyTrend = 'down';
       }
       
-      // Calcular sequência de dias
+      // Calcular sequência de dias - CÓDIGO CORRIGIDO
       let streakDays = 0;
       if (completedWorkouts.length > 0) {
         // Ordenar por data de conclusão
-        const sortedWorkouts = [...completedWorkouts].sort((a, b) => {
-          try {
-            if (!a.completedAt && !a.date) return 1;
-            if (!b.completedAt && !b.date) return -1;
-            
-            const dateA = parseWorkoutDate(a.completedAt || a.date);
-            const dateB = parseWorkoutDate(b.completedAt || b.date);
-            
-            if (!dateA) return 1;
-            if (!dateB) return -1;
-            
+        const sortedWorkouts = [...completedWorkouts]
+          .filter(w => w.completedAt) // Garantir que só consideramos treinos com completedAt
+          .sort((a, b) => {
+            const dateA = parseISO(a.completedAt);
+            const dateB = parseISO(b.completedAt);
             return dateB - dateA; // Mais recente primeiro
-          } catch (error) {
-            console.error("Erro ao ordenar treinos:", error);
-            return 0;
-          }
-        });
+          });
         
-        if (sortedWorkouts[0]) {
-          const latestWorkoutDate = parseWorkoutDate(sortedWorkouts[0].completedAt || sortedWorkouts[0].date);
+        if (sortedWorkouts.length > 0) {
+          const latestWorkoutDate = parseISO(sortedWorkouts[0].completedAt);
           
-          if (latestWorkoutDate) {
-            // Se o último treino foi hoje ou ontem, calcular sequência
-            const daysSinceLastWorkout = differenceInDays(today, latestWorkoutDate);
+          // Se o último treino foi hoje ou ontem, calcular sequência
+          const daysSinceLastWorkout = differenceInDays(today, latestWorkoutDate);
+          
+          if (daysSinceLastWorkout <= 1) {
+            // Começar a contar a sequência
+            let currentDate = latestWorkoutDate;
+            let consecutiveDays = 1;
             
-            if (daysSinceLastWorkout <= 1) {
-              // Começar a contar a sequência
-              let currentDate = latestWorkoutDate;
-              let consecutiveDays = 1;
+            // Verificar dias anteriores
+            for (let i = 1; i < sortedWorkouts.length; i++) {
+              const prevWorkoutDate = parseISO(sortedWorkouts[i].completedAt);
+              const daysBetween = differenceInDays(currentDate, prevWorkoutDate);
               
-              // Verificar dias anteriores
-              for (let i = 1; i < sortedWorkouts.length; i++) {
-                if (!sortedWorkouts[i].completedAt && !sortedWorkouts[i].date) continue;
-                
-                const prevWorkoutDate = parseWorkoutDate(sortedWorkouts[i].completedAt || sortedWorkouts[i].date);
-                if (!prevWorkoutDate) continue;
-                
-                const daysBetween = differenceInDays(currentDate, prevWorkoutDate);
-                
-                if (daysBetween === 1) {
-                  consecutiveDays++;
-                  currentDate = prevWorkoutDate;
-                } else if (daysBetween > 1) {
-                  break;
-                }
+              if (daysBetween === 1) {
+                consecutiveDays++;
+                currentDate = prevWorkoutDate;
+              } else if (daysBetween > 1) {
+                break;
               }
-              
-              streakDays = consecutiveDays;
             }
+            
+            streakDays = consecutiveDays;
           }
         }
       }
       
-      // Progresso mensal (% de dias do mês com treinos concluídos)
+      // Progresso mensal (% de dias do mês com treinos concluídos) - CÓDIGO CORRIGIDO
       const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
       const currentDay = today.getDate();
       const monthlyTarget = Math.min(currentDay, daysInMonth);
       
-      // Conjunto de dias únicos do mês atual com treinos
-      const daysWithWorkouts = new Set();
+      // Obter dias únicos do mês atual com treinos
+      const daysWithWorkouts = new Set(
+        completedWorkouts
+          .filter(workout => {
+            if (!workout.completedAt) return false;
+            
+            const workoutDate = parseISO(workout.completedAt);
+            return workoutDate.getMonth() === today.getMonth() && 
+                  workoutDate.getFullYear() === today.getFullYear();
+          })
+          .map(workout => {
+            const workoutDate = parseISO(workout.completedAt);
+            return format(workoutDate, 'yyyy-MM-dd');
+          })
+      ).size;
       
-      completedWorkouts.forEach(workout => {
-        try {
-          if (!workout.completedAt && !workout.date) return;
-          
-          const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-          if (!workoutDate) return;
-          
-          if (workoutDate.getMonth() === today.getMonth() && 
-              workoutDate.getFullYear() === today.getFullYear()) {
-            daysWithWorkouts.add(workoutDate.getDate());
-          }
-        } catch (error) {
-          console.error("Erro ao processar data para progresso mensal:", error);
-        }
-      });
+      const monthlyProgress = Math.round((daysWithWorkouts / monthlyTarget) * 100);
       
-      const monthlyProgress = Math.round((daysWithWorkouts.size / monthlyTarget) * 100);
-      
-      // Taxa de conclusão (% de treinos planejados que foram concluídos)
+      // Taxa de conclusão (% de treinos planejados que foram concluídos) - CÓDIGO CORRIGIDO
       const allScheduledWorkouts = workouts.filter(workout => {
-        try {
-          if (!workout.date) return false;
-          
-          const workoutDate = parseWorkoutDate(workout.date);
-          if (!workoutDate) return false;
-          
-          return workoutDate <= today;
-        } catch (error) {
-          console.error("Erro ao processar data para taxa de conclusão:", error);
-          return false;
-        }
+        if (!workout.date) return false;
+        
+        const workoutDate = parseISO(workout.date);
+        return workoutDate <= today;
       });
       
       const completionRate = allScheduledWorkouts.length > 0
         ? Math.round((completedWorkouts.length / allScheduledWorkouts.length) * 100)
         : 0;
       
-      // Distribuição por grupo muscular
+      // Distribuição por grupo muscular - CÓDIGO CORRIGIDO
       const bodyPartCounts = {};
       completedWorkouts.forEach(workout => {
         const category = workout.category || 'Outros';
         bodyPartCounts[category] = (bodyPartCounts[category] || 0) + 1;
       });
       
-      const bodyPartDistribution = Object.entries(bodyPartCounts).map(([name, value]) => ({
-        name,
-        value
-      }));
+      const bodyPartDistribution = Object.entries(bodyPartCounts)
+        .map(([name, value]) => ({
+          name,
+          value
+        }))
+        .sort((a, b) => b.value - a.value); // Ordenar por quantidade (maior primeiro)
       
-      // Atividade semanal (últimos 7 dias)
-      const last7Days = eachDayOfInterval({
-        start: subDays(today, 6),
-        end: today
-      });
-      
-      const weeklyActivity = last7Days.map(day => {
-        // Filtrar os treinos para este dia específico
-        const dayWorkouts = completedWorkouts.filter(workout => {
-          try {
-            if (!workout.completedAt && !workout.date) return false;
-            
-            const workoutDate = parseWorkoutDate(workout.completedAt || workout.date);
-            if (!workoutDate) return false;
-            
-            return workoutDate.getFullYear() === day.getFullYear() &&
-                  workoutDate.getMonth() === day.getMonth() &&
-                  workoutDate.getDate() === day.getDate();
-          } catch (error) {
-            console.error("Erro ao processar data para atividade semanal:", error);
-            return false;
-          }
-        });
-        
-        return {
-          date: format(day, 'dd/MM'),
-          day: format(day, 'EEE', { locale: ptBR }),
-          count: dayWorkouts.length,
-          isToday: day.getDate() === today.getDate() && 
-                  day.getMonth() === today.getMonth() &&
-                  day.getFullYear() === today.getFullYear()
-        };
-      });
-      
-      // Criar um novo array com os valores atualizados em vez de modificar diretamente
-      const updatedWeeklyActivity = weeklyActivity.map(day => 
-        day.isToday && day.count === 0 
-          ? {...day, count: 1} 
-          : day
-      );
+      // Log para depuração
+      console.log('DEBUG_WEEKLY_ACTIVITY:', JSON.stringify(weeklyActivity, null, 2));
       
       setProgress({
-        weeklyWorkouts: weeklyWorkouts.length,
+        // CORREÇÃO: Usar a soma dos treinos da atividade semanal para o total semanal
+        weeklyWorkouts: weeklyActivity.reduce((sum, day) => sum + day.count, 0),
         weeklyGoal: 5, // Meta semanal fixa (poderia vir das configurações do usuário)
         monthlyProgress: monthlyProgress,
         streakDays: streakDays,
@@ -389,23 +429,23 @@ const ProgressTracker = () => {
         weeklyTrend: weeklyTrend,
         completionRate: completionRate,
         bodyPartDistribution: bodyPartDistribution,
-        weeklyActivity: updatedWeeklyActivity
+        weeklyActivity: weeklyActivity
       });
     } catch (error) {
       console.error("Erro ao calcular progresso:", error);
       // Em caso de erro, usar dados de demonstração
-      setProgress(generateDemoData());
+      setProgress(generateDemoData([]));
     }
-  }, [workouts, loading, generateDemoData, getCompletedWorkouts, today]);
+  }, [workouts, loading, generateDemoData, checkDateFormats, getCompletedWorkouts]);
 
-  const renderTrendIcon = useCallback(() => {
+  const renderTrendIcon = () => {
     if (progress.weeklyTrend === 'up') {
       return <FaArrowUp className="text-green-500" />;
     } else if (progress.weeklyTrend === 'down') {
       return <FaArrowDown className="text-red-500" />;
     }
     return <FaEquals className="text-gray-500" />;
-  }, [progress.weeklyTrend]);
+  };
 
   // Memoize os dados dos gráficos para evitar re-renderizações desnecessárias
   const memoizedWeeklyActivity = useMemo(() => progress.weeklyActivity, [progress.weeklyActivity]);
@@ -548,19 +588,21 @@ const ProgressTracker = () => {
                   </div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Progresso mensal</p>
                 </div>
-                <div className="flex justify-between mb-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {format(today, "MMMM 'de' yyyy", { locale: ptBR })}
-                  </p>
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">{progress.monthlyProgress}%</p>
+                                <div className="flex justify-between mb-2">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">0%</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">100%</span>
                 </div>
-                <div className="bg-white/60 dark:bg-gray-700/50 rounded-full h-3 overflow-hidden">
+                <div className="bg-white/60 dark:bg-gray-700/50 rounded-full h-2.5 overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${progress.monthlyProgress}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-green-500 h-3 rounded-full"
+                    className="bg-green-500 h-2.5 rounded-full"
                   ></motion.div>
+                </div>
+                <div className="flex items-center mt-2">
+                  <span className="text-3xl font-bold text-green-600 dark:text-green-400">{progress.monthlyProgress}%</span>
+                  <span className="text-gray-500 dark:text-gray-400 ml-2">concluído</span>
                 </div>
               </motion.div>
               
@@ -598,7 +640,7 @@ const ProgressTracker = () => {
                 </motion.div>
               </div>
               
-                            <div className="overflow-x-auto pb-2">
+              <div className="overflow-x-auto pb-2">
                 <div className="flex space-x-3 min-w-max">
                   {progress.weeklyActivity.map((day, index) => (
                     <motion.div 
@@ -670,4 +712,3 @@ const ProgressTracker = () => {
 };
 
 export default ProgressTracker;
-
