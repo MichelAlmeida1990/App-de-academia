@@ -1,17 +1,6 @@
 // src/components/exercises/SimilarExercises.js
 
 import React from 'react';
-import { 
-  Box, 
-  Heading, 
-  SimpleGrid, 
-  Text, 
-  Image, 
-  Flex, 
-  Badge,
-  useColorModeValue,
-  Link
-} from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 
 const ExerciseCard = ({ exercise }) => {
@@ -25,7 +14,7 @@ const ExerciseCard = ({ exercise }) => {
       textDecoration="none" 
       _hover={{ textDecoration: 'none' }}
     >
-      <Box
+      <div
         borderWidth="1px"
         borderRadius="lg"
         overflow="hidden"
@@ -48,23 +37,23 @@ const ExerciseCard = ({ exercise }) => {
           objectFit="cover"
         />
         
-        <Box p={4} flex="1">
-          <Flex justifyContent="space-between" alignItems="flex-start" mb={2}>
-            <Heading as="h3" size="sm" noOfLines={2}>
+        <div p={4} flex="1">
+          <div justifyContent="space-between" alignItems="flex-start" mb={2} style={{display: "flex"}}
+            <h2 as="h3" size="sm" noOfLines={2}>
               {exercise.name}
-            </Heading>
-          </Flex>
+            </h2>
+          </div>
           
-          <Flex mt={2} flexWrap="wrap" gap={2}>
-            <Badge colorScheme="purple" fontSize="0.7em" borderRadius="full">
+          <div mt={2} flexWrap="wrap" gap={2} style={{display: "flex"}}
+            <span colorScheme="purple" fontSize="0.7em" borderRadius="full" className="badge">
               {exercise.bodyPart}
-            </Badge>
-            <Badge colorScheme="blue" fontSize="0.7em" borderRadius="full">
+            </span>
+            <span colorScheme="blue" fontSize="0.7em" borderRadius="full" className="badge">
               {exercise.target}
-            </Badge>
-          </Flex>
-        </Box>
-      </Box>
+            </span>
+          </div>
+        </div>
+      </div>
     </Link>
   );
 };
@@ -74,45 +63,49 @@ const SimilarExercises = ({ targetMuscleExercises, equipmentExercises }) => {
   const sectionBg = useColorModeValue('gray.50', 'gray.900');
 
   return (
-    <Box mb={8}>
-      <Heading as="h2" size="lg" mb={6} color={headingColor}>
+    <div mb={8}>
+      <h2 as="h2" size="lg" mb={6} color={headingColor}>
         Exercícios Similares
-      </Heading>
+      </h2>
       
       {targetMuscleExercises?.length > 0 && (
-        <Box mb={8} p={5} borderRadius="lg" bg={sectionBg}>
-          <Heading as="h3" size="md" mb={4}>
+        <div mb={8} p={5} borderRadius="lg" bg={sectionBg}>
+          <h2 as="h3" size="md" mb={4}>
             Mesmo Grupo Muscular
-          </Heading>
+          </h2>
           <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4}>
             {targetMuscleExercises.slice(0, 4).map((exercise) => (
               <ExerciseCard key={exercise.id} exercise={exercise} />
             ))}
           </SimpleGrid>
-        </Box>
+        </div>
       )}
       
       {equipmentExercises?.length > 0 && (
-        <Box p={5} borderRadius="lg" bg={sectionBg}>
-          <Heading as="h3" size="md" mb={4}>
+        <div p={5} borderRadius="lg" bg={sectionBg}>
+          <h2 as="h3" size="md" mb={4}>
             Mesmo Equipamento
-          </Heading>
+          </h2>
           <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4}>
             {equipmentExercises.slice(0, 4).map((exercise) => (
               <ExerciseCard key={exercise.id} exercise={exercise} />
             ))}
           </SimpleGrid>
-        </Box>
+        </div>
       )}
       
       {(!targetMuscleExercises || targetMuscleExercises.length === 0) && 
        (!equipmentExercises || equipmentExercises.length === 0) && (
-        <Text color="gray.500" textAlign="center" py={8}>
+        <span color="gray.500" textAlign="center" py={8}>
           Nenhum exercício similar encontrado.
-        </Text>
+        </span>
       )}
-    </Box>
+    </div>
   );
 };
 
 export default SimilarExercises;
+
+
+
+

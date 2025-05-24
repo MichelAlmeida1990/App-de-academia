@@ -1,17 +1,6 @@
 // src/components/exercises/MuscleHighlight.js
 
 import React from 'react';
-import { 
-  Box, 
-  Heading, 
-  Text, 
-  Image, 
-  Flex, 
-  Badge,
-  useColorModeValue,
-  SimpleGrid
-} from '@chakra-ui/react';
-
 // Imagens de músculos (você precisará adicionar estas imagens ao seu projeto)
 const muscleImages = {
   chest: '/images/muscles/chest.png',
@@ -42,7 +31,7 @@ const MuscleHighlight = ({ targetMuscle, secondaryMuscles = [] }) => {
   const targetMuscleImage = muscleImages[targetMuscleNormalized] || fallbackImage;
   
   return (
-    <Box 
+    <div 
       bg={bgColor}
       borderRadius="lg"
       boxShadow="md"
@@ -51,39 +40,39 @@ const MuscleHighlight = ({ targetMuscle, secondaryMuscles = [] }) => {
       mb={6}
       overflow="hidden"
     >
-      <Box p={5}>
-        <Heading as="h3" size="md" mb={4} color={headingColor}>
+      <div p={5}>
+        <h2 as="h3" size="md" mb={4} color={headingColor}>
           Músculos Trabalhados
-        </Heading>
+        </h2>
         
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-          <Box>
-            <Flex alignItems="center" mb={4}>
-              <Badge colorScheme="red" mr={2} px={2} py={1}>
+          <div>
+            <div alignItems="center" mb={4} style={{display: "flex"}}
+              <span colorScheme="red" mr={2} px={2} py={1} className="badge">
                 Principal
-              </Badge>
-              <Text fontWeight="bold">{targetMuscle}</Text>
-            </Flex>
+              </span>
+              <span fontWeight="bold">{targetMuscle}</span>
+            </div>
             
             {secondaryMuscles.length > 0 && (
-              <Box>
-                <Flex alignItems="center" mb={2}>
-                  <Badge colorScheme="orange" mr={2} px={2} py={1}>
+              <div>
+                <div alignItems="center" mb={2} style={{display: "flex"}}
+                  <span colorScheme="orange" mr={2} px={2} py={1} className="badge">
                     Secundários
-                  </Badge>
-                </Flex>
-                <Flex flexWrap="wrap" gap={2}>
+                  </span>
+                </div>
+                <div flexWrap="wrap" gap={2} style={{display: "flex"}}
                   {secondaryMuscles.map((muscle, index) => (
-                    <Badge key={index} colorScheme="gray" variant="subtle">
+                    <span key={index} colorScheme="gray" variant="subtle" className="badge">
                       {muscle}
-                    </Badge>
+                    </span>
                   ))}
-                </Flex>
-              </Box>
+                </div>
+              </div>
             )}
-          </Box>
+          </div>
           
-          <Box 
+          <div 
             borderRadius="md" 
             overflow="hidden" 
             bg="gray.50" 
@@ -99,15 +88,19 @@ const MuscleHighlight = ({ targetMuscle, secondaryMuscles = [] }) => {
               objectFit="contain"
               fallbackSrc={fallbackImage}
             />
-          </Box>
+          </div>
         </SimpleGrid>
         
-        <Text fontSize="sm" color="gray.500" mt={4}>
+        <span fontSize="sm" color="gray.500" mt={4}>
           Nota: Este diagrama mostra os principais músculos trabalhados durante este exercício.
-        </Text>
-      </Box>
-    </Box>
+        </span>
+      </div>
+    </div>
   );
 };
 
 export default MuscleHighlight;
+
+
+
+

@@ -6,7 +6,7 @@ const exercisesData = [
     bodyPart: "pernas",
     target: "quadríceps",
     equipment: "peso corporal",
-    gifUrl: "https://i.pinimg.com/originals/96/2b/9c/962b9c8b7a7c8b8a8c8b8a8c8b8a8c8b.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGJ4YzZhcWt5ZWNyZmJxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ZBn3ZRprW0p68/giphy.gif",
     instructions: [
       "Fique em pé com os pés na largura dos ombros",
       "Mantenha o peito erguido e olhe para frente",
@@ -32,7 +32,7 @@ const exercisesData = [
     bodyPart: "peito",
     target: "peitoral",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/AgonizingGloomyBuzzard-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l46Cy1rHbQ92uuLXa/giphy.gif",
     instructions: [
       "Comece na posição de prancha com mãos no chão",
       "Mãos ligeiramente mais largas que os ombros",
@@ -58,7 +58,7 @@ const exercisesData = [
     bodyPart: "abdômen",
     target: "abdominais",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FlawedImpartialGalapagosdove-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXd2eWE4ZGJoMnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKqnN349PBUtGFO/giphy.gif",
     instructions: [
       "Deite-se de costas com joelhos dobrados",
       "Pés apoiados no chão, mãos atrás da cabeça",
@@ -84,7 +84,7 @@ const exercisesData = [
     bodyPart: "abdômen",
     target: "core",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/DistantAcidicHyena-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3F3dmVhOGRiaDBucW1jdmNybzRxd2lhd3RiZGVja2FicTYwb2RlZmQmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/26FLgGTPUDH6UGAbm/giphy.gif",
     instructions: [
       "Apoie-se nos antebraços e pontas dos pés",
       "Mantenha o corpo em linha reta",
@@ -110,7 +110,7 @@ const exercisesData = [
     bodyPart: "corpo todo",
     target: "cardiovascular",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FelineUncommonAntelope-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlvtIPzPdt2usKs/giphy.gif",
     instructions: [
       "Comece em pé, depois agache e coloque as mãos no chão",
       "Pule os pés para trás em posição de prancha",
@@ -136,7 +136,7 @@ const exercisesData = [
     bodyPart: "abdômen",
     target: "core",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SoftWelcomeAmericanbittern-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXd2eWE4ZGJoMnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ZBn3ZRprW0p68/giphy.gif",
     instructions: [
       "Comece na posição de prancha alta",
       "Mãos diretamente abaixo dos ombros",
@@ -162,7 +162,7 @@ const exercisesData = [
     bodyPart: "corpo todo",
     target: "cardiovascular",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FluidSpeedyFrog-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3F3dmVhOGRiaDBucW1jdmNybzRxd2lhd3RiZGVja2FicTYwb2RlZmQmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/l0HlvtIPzPdt2usKs/giphy.gif",
     instructions: [
       "Comece em pé com pés juntos e braços ao lado",
       "Pule abrindo as pernas para os lados",
@@ -188,7 +188,7 @@ const exercisesData = [
     bodyPart: "pernas",
     target: "quadríceps",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SilentUncomfortableAmericancrow-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l46Cy1rHbQ92uuLXa/giphy.gif",
     instructions: [
       "Fique em pé com pés na largura dos quadris",
       "Dê um passo à frente com uma perna",
@@ -214,7 +214,7 @@ const exercisesData = [
     bodyPart: "pernas",
     target: "quadríceps",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FamousGloomyBluebottle-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXd2eWE4ZGJoMnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKqnN349PBUtGFO/giphy.gif",
     instructions: [
       "Corra no lugar levantando os joelhos alto",
       "Tente tocar os joelhos no peito",
@@ -240,7 +240,7 @@ const exercisesData = [
     bodyPart: "pernas",
     target: "quadríceps",
     equipment: "parede",
-    gifUrl: "https://thumbs.gfycat.com/SoftMadeupBeetle-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3F3dmVhOGRiaDBucW1jdmNybzRxd2lhd3RiZGVja2FicTYwb2RlZmQmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/26FLgGTPUDH6UGAbm/giphy.gif",
     instructions: [
       "Encoste as costas em uma parede",
       "Caminhe com os pés para frente",
@@ -266,7 +266,7 @@ const exercisesData = [
     bodyPart: "abdômen",
     target: "oblíquos",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/AngelicInfatuatedGadwall-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlvtIPzPdt2usKs/giphy.gif",
     instructions: [
       "Sente-se com joelhos dobrados e pés elevados",
       "Incline o tronco ligeiramente para trás",
@@ -292,7 +292,7 @@ const exercisesData = [
     bodyPart: "abdômen",
     target: "core",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FlashyWelcomeDutchshepherddog-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXd2eWE4ZGJoMnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ZBn3ZRprW0p68/giphy.gif",
     instructions: [
       "Deite-se de costas com braços estendidos para cima",
       "Joelhos dobrados em 90 graus, coxas perpendiculares",
@@ -318,7 +318,7 @@ const exercisesData = [
     bodyPart: "glúteos",
     target: "glúteos",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FluidSpeedyFrog-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3F3dmVhOGRiaDBucW1jdmNybzRxd2lhd3RiZGVja2FicTYwb2RlZmQmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/l46Cy1rHbQ92uuLXa/giphy.gif",
     instructions: [
       "Deite-se de costas com joelhos dobrados",
       "Pés apoiados no chão, braços ao lado do corpo",
@@ -344,7 +344,7 @@ const exercisesData = [
     bodyPart: "ombros",
     target: "deltoides",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SilentUncomfortableAmericancrow-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKqnN349PBUtGFO/giphy.gif",
     instructions: [
       "Comece na posição de prancha",
       "Caminhe com os pés em direção às mãos",
@@ -370,7 +370,7 @@ const exercisesData = [
     bodyPart: "abdômen",
     target: "oblíquos",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/AngelicInfatuatedGadwall-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXd2eWE4ZGJoMnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlvtIPzPdt2usKs/giphy.gif",
     instructions: [
       "Deite-se de costas com mãos atrás da cabeça",
       "Levante os ombros do chão",
@@ -396,7 +396,7 @@ const exercisesData = [
     bodyPart: "corpo todo",
     target: "core",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SoftWelcomeAmericanbittern-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3F3dmVhOGRiaDBucW1jdmNybzRxd2lhd3RiZGVja2FicTYwb2RlZmQmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/ZBn3ZRprW0p68/giphy.gif",
     instructions: [
       "Comece em posição de quatro apoios",
       "Levante os joelhos alguns centímetros do chão",
@@ -422,7 +422,7 @@ const exercisesData = [
     bodyPart: "costas",
     target: "lombar",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FlashyWelcomeDutchshepherddog-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26FLgGTPUDH6UGAbm/giphy.gif",
     instructions: [
       "Deite-se de bruços com braços estendidos à frente",
       "Mantenha a testa no chão",
@@ -448,7 +448,7 @@ const exercisesData = [
     bodyPart: "pernas",
     target: "quadríceps",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SilentUncomfortableAmericancrow-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjZkNXB3YnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l46Cy1rHbQ92uuLXa/giphy.gif",
     instructions: [
       "Fique em pé com pés juntos",
       "Dê um passo largo para o lado",
@@ -474,182 +474,8 @@ const exercisesData = [
     bodyPart: "pernas",
     target: "quadríceps",
     equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SilentUncomfortableAmericancrow-size_restricted.gif",
+    gifUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXd2eWE4ZGJoMnBxbWN2Y3JvNHF3aWF3dGJkZWNrYWJxNjBvZGVmZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKqnN349PBUtGFO/giphy.gif",
     instructions: [
       "Fique em pé com pés na largura dos quadris",
       "Dê um passo para trás com uma perna",
       "Dobre ambos os joelhos em 90 graus",
-      "O joelho de trás deve quase tocar o chão",
-      "Empurre com a perna da frente para voltar",
-      "Alterne as pernas"
-    ],
-    tips: [
-      "Mantenha a maior parte do peso na perna da frente",
-      "Não deixe o joelho da frente passar do pé",
-      "Mantenha o tronco ereto",
-      "Controle a descida"
-    ],
-    level: "beginner",
-    secondaryMuscles: ["glúteos", "panturrilhas"],
-    duration: "3x10-12 cada perna",
-    calories: 7
-  },
-  {
-    id: "0020",
-    name: "Crab Walk",
-    bodyPart: "corpo todo",
-    target: "tríceps",
-    equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/SoftWelcomeAmericanbittern-size_restricted.gif",
-    instructions: [
-      "Sente-se com joelhos dobrados e mãos atrás do corpo",
-      "Levante os quadris do chão",
-      "Caminhe para frente movendo mão e pé opostos",
-      "Mantenha os quadris elevados",
-      "Continue o movimento coordenado",
-      "Pode caminhar para frente e para trás"
-    ],
-    tips: [
-      "Mantenha os quadris altos",
-      "Não deixe o bumbum tocar o chão",
-      "Coordene braços e pernas opostos",
-      "Mantenha o core contraído"
-    ],
-    level: "intermediate",
-    secondaryMuscles: ["ombros", "core", "glúteos"],
-    duration: "3x30-45 segundos",
-    calories: 8
-  },
-  {
-    id: "0021",
-    name: "Single Leg Glute Bridge",
-    bodyPart: "glúteos",
-    target: "glúteos",
-    equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FluidSpeedyFrog-size_restricted.gif",
-    instructions: [
-      "Deite-se de costas com um joelho dobrado",
-      "Estenda a outra perna para cima",
-      "Contraia os glúteos e levante os quadris",
-      "Use apenas uma perna para o apoio",
-      "Segure por 2 segundos no topo",
-      "Desça controladamente e alterne"
-    ],
-    tips: [
-      "Mantenha a perna estendida reta",
-      "Foque na contração do glúteo",
-      "Não arqueie demais as costas",
-      "Empurre através do calcanhar"
-    ],
-    level: "intermediate",
-    secondaryMuscles: ["isquiotibiais", "core"],
-    duration: "3x8-10 cada perna",
-    calories: 6
-  },
-  {
-    id: "0022",
-    name: "Diamond Push-up",
-    bodyPart: "peito",
-    target: "tríceps",
-    equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/AgonizingGloomyBuzzard-size_restricted.gif",
-    instructions: [
-      "Posição de prancha com mãos formando um diamante",
-      "Polegares e indicadores se tocando",
-      "Mantenha o corpo em linha reta",
-      "Dobre os cotovelos para baixar o peito",
-      "Empurre para cima mantendo a forma",
-      "Mantenha os cotovelos próximos ao corpo"
-    ],
-    tips: [
-      "Movimento mais difícil que flexão normal",
-      "Mantenha o core contraído",
-      "Se for difícil, apoie os joelhos",
-      "Foque na contração dos tríceps"
-    ],
-    level: "advanced",
-    secondaryMuscles: ["peito", "ombros", "core"],
-    duration: "3x5-8 repetições",
-    calories: 8
-  },
-  {
-    id: "0023",
-    name: "Side Plank",
-    bodyPart: "abdômen",
-    target: "oblíquos",
-    equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/DistantAcidicHyena-size_restricted.gif",
-    instructions: [
-      "Deite-se de lado apoiado no antebraço",
-      "Cotovelo diretamente abaixo do ombro",
-      "Levante os quadris do chão",
-      "Forme uma linha reta da cabeça aos pés",
-      "Mantenha a posição pelo tempo determinado",
-      "Repita do outro lado"
-    ],
-    tips: [
-      "Não deixe os quadris caírem",
-      "Mantenha o pescoço neutro",
-      "Respire normalmente",
-      "Contraia os oblíquos"
-    ],
-    level: "intermediate",
-    secondaryMuscles: ["core", "ombros"],
-    duration: "3x20-45 segundos cada lado",
-    calories: 5
-  },
-  {
-    id: "0024",
-    name: "Squat Jump",
-    bodyPart: "pernas",
-    target: "quadríceps",
-    equipment: "peso corporal",
-    gifUrl: "https://thumbs.gfycat.com/FelineUncommonAntelope-size_restricted.gif",
-    instructions: [
-      "Comece em posição de agachamento",
-      "Desça até as coxas ficarem paralelas",
-      "Exploda para cima em um salto",
-      "Aterrisse suavemente em agachamento",
-      "Absorva o impacto com os joelhos",
-      "Repita o movimento de forma fluida"
-    ],
-    tips: [
-      "Aterrisse suavemente",
-      "Mantenha os joelhos alinhados",
-      "Use os braços para impulsão",
-      "Controle a aterrissagem"
-    ],
-    level: "intermediate",
-    secondaryMuscles: ["glúteos", "panturrilhas", "core"],
-    duration: "3x8-12 repetições",
-    calories: 10
-  },
-  {
-    id: "0025",
-    name: "Tricep Dips",
-    bodyPart: "braços",
-    target: "tríceps",
-    equipment: "cadeira/banco",
-    gifUrl: "https://thumbs.gfycat.com/AgonizingGloomyBuzzard-size_restricted.gif",
-    instructions: [
-      "Sente-se na borda de uma cadeira ou banco",
-      "Coloque as mãos ao lado dos quadris",
-      "Deslize o corpo para frente da cadeira",
-      "Dobre os cotovelos para descer o corpo",
-      "Empurre para cima até os braços ficarem retos",
-      "Mantenha os cotovelos próximos ao corpo"
-    ],
-    tips: [
-      "Não desça muito para evitar lesões",
-      "Mantenha os ombros para baixo",
-      "Foque na contração dos tríceps",
-      "Controle tanto a descida quanto a subida"
-    ],
-    level: "beginner",
-    secondaryMuscles: ["ombros", "peito"],
-    duration: "3x8-12 repetições",
-    calories: 6
-  }
-];
-
-export default exercisesData;

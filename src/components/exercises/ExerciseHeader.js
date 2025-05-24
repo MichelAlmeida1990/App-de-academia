@@ -1,21 +1,6 @@
 // src/components/exercises/ExerciseHeader.js
 
 import React from 'react';
-import { 
-  Box, 
-  Heading, 
-  Flex, 
-  Badge, 
-  IconButton, 
-  Text,
-  useColorModeValue,
-  Button,
-  HStack,
-  Tooltip,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink
-} from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
   FaArrowLeft, 
@@ -39,7 +24,7 @@ const ExerciseHeader = ({
   const badgeBg = useColorModeValue('gray.100', 'gray.700');
 
   return (
-    <Box 
+    <div 
       bg={bgColor} 
       borderRadius="lg" 
       boxShadow="md"
@@ -48,8 +33,8 @@ const ExerciseHeader = ({
       mb={6}
       overflow="hidden"
     >
-      <Box p={5}>
-        <Flex direction="column" width="100%">
+      <div p={5}>
+        <div direction="column" width="100%" style={{display: "flex"}}
           {/* Breadcrumb navigation */}
           <Breadcrumb fontSize="sm" color="gray.500" mb={4}>
             <BreadcrumbItem>
@@ -68,13 +53,13 @@ const ExerciseHeader = ({
           </Breadcrumb>
 
           {/* Back button and title */}
-          <Flex 
+          <div 
             justifyContent="space-between" 
             alignItems={{ base: 'flex-start', md: 'center' }}
             direction={{ base: 'column', md: 'row' }}
             mb={4}
-          >
-            <Flex alignItems="center" mb={{ base: 4, md: 0 }}>
+           style={{display: "flex"}}
+            <div alignItems="center" mb={{ base: 4, md: 0 }} style={{display: "flex"}}
               <IconButton
                 as={RouterLink}
                 to="/exercises"
@@ -84,10 +69,10 @@ const ExerciseHeader = ({
                 size="sm"
                 variant="outline"
               />
-              <Heading as="h1" size="xl" color={headingColor} lineHeight="1.2">
+              <h2 as="h1" size="xl" color={headingColor} lineHeight="1.2">
                 {name}
-              </Heading>
-            </Flex>
+              </h2>
+            </div>
             
             <HStack spacing={2}>
               <Tooltip label={isSaved ? "Remover dos favoritos" : "Salvar exercício"}>
@@ -108,55 +93,55 @@ const ExerciseHeader = ({
                 />
               </Tooltip>
             </HStack>
-          </Flex>
+          </div>
           
           {/* Exercise metadata */}
-          <Flex 
+          <div 
             mt={2} 
             flexWrap="wrap" 
             gap={3}
             direction={{ base: 'column', sm: 'row' }}
             alignItems={{ base: 'flex-start', sm: 'center' }}
-          >
-            <Flex alignItems="center">
-              <Badge 
+           style={{display: "flex"}}
+            <div alignItems="center" style={{display: "flex"}}
+              <span 
                 colorScheme="purple" 
                 px={2} 
                 py={1} 
                 borderRadius="full" 
                 mr={2}
-              >
+               className="badge">
                 Grupo Muscular
-              </Badge>
-              <Text fontWeight="medium">{bodyPart}</Text>
-            </Flex>
+              </span>
+              <span fontWeight="medium">{bodyPart}</span>
+            </div>
             
-            <Flex alignItems="center">
-              <Badge 
+            <div alignItems="center" style={{display: "flex"}}
+              <span 
                 colorScheme="blue" 
                 px={2} 
                 py={1} 
                 borderRadius="full" 
                 mr={2}
-              >
+               className="badge">
                 Músculo Alvo
-              </Badge>
-              <Text fontWeight="medium">{target}</Text>
-            </Flex>
+              </span>
+              <span fontWeight="medium">{target}</span>
+            </div>
             
-            <Flex alignItems="center">
-              <Badge 
+            <div alignItems="center" style={{display: "flex"}}
+              <span 
                 colorScheme="green" 
                 px={2} 
                 py={1} 
                 borderRadius="full" 
                 mr={2}
-              >
+               className="badge">
                 Equipamento
-              </Badge>
-              <Text fontWeight="medium">{equipment}</Text>
-            </Flex>
-          </Flex>
+              </span>
+              <span fontWeight="medium">{equipment}</span>
+            </div>
+          </div>
           
           {/* Start workout button */}
           <Button 
@@ -168,10 +153,14 @@ const ExerciseHeader = ({
           >
             Iniciar Treino com Este Exercício
           </Button>
-        </Flex>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default ExerciseHeader;
+
+
+
+

@@ -49,7 +49,27 @@ const ExerciseCard = ({ exercise, isFavorite, onToggleFavorite }) => {
 };
 
 const SearchExercises = () => {
-  const { exercises, savedExercises, toggleSavedExercise } = useExercise();
+  // Proteção contra contexto undefined
+  const context = useExercise();
+  
+  if (!context) {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Carregando exercícios...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { 
+    exercises = [], 
+    savedExercises = [], 
+    toggleSavedExercise,
+    isLoading: contextLoading 
+  } = context;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -68,6 +88,13 @@ const SearchExercises = () => {
   
   const searchInputRef = useRef(null);
   
+  // Inicializar com todos os exercícios quando carregarem
+  useEffect(() => {
+    if (exercises.length > 0) {
+      setFilteredExercises(exercises);
+    }
+  }, [exercises]);
+  
   // Extrair opções de filtro únicas
   useEffect(() => {
     if (exercises.length > 0) {
@@ -83,6 +110,8 @@ const SearchExercises = () => {
   
   // Função de busca e filtragem
   const handleSearch = () => {
+    if (exercises.length === 0) return;
+    
     setIsLoading(true);
     
     // Simular um pequeno atraso para mostrar o estado de carregamento
@@ -115,21 +144,23 @@ const SearchExercises = () => {
       
       setFilteredExercises(results);
       setIsLoading(false);
-    }, 500);
+    }, 300);
   };
   
   // Atualizar resultados quando os filtros mudarem
   useEffect(() => {
-    handleSearch();
-    
-    // Atualizar filtros ativos
-    const newActiveFilters = [];
-    if (bodyPartFilter) newActiveFilters.push({ type: 'bodyPart', value: bodyPartFilter });
-    if (targetFilter) newActiveFilters.push({ type: 'target', value: targetFilter });
-    if (equipmentFilter) newActiveFilters.push({ type: 'equipment', value: equipmentFilter });
-    
-    setActiveFilters(newActiveFilters);
-  }, [searchTerm, bodyPartFilter, targetFilter, equipmentFilter]);
+    if (exercises.length > 0) {
+      handleSearch();
+      
+      // Atualizar filtros ativos
+      const newActiveFilters = [];
+      if (bodyPartFilter) newActiveFilters.push({ type: 'bodyPart', value: bodyPartFilter });
+      if (targetFilter) newActiveFilters.push({ type: 'target', value: targetFilter });
+      if (equipmentFilter) newActiveFilters.push({ type: 'equipment', value: equipmentFilter });
+      
+      setActiveFilters(newActiveFilters);
+    }
+  }, [searchTerm, bodyPartFilter, targetFilter, equipmentFilter, exercises]);
   
   // Remover um filtro específico
   const removeFilter = (filterType) => {
@@ -154,8 +185,22 @@ const SearchExercises = () => {
     setBodyPartFilter('');
     setTargetFilter('');
     setEquipmentFilter('');
-    searchInputRef.current.focus();
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   };
+
+  // Mostrar loading se o contexto ainda está carregando
+  if (contextLoading) {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Carregando exercícios...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div>

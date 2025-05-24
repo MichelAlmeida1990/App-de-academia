@@ -1,0 +1,291 @@
+/* src/components/ExerciseVideo.css */
+.exercise-video-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.exercise-video-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* GIF Principal */
+.exercise-gif {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  transition: opacity 0.3s ease;
+  background-color: #f8f9fa;
+}
+
+.exercise-gif.loading {
+  opacity: 0.7;
+  filter: blur(2px);
+}
+
+/* Estados de Loading */
+.exercise-video-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  min-height: 300px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.exercise-video-loading p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Estado de Erro */
+.exercise-video-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  min-height: 300px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.exercise-video-error p {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.retry-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.retry-button:hover {
+  background: white;
+  color: #ff6b6b;
+  transform: translateY(-2px);
+}
+
+/* Overlay de Informações */
+.exercise-video-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+  padding: 30px 20px 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.exercise-video-container:hover .exercise-video-overlay {
+  transform: translateY(0);
+}
+
+.exercise-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.exercise-details {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exercise-details span {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+  backdrop-filter: blur(10px);
+}
+
+.body-part {
+  background: rgba(74, 144, 226, 0.8) !important;
+}
+
+.target {
+  background: rgba(80, 200, 120, 0.8) !important;
+}
+
+.equipment {
+  background: rgba(255, 159, 67, 0.8) !important;
+}
+
+/* Badge de Qualidade */
+.quality-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+/* Placeholder para exercício não encontrado */
+.exercise-video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  text-align: center;
+  min-height: 300px;
+  border-radius: 12px;
+}
+
+.exercise-video-placeholder p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .exercise-video-container {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .exercise-video-loading,
+  .exercise-video-error,
+  .exercise-video-placeholder {
+    padding: 40px 16px;
+    min-height: 250px;
+  }
+  
+  .exercise-info h3 {
+    font-size: 16px;
+  }
+  
+  .exercise-details span {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .exercise-video-loading,
+  .exercise-video-error,
+  .exercise-video-placeholder {
+    padding: 30px 12px;
+    min-height: 200px;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+  
+  .error-icon {
+    font-size: 36px;
+  }
+  
+  .exercise-video-loading p,
+  .exercise-video-error p {
+    font-size: 14px;
+  }
+}
+
+/* Animações de entrada */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.exercise-video-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Efeito de hover suave */
+.exercise-gif {
+  transition: all 0.3s ease;
+}
+
+.exercise-video-container:hover .exercise-gif {
+  transform: scale(1.02);
+}
+
+/* Loading skeleton effect */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.exercise-gif.loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
+}
