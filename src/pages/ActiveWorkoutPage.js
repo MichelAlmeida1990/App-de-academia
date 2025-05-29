@@ -1,13 +1,16 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ActiveWorkout from '../components/workout/ActiveWorkout';
 
 const ActiveWorkoutPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <ActiveWorkout workoutId={id} />
+    <div className="min-h-screen bg-gray-900">
+      <ActiveWorkout 
+        workoutId={id} 
+      />
     </div>
   );
 };

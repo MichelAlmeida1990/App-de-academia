@@ -1,119 +1,191 @@
-// src/components/dashboard/Dashboard.js - NOVO CONTEÚDO PROPOSTO
-import React from 'react';
-import { useAuth } from '../../context/AuthContext'; // Ajuste o caminho se necessário
-import { useWorkout } from '../../hooks/useWorkout'; // Ajuste o caminho se necessário
-import { FaDumbbell, FaChartLine, FaClipboardList, FaRunning } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useWorkout } from '../../context/WorkoutContext';
+import { FaDumbbell, FaChartLine, FaClipboardList, FaRunning, FaPlay } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import Card from '../common/Card';
 
 const Dashboard = () => {
-  const { currentUser } = useAuth();
-  const { workouts = [] } = useWorkout(); // Obtenha seus treinos aqui
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const { workouts = [], loading: contextLoading, refreshWorkouts } = useWorkout();
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Dados simulados para o dashboard
-  const totalWorkouts = workouts.length;
-  const completedWorkouts = workouts.filter(w => w.completed).length;
-  // Filtrando treinos que ainda não foram completados e têm data futura
-  const upcomingWorkouts = workouts
-    .filter(w => !w.completed && new Date(w.date) > new Date())
-    .sort((a, b) => new Date(a.date) - new Date(b.date)) // Ordena por data mais próxima
-    .slice(0, 3); // Limita aos 3 próximos
+  // Efeito para carregar dados apenas uma vez
+  useEffect(() => {
+    // Verificamos se os dados já foram carregados
+    if (!dataLoaded) {
+      const loadData = async () => {
+        setLoading(true);
+        try {
+          await refreshWorkouts();
+        } catch (error) {
+          console.error("Erro ao atualizar treinos:", error);
+        } finally {
+          setLoading(false);
+          // Marcamos que os dados foram carregados
+          setDataLoaded(true);
+        }
+      };
 
-  const lastCompletedWorkout = workouts
-    .filter(w => w.completed)
-    .sort((a, b) => new Date(b.date) - new Date(a.date))[0]; // Último completo
+      loadData();
+    }
+  }, [dataLoaded, refreshWorkouts]);
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-        Bem-vindo, {currentUser ? currentUser.displayName || currentUser.email : 'Usuário'}!
-      </h1>
+  // Dados para o dashboard
+  const totalWorkouts = workouts.length;
+  
+  // Filtrando treinos que foram marcados como completados
+  const completedWorkouts = workouts.filter(w => w.completed || w.completedAt).length;
+  
+  // Ordenando treinos completados por data (mais recente primeiro)
+  const sortedCompletedWorkouts = [...workouts]
+    .filter(w => w.completed || w.completedAt)
+    .sort((a, b) => {
+      const dateA = new Date(a.completedAt || a.date);
+      const dateB = new Date(b.completedAt || b.date);
+      return dateB - dateA;
+    });
+  
+  // Obtendo o último treino completado
+  const lastCompletedWorkout = sortedCompletedWorkouts.length > 0 ? sortedCompletedWorkouts[0] : null;
+  
+  // Filtrando treinos futuros (não completados e com data futura)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normaliza para início do dia
+  
+  const upcomingWorkouts = workouts
+    .filter(w => {
+      // Não completado e data futura ou hoje
+      const workoutDate = new Date(w.date);
+      workoutDate.setHours(0, 0, 0, 0); // Normaliza para início do dia
+      return (!w.completed && !w.completedAt) && workoutDate >= today;
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 3); // Limita aos 3 próximos
 
-      {/* Seção de Resumo/Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {/* Card 1: Total de Treinos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-transform transform hover:scale-105 duration-200 glassmorphism-card">
-          <div className="flex items-center mb-4">
-            <FaDumbbell className="text-4xl text-purple-600 dark:text-purple-400 mr-4" />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Treinos Registrados</h2>
-          </div>
-          <p className="text-4xl font-bold text-gray-900 dark:text-white">{totalWorkouts}</p>
-          <p className="text-gray-600 dark:text-gray-400">Total de treinos criados</p>
-        </div>
+  if (loading || contextLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p className="text-white">Carregando dados...</p>
+      </div>
+    );
+  }
 
-        {/* Card 2: Treinos Concluídos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-transform transform hover:scale-105 duration-200 glassmorphism-card">
-          <div className="flex items-center mb-4">
-            <FaClipboardList className="text-4xl text-teal-600 dark:text-teal-400 mr-4" />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Treinos Completados</h2>
-          </div>
-          <p className="text-4xl font-bold text-gray-900 dark:text-white">{completedWorkouts}</p>
-          <p className="text-gray-600 dark:text-gray-400">Total de treinos finalizados</p>
-        </div>
+  // Função para formatar a data no padrão brasileiro
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
 
-        {/* Card 3: Veja seu Progresso */}
-        <Link to="/progress" className="block">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 flex flex-col items-center justify-center h-full transition-transform transform hover:scale-105 duration-200 cursor-pointer glassmorphism-card">
-            <FaChartLine className="text-5xl text-blue-600 dark:text-blue-400 mb-2" />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Seu Progresso</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-center">Acompanhe suas métricas e recordes pessoais.</p>
-          </div>
-        </Link>
-      </div>
+  const handleStartWorkout = (workoutId) => {
+    navigate(`/workout/${workoutId}/active`);
+  };
 
-      {/* Seção de Atividade Recente / Próximos Treinos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Card: Último Treino Completo */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 glassmorphism-card">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Último Treino Completo</h2>
-          {lastCompletedWorkout ? (
-            <div>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">{lastCompletedWorkout.name}</p>
-              <p className="text-gray-600 dark:text-gray-400">
-                Concluído em: {new Date(lastCompletedWorkout.date).toLocaleDateString()}
-              </p>
-              <Link to={`/workout/${lastCompletedWorkout.id}`} className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline">
-                Ver detalhes
-              </Link>
-            </div>
-          ) : (
-            <p className="text-gray-600 dark:text-gray-400">Nenhum treino completo ainda.</p>
-          )}
-        </div>
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6 text-white">
+        Bem-vindo, {currentUser ? currentUser.displayName || currentUser.email : 'Usuário'}!
+      </h1>
 
-        {/* Card: Próximos Treinos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 glassmorphism-card">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Próximos Treinos</h2>
-          {upcomingWorkouts.length > 0 ? (
-            <ul>
-              {upcomingWorkouts.map(workout => (
-                <li key={workout.id} className="mb-2 pb-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                  <Link to={`/workout/${workout.id}`} className="text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
-                    {workout.name}
-                  </Link>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(workout.date).toLocaleDateString()}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-600 dark:text-gray-400">Nenhum treino agendado.</p>
-          )}
-        </div>
-      </div>
+      {/* Seção de Resumo/Estatísticas - Grid de 3 colunas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {/* Card 1: Total de Treinos */}
+        <Card className="p-6 bg-white/80 backdrop-blur-md hover:bg-white/90 transition-all duration-300">
+          <div className="flex items-center mb-4">
+            <FaDumbbell className="text-4xl text-purple-600 mr-4" />
+            <h2 className="text-xl font-semibold text-gray-800">Treinos Registrados</h2>
+          </div>
+          <p className="text-4xl font-bold text-gray-900">{totalWorkouts}</p>
+          <p className="text-gray-600">Total de treinos criados</p>
+        </Card>
 
-      {/* Botão para criar novo treino */}
-      <div className="mt-8 text-center">
-        <Link 
-          to="/workout/new" 
-          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
-        >
-          <FaRunning className="mr-2 -ml-1 text-xl" />
-          Criar Novo Treino
-        </Link>
-      </div>
-    </div>
-  );
+        {/* Card 2: Treinos Concluídos */}
+        <Card className="p-6 bg-white/80 backdrop-blur-md hover:bg-white/90 transition-all duration-300">
+          <div className="flex items-center mb-4">
+            <FaClipboardList className="text-4xl text-purple-600 mr-4" />
+            <h2 className="text-xl font-semibold text-gray-800">Treinos Completados</h2>
+          </div>
+          <p className="text-4xl font-bold text-gray-900">{completedWorkouts}</p>
+          <p className="text-gray-600">Total de treinos finalizados</p>
+        </Card>
+
+        {/* Card 3: Veja seu Progresso */}
+        <Link to="/progress" className="block h-full">
+          <Card className="p-6 flex flex-col items-center justify-center h-full bg-white/80 backdrop-blur-md hover:bg-white/90 transition-all duration-300">
+            <FaChartLine className="text-5xl text-purple-600 mb-2" />
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Seu Progresso</h2>
+            <p className="text-gray-600 text-center">Acompanhe suas métricas e recordes pessoais.</p>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Seção de Atividade Recente / Próximos Treinos - Grid de 2 colunas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Card: Último Treino Completo */}
+        <Card className="p-6 bg-white/80 backdrop-blur-md hover:bg-white/90 transition-all duration-300">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Último Treino Completo</h2>
+          {lastCompletedWorkout ? (
+            <div>
+              <p className="text-2xl font-bold text-purple-600 mb-2">{lastCompletedWorkout.name}</p>
+              <p className="text-gray-600">
+                Concluído em: {formatDate(lastCompletedWorkout.completedAt || lastCompletedWorkout.date)}
+              </p>
+              <Link to={`/workout/${lastCompletedWorkout.id}`} className="mt-4 inline-block text-purple-600 hover:text-purple-700 transition-colors duration-200">
+                Ver detalhes
+              </Link>
+            </div>
+          ) : (
+            <p className="text-gray-600">Nenhum treino completo ainda.</p>
+          )}
+        </Card>
+
+        {/* Card: Próximos Treinos */}
+        <Card className="p-6 bg-white/80 backdrop-blur-md hover:bg-white/90 transition-all duration-300">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Próximos Treinos</h2>
+          {upcomingWorkouts.length > 0 ? (
+            <ul>
+              {upcomingWorkouts.map(workout => (
+                <li key={workout.id} className="mb-4 pb-4 border-b border-gray-200 last:border-b-0">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <Link to={`/workout/${workout.id}`} className="text-lg font-medium text-gray-800 hover:text-purple-600 transition-colors duration-200">
+                        {workout.name}
+                      </Link>
+                      <p className="text-sm text-gray-600">
+                        {formatDate(workout.date)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleStartWorkout(workout.id)}
+                      className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors duration-200 flex items-center"
+                    >
+                      <FaPlay className="mr-2" />
+                      Iniciar
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-600">Nenhum treino agendado.</p>
+          )}
+        </Card>
+      </div>
+
+      {/* Botão para criar novo treino */}
+      <div className="mt-8 text-center">
+        <Link 
+          to="/workout/new" 
+          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
+        >
+          <FaRunning className="mr-2 -ml-1 text-xl" />
+          Criar Novo Treino
+        </Link>
+      </div>
+    </div>
+  );
 };
 
-export default Dashboard; // Exporta como 'Dashboard'
+export default Dashboard;

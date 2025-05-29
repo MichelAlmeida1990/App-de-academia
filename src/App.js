@@ -30,21 +30,7 @@ import ProgressPage from './pages/ProgressPage';
 import AuthPage from './pages/AuthPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-
-// Components
-import ActiveWorkout from './components/workout/ActiveWorkout';
-
-/**
- * Componente para a página de treino ativo.
- * Encapsula o componente ActiveWorkout para ser usado em uma rota.
- */
-const ActiveWorkoutPage = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <ActiveWorkout />
-    </div>
-  );
-};
+import ActiveWorkoutPage from './pages/ActiveWorkoutPage';
 
 /**
  * Componente placeholder para a página de edição de treino.
@@ -52,10 +38,6 @@ const ActiveWorkoutPage = () => {
  * se você tiver um arquivo `src/pages/EditWorkoutPage.js` completo.
  */
 const EditWorkoutPage = () => {
-  // Exemplo de como importar e usar a página real se ela existir:
-  // import ActualEditWorkoutPage from './pages/EditWorkoutPage';
-  // return <ActualEditWorkoutPage />;
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Editar Treino</h1>
@@ -75,14 +57,7 @@ const EditWorkoutPage = () => {
  */
 const SmartRedirect = () => {
   const { isAuthenticated } = useAuth();
-
-  // Se autenticado, redireciona para dashboard
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  // Se não autenticado, mostra HomePage
-  return <HomePage />;
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <HomePage />;
 };
 
 /**
@@ -90,15 +65,13 @@ const SmartRedirect = () => {
  * Isso garante que o tema do Material-UI seja sincronizado com o tema personalizado.
  */
 const ThemedAppContent = () => {
-  const { darkMode } = useTheme(); // Pega o estado darkMode do seu ThemeContext
-  const muiTheme = getMuiTheme(darkMode); // Cria o tema MUI baseado no darkMode
+  const { darkMode } = useTheme();
+  const muiTheme = getMuiTheme(darkMode);
 
   return (
     <MuiThemeProvider theme={muiTheme}>
-      <CssBaseline /> {/* Normaliza o CSS do navegador e aplica as cores base do tema MUI */}
+      <CssBaseline />
       <Router>
-        {/* O min-h-screen e transition-colors são importantes para o layout e transição de tema */}
-        {/* Removido bg-gray-50 dark:bg-gray-900 aqui para permitir que o body.css em index.css defina o background */}
         <div className="min-h-screen transition-colors duration-200">
           <Routes>
             {/* ROTA RAIZ CORRIGIDA - Redirecionamento inteligente */}
@@ -108,6 +81,16 @@ const ThemedAppContent = () => {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* Rota do treino ativo - fora do Layout para evitar problemas de renderização */}
+            <Route
+              path="/workout/:id/active"
+              element={
+                <ProtectedRoute>
+                  <ActiveWorkoutPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Rotas protegidas que usam o Layout (Header, Footer, etc.) */}
             <Route element={<Layout />}>
@@ -150,15 +133,7 @@ const ThemedAppContent = () => {
                 path="/workout/:id/edit"
                 element={
                   <ProtectedRoute>
-                    <EditWorkoutPage /> {/* Usa a página de edição correta aqui */}
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/workout/:id/active"
-                element={
-                  <ProtectedRoute>
-                    <ActiveWorkoutPage />
+                    <EditWorkoutPage />
                   </ProtectedRoute>
                 }
               />
@@ -237,11 +212,11 @@ const ThemedAppContent = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppThemeProvider> {/* Seu ThemeContext personalizado */}
+      <AppThemeProvider>
         <ToastProvider>
           <WorkoutProvider>
             <ExerciseProvider>
-              <ThemedAppContent /> {/* Renderiza o componente que configura o tema MUI e as rotas */}
+              <ThemedAppContent />
             </ExerciseProvider>
           </WorkoutProvider>
         </ToastProvider>

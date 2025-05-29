@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
+import Card from '../../components/common/Card';
 
 const RegisterForm = ({ onToggleForm }) => {
   const [name, setName] = useState('');

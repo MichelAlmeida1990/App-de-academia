@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
+import Card from '../../components/common/Card';
 import Input from '../../components/ui/Input'; // Supondo que você criou este componente
 
 const LoginForm = ({ onToggleForm }) => {

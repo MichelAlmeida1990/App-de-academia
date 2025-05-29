@@ -13,29 +13,30 @@ export const WorkoutProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
 
+  // Função para buscar treinos do usuário atual
+  const refreshWorkouts = async () => {
+    if (!currentUser) {
+      setWorkouts([]);
+      return [];
+    }
+
+    try {
+      setLoading(true);
+      const workoutData = LocalStorageService.getWorkouts(currentUser.uid);
+      setWorkouts(workoutData);
+      setError(null);
+      return workoutData;
+    } catch (error) {
+      console.error('Erro ao atualizar treinos:', error);
+      setError("Falha ao atualizar treinos. Por favor, tente novamente mais tarde.");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchWorkouts = async () => {
-      if (!currentUser) {
-        setWorkouts([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const workoutData = LocalStorageService.getWorkouts(currentUser.uid);
-        setWorkouts(workoutData);
-        setError(null);
-      } catch (error) {
-        console.error('Erro ao buscar treinos:', error);
-        setError("Falha ao carregar treinos. Por favor, tente novamente mais tarde.");
-        setWorkouts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWorkouts();
+    refreshWorkouts();
   }, [currentUser]);
 
   const addWorkout = async (workout) => {
@@ -77,15 +78,31 @@ export const WorkoutProvider = ({ children }) => {
         throw new Error("Usuário não autenticado");
       }
 
-      if (updatedWorkout.userId !== currentUser.uid) {
-        throw new Error("Você não tem permissão para editar este treino");
+      // Garantir que o treino tenha um ID
+      if (!updatedWorkout.id) {
+        throw new Error("Treino sem ID");
       }
 
+      // Atualizar o treino no localStorage
       const updated = LocalStorageService.updateWorkout(updatedWorkout);
       
+      // Atualizar o estado local
       setWorkouts(prev => 
         prev.map(workout => 
-          workout.id === updatedWorkout.id ? updated : workout
+          workout.id === updatedWorkout.id ? {
+            ...workout,
+            ...updatedWorkout,
+            exercises: updatedWorkout.exercises.map(exercise => ({
+              ...exercise,
+              sets: Array.isArray(exercise.sets) ? exercise.sets : 
+                Array(exercise.sets).fill(null).map(() => ({
+                  reps: exercise.reps,
+                  weight: 0,
+                  rest: exercise.rest,
+                  completed: false
+                }))
+            }))
+          } : workout
         )
       );
       
@@ -464,6 +481,7 @@ export const WorkoutProvider = ({ children }) => {
         getWorkoutStatsByPeriod,
         getMuscleGroupStats,
         getGeneralStats,
+        refreshWorkouts, // Nova função adicionada
       }}
     >
       {children}
