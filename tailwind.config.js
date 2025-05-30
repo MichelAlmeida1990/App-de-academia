@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -18,6 +19,16 @@ module.exports = {
           800: '#002e62',
           900: '#001731',
         },
+        dark: {
+          background: '#111827',
+          surface: '#1F2937',
+          primary: '#3B82F6',
+          text: '#F9FAFB',
+          border: '#374151'
+        }
+      },
+      backgroundColor: {
+        dark: '#111827',
       },
     },
   },

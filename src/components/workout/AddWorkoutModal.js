@@ -1,8 +1,9 @@
 // src/components/workout/AddWorkoutModal.js
 import React, { useState, useContext } from 'react';
 import { WorkoutContext } from '../../context/WorkoutContext';
-import { workoutTemplates } from '../../data/workoutData';
+import workoutTemplates from '../../data/workoutTemplates.js';
 import { ThemeContext } from '../../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 const AddWorkoutModal = ({ isOpen, onClose }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('');

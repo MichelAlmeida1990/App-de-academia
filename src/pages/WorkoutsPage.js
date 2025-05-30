@@ -22,6 +22,7 @@ import {
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useWorkout } from '../context/WorkoutContext';
+import { useToast } from '../context/ToastContext';
 
 // Componente de Card de Estatística
 const StatCard = ({ icon, title, value, color = 'purple' }) => {
@@ -51,9 +52,9 @@ const StatCard = ({ icon, title, value, color = 'purple' }) => {
 const WorkoutCard = ({ workout, onView, onEdit, onDelete, onStart }) => {
   const getWorkoutTypeColor = (type) => {
     switch (type?.toLowerCase()) {
-      case 'força': return 'bg-red-500';
       case 'hipertrofia': return 'bg-purple-500';
-      case 'resistência': return 'bg-green-500';
+      case 'forca': return 'bg-red-500';
+      case 'resistencia': return 'bg-green-500';
       case 'cardio': return 'bg-orange-500';
       default: return 'bg-gray-500';
     }
@@ -61,9 +62,9 @@ const WorkoutCard = ({ workout, onView, onEdit, onDelete, onStart }) => {
 
   const getWorkoutTypeIcon = (type) => {
     switch (type?.toLowerCase()) {
-      case 'força': return <FaDumbbell />;
       case 'hipertrofia': return <FaFire />;
-      case 'resistência': return <FaHeart />;
+      case 'forca': return <FaDumbbell />;
+      case 'resistencia': return <FaHeart />;
       case 'cardio': return <FaRunning />;
       default: return <FaHeartbeat />;
     }
@@ -203,7 +204,8 @@ const EmptyState = ({ title, description, onCreateNew }) => {
 
 // Componente principal
 const WorkoutsPage = ({ onNavigate, onCreateWorkout, onStartWorkout }) => {
-  const { workouts, loading: workoutsLoading } = useWorkout();
+  const { workouts, loading: workoutsLoading, deleteWorkout } = useWorkout();
+  const { showToast } = useToast();
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -282,7 +284,14 @@ const WorkoutsPage = ({ onNavigate, onCreateWorkout, onStartWorkout }) => {
 
   const handleDeleteWorkout = (workout) => {
     if (window.confirm(`Tem certeza que deseja excluir o treino "${workout.name}"?`)) {
-      // Implemente a lógica para excluir o treino do contexto
+      deleteWorkout(workout.id)
+        .then(() => {
+          showToast('Treino excluído com sucesso!', 'success');
+        })
+        .catch(error => {
+          console.error('Erro ao excluir treino:', error);
+          showToast('Erro ao excluir treino. Tente novamente.', 'error');
+        });
     }
   };
 
@@ -381,9 +390,9 @@ const WorkoutsPage = ({ onNavigate, onCreateWorkout, onStartWorkout }) => {
                   onChange={(e) => setFilter(e.target.value)}
                 >
                   <option value="all">Todos os tipos</option>
-                  <option value="força">Força</option>
                   <option value="hipertrofia">Hipertrofia</option>
-                  <option value="resistência">Resistência</option>
+                  <option value="forca">Força</option>
+                  <option value="resistencia">Resistência</option>
                   <option value="cardio">Cardio</option>
                 </select>
               </div>

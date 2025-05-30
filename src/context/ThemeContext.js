@@ -28,7 +28,7 @@ const AVAILABLE_ACCENT_COLORS = ['blue', 'purple', 'green', 'red', 'orange', 'pi
 // Configurações padrão do tema
 const DEFAULT_THEME_SETTINGS = {
   darkMode: false,
-  accentColor: 'blue',
+  accentColor: 'purple',
   reducedMotion: false,
   highContrast: false,
   fontSize: 'medium', // 'small', 'medium', 'large'
@@ -69,15 +69,13 @@ export const ThemeProvider = ({ children }) => {
     try {
       localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
       
-      // Para compatibilidade com código existente
-      localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-      localStorage.setItem('accentColor', accentColor);
-      
-      // Aplica ou remove a classe 'dark' no elemento HTML
+      // Aplica a classe 'dark' no elemento HTML
       if (darkMode) {
         document.documentElement.classList.add('dark');
+        document.body.classList.add('dark:bg-gray-900');
       } else {
         document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark:bg-gray-900');
       }
       
       // Define a cor do tema na meta tag
@@ -103,7 +101,6 @@ export const ThemeProvider = ({ children }) => {
       }
       
       // Aplica tamanho de fonte
-      // src/context/ThemeContext.js (continuação)
       document.documentElement.classList.remove('text-sm', 'text-base', 'text-lg');
       
       switch (fontSize) {

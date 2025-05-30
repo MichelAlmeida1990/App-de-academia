@@ -1,10 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WorkoutContext } from '../context/WorkoutContext';
 import { useToast } from '../context/ToastContext';
 import { FiArrowLeft, FiSave, FiPlus, FiTrash2, FiList, FiX, FiClock, FiCalendar } from 'react-icons/fi';
 import { FaDumbbell } from 'react-icons/fa';
-import workoutTemplates from '../data/workoutTemplates';
+import workoutTemplates from '../data/workoutTemplates.js';
 
 // Lista de exercícios organizados por grupo muscular
 const exercisesByMuscleGroup = {
@@ -95,6 +95,8 @@ const NewWorkoutPage = () => {
   const { addWorkout } = useContext(WorkoutContext);
   const { showToast } = useToast();
   
+  console.log('Templates disponíveis:', workoutTemplates); // Debug
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
@@ -102,7 +104,7 @@ const NewWorkoutPage = () => {
   
   const [workoutData, setWorkoutData] = useState({
     name: '',
-    type: 'força',
+    type: 'hipertrofia',
     description: '',
     date: new Date().toISOString().split('T')[0],
     duration: 60,
@@ -116,6 +118,21 @@ const NewWorkoutPage = () => {
     reps: 12,
     rest: 60
   });
+
+  // Estado para controlar as sugestões de treino
+  const [suggestedWorkouts, setSuggestedWorkouts] = useState([]);
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
+
+  // Inicializar sugestões de treino (um de cada tipo)
+  useEffect(() => {
+    const types = ['hipertrofia', 'forca', 'resistencia', 'cardio'];
+    const suggestions = types.map(type => {
+      const templatesOfType = workoutTemplates.filter(t => t.type === type);
+      return templatesOfType[Math.floor(Math.random() * templatesOfType.length)];
+    }).filter(Boolean);
+    
+    setSuggestedWorkouts(suggestions);
+  }, []);
 
   const handleTemplateChange = (e) => {
     const templateId = e.target.value;
@@ -237,36 +254,45 @@ const NewWorkoutPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/workouts')}
-            className="text-gray-300 hover:text-white transition-colors"
+            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <FiArrowLeft size={24} />
           </button>
-          <h1 className="text-2xl font-bold text-white">Criar Novo Treino</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Criar Novo Treino</h1>
           <div className="w-6" /> {/* Espaçador */}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Seleção de Template */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Escolha um Modelo de Treino
+                Sugestões de Treino
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Selecione um dos modelos abaixo ou crie seu treino do zero
+                Escolha uma sugestão ou explore todos os treinos disponíveis
               </p>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowAllTemplates(!showAllTemplates)}
+                  className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                >
+                  {showAllTemplates ? 'Mostrar apenas sugestões' : 'Ver todos os treinos'}
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Grid de Templates */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {workoutTemplates.map((template) => (
+            {(showAllTemplates ? workoutTemplates : suggestedWorkouts).map((template) => (
               <div
                 key={template.id}
                 className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer border-2 ${
@@ -296,9 +322,25 @@ const NewWorkoutPage = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {template.title}
                   </h3>
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-sm rounded-full">
-                    {template.type}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-sm rounded-full">
+                      {template.type}
+                    </span>
+                    {!showAllTemplates && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSuggestedWorkouts(prev => 
+                            prev.filter(t => t.id !== template.id)
+                          );
+                        }}
+                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <FiX size={18} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                   {template.description}
@@ -350,9 +392,9 @@ const NewWorkoutPage = () => {
                       onChange={handleChange}
                       className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
                     >
-                      <option value="força">Força</option>
                       <option value="hipertrofia">Hipertrofia</option>
-                      <option value="resistência">Resistência</option>
+                      <option value="forca">Força</option>
+                      <option value="resistencia">Resistência</option>
                       <option value="cardio">Cardio</option>
                     </select>
                   </div>
