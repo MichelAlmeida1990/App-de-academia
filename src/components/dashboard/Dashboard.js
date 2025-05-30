@@ -86,7 +86,7 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-white">
-        Bem-vindo, {currentUser ? currentUser.displayName || currentUser.email : 'Usuário'}!
+        Bem-vindo, {currentUser?.displayName ? currentUser.displayName : 'Usuário'}!
       </h1>
 
       {/* Seção de Resumo/Estatísticas - Grid de 3 colunas */}

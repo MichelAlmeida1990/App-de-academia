@@ -207,7 +207,7 @@ const Header = () => {
                   >
                     <FaUserCircle className="text-lg" />
                     <span className="text-sm font-medium hidden xl:block">
-                      {user?.name || user?.email || 'Usuário'} {/* Exibe nome ou email do usuário */}
+                      {user?.displayName || user?.email || 'Usuário'}
                     </span>
                   </motion.button>
 
@@ -223,7 +223,7 @@ const Header = () => {
                       >
                         <div className="px-4 py-4 border-b border-white/20">
                           <p className="text-sm font-medium text-white">
-                            {user?.name || 'Usuário'}
+                            {user?.displayName || 'Usuário'}
                           </p>
                           <p className="text-sm text-white/70">
                             {user?.email}
@@ -360,7 +360,7 @@ const Header = () => {
                       </div>
                       <div>
                         <p className="font-medium text-white">
-                          {user.name || 'Usuário'}
+                          {user.displayName || 'Usuário'}
                         </p>
                         <p className="text-sm text-white/70">
                           {user.email}

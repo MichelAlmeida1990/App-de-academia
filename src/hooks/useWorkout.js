@@ -12,6 +12,7 @@ export const useWorkout = (workoutId) => {
   const [workout, setWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [personalRecords, setPersonalRecords] = useState({});
 
   // Função para atualizar os dados do treino atual
   const refreshWorkout = async () => {
@@ -41,31 +42,44 @@ export const useWorkout = (workoutId) => {
   };
 
   useEffect(() => {
-    const fetchWorkout = async () => {
-      try {
-        setLoading(true);
-        // Encontrar o treino pelo ID no contexto
-        const foundWorkout = workouts.find(w => w.id === workoutId);
+    let isMounted = true; 
 
-        if (foundWorkout) {
-          setWorkout(foundWorkout);
-        } else {
-          setError('Treino não encontrado');
+    if (!workoutId) {
+      if (isMounted) {
+        setLoading(false); 
+      }
+      return; 
+    }
+
+    const fetchWorkoutById = async () => {
+      if (isMounted) setLoading(true);
+      try {
+        const foundWorkout = workouts.find(w => w.id === workoutId);
+        if (isMounted) { 
+          if (foundWorkout) {
+            setWorkout(foundWorkout);
+            setError(null); 
+          } else {
+            setError('Treino não encontrado'); 
+          }
         }
       } catch (err) {
-        console.error('Erro ao buscar treino:', err);
-        setError('Falha ao carregar o treino');
+        console.error(`Erro ao buscar treino com ID ${workoutId}:`, err);
+        if (isMounted) {
+          setError(`Falha ao carregar o treino ${workoutId}`);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    if (workoutId) {
-      fetchWorkout();
-    } else {
-      // Se não houver ID, apenas definir loading como false
-      setLoading(false);
-    }
+    fetchWorkoutById();
+
+    return () => {
+      isMounted = false; 
+    };
   }, [workoutId, workouts]);
 
   const saveWorkout = async (updatedWorkout) => {
@@ -244,9 +258,165 @@ export const useWorkout = (workoutId) => {
     return Math.round((completedCount / workout.exercises.length) * 100);
   };
 
+  const getAllExercises = () => {
+    if (!workouts || workouts.length === 0) {
+      return [];
+    }
+    const allExercisesSet = new Set();
+    workouts.forEach(workout => {
+      if (workout.exercises && workout.exercises.length > 0) {
+        workout.exercises.forEach(exercise => {
+          // Assumindo que o nome do exercício é o que está sendo usado como valor/chave
+          // Se o objeto 'exercise' for uma string, adicione diretamente
+          // Se for um objeto com uma propriedade 'name', use exercise.name
+          if (typeof exercise === 'string') {
+            allExercisesSet.add(exercise);
+          } else if (exercise && typeof exercise.name === 'string') {
+            allExercisesSet.add(exercise.name);
+          }
+        });
+      }
+    });
+    return Array.from(allExercisesSet);
+  };
+
+  // Função para obter o histórico de progresso de um exercício específico
+  const getExerciseProgressHistory = (exerciseName) => {
+    const history = [];
+    if (!workouts || typeof exerciseName !== 'string' || exerciseName.trim() === '') {
+      return history; 
+    }
+
+    workouts.forEach(w => {
+      if (w.completed && w.exercises) { 
+        w.exercises.forEach(ex => {
+          let currentExerciseName = '';
+          let currentWeight = null;
+
+          if (typeof ex === 'string') {
+            // Tratar se o exercício for apenas uma string (sem peso)
+            // currentExerciseName = ex; 
+          } else if (ex && typeof ex.name === 'string') {
+            currentExerciseName = ex.name;
+            currentWeight = ex.weight; 
+          }
+
+          if (currentExerciseName === exerciseName && typeof currentWeight === 'number' && w.completedAt) {
+            history.push({
+              date: w.completedAt, 
+              weight: currentWeight 
+            });
+          }
+        });
+      }
+    });
+    return history.sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
+
+  // Calcular/Atualizar recordes pessoais quando os treinos mudam
+  useEffect(() => {
+    const calculatedRecords = {};
+    if (workouts) {
+      workouts.forEach(w => {
+        if (w.completed && w.exercises) {
+          w.exercises.forEach(ex => {
+            let exName = '';
+            let exWeight = 0;
+
+            if (typeof ex === 'string') {
+              // exName = ex; // Se o exercício for string, pode não ter peso associado para recorde
+            } else if (ex && typeof ex.name === 'string' && typeof ex.weight === 'number') {
+              exName = ex.name;
+              exWeight = ex.weight;
+            }
+            
+            if (exName && exWeight > (calculatedRecords[exName] || 0)) {
+              calculatedRecords[exName] = exWeight;
+            }
+          });
+        }
+      });
+    }
+    setPersonalRecords(calculatedRecords);
+  }, [workouts]);
+
+  const getWorkoutStats = () => {
+    const totalWorkouts = workouts ? workouts.length : 0;
+    const completedWorkouts = workouts ? workouts.filter(w => w.completed || w.completedAt).length : 0;
+    return {
+      totalWorkouts,
+      completedWorkouts,
+    };
+  };
+
+  const calculateCurrentStreak = () => {
+    if (!workouts || workouts.length === 0) return 0;
+
+    const completedDates = workouts
+      .filter(w => w.completed && w.completedAt)
+      .map(w => new Date(w.completedAt).setHours(0, 0, 0, 0))
+      .sort((a, b) => b - a);
+
+    if (completedDates.length === 0) return 0;
+
+    const uniqueDates = [...new Set(completedDates)];
+    if (uniqueDates.length === 0) return 0;
+
+    let streak = 0;
+    const today = new Date().setHours(0, 0, 0, 0);
+    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).setHours(0,0,0,0);
+    
+    if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) {
+      return 0;
+    }
+    
+    streak = 1;
+    for (let i = 0; i < uniqueDates.length - 1; i++) {
+      const currentDay = new Date(uniqueDates[i]);
+      const previousDayInArray = new Date(uniqueDates[i+1]);
+      
+      const expectedPreviousDay = new Date(currentDay);
+      expectedPreviousDay.setDate(currentDay.getDate() - 1);
+
+      if (previousDayInArray.getTime() === expectedPreviousDay.getTime()) {
+        streak++;
+      } else {
+        break; 
+      }
+    }
+    return streak;
+  };
+
+  const getUnlockedAchievements = () => {
+    const unlocked = [];
+    const stats = getWorkoutStats();
+    const recordsCount = personalRecords ? Object.keys(personalRecords).length : 0;
+    const currentStreak = calculateCurrentStreak();
+
+    // Conquistas de Treino
+    if (stats.completedWorkouts >= 1) unlocked.push('firstWorkout');
+    if (stats.completedWorkouts >= 10) unlocked.push('tenWorkouts');
+    if (stats.completedWorkouts >= 25) unlocked.push('twentyFiveWorkouts');
+    if (stats.completedWorkouts >= 50) unlocked.push('fiftyWorkouts');
+    if (stats.completedWorkouts >= 100) unlocked.push('hundredWorkouts');
+
+    // Conquistas de Recorde Pessoal
+    if (recordsCount >= 1) unlocked.push('firstRecord');
+    if (recordsCount >= 5) unlocked.push('fiveRecords');
+    if (recordsCount >= 10) unlocked.push('tenRecords');
+    
+    // Conquistas de Sequência de Dias
+    if (currentStreak >= 3) unlocked.push('threeConsecutiveDays');
+    if (currentStreak >= 7) unlocked.push('sevenConsecutiveDays');
+    if (currentStreak >= 14) unlocked.push('fourteenConsecutiveDays');
+    if (currentStreak >= 30) unlocked.push('thirtyConsecutiveDays');
+
+    return unlocked;
+  };
+
   return {
     workout,
-    workouts, // Expondo todos os treinos
+    workouts,
     loading,
     error,
     saveWorkout,
@@ -257,6 +427,12 @@ export const useWorkout = (workoutId) => {
     getCompletedWorkouts,
     getWorkoutStatsByPeriod,
     getWorkoutProgress,
-    refreshWorkout, // Nova função para atualizar o treino atual
+    refreshWorkout,
+    getAllExercises,
+    personalRecords,             // Exportar personalRecords
+    getExerciseProgressHistory,  // Exportar getExerciseProgressHistory
+    getWorkoutStats,             // Exportar getWorkoutStats
+    calculateCurrentStreak,      // Exportar calculateCurrentStreak
+    getUnlockedAchievements,     // Exportar getUnlockedAchievements
   };
 };

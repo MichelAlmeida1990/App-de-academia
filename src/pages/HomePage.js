@@ -15,8 +15,10 @@ import {
   FaCheckCircle,
   FaExclamationTriangle
 } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
-// Simulação de autenticação
+// Simulação de autenticação - ESTE MOCK NÃO SERÁ MAIS USADO DIRETAMENTE NO HANDLESUBMIT
+/*
 const mockAuth = {
   login: (email, password) => {
     return new Promise((resolve, reject) => {
@@ -42,6 +44,7 @@ const mockAuth = {
     });
   }
 };
+*/
 
 // Componente de Feature Card
 const FeatureCard = ({ icon, title, description, delay = 0 }) => {
@@ -125,7 +128,8 @@ const Toast = ({ type, message, onClose }) => {
 };
 
 // Componente principal
-const HomePage = ({ onLogin }) => {
+const HomePage = () => {
+  const { login: contextLogin, signup: contextSignup, isAuthenticated: globalIsAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -133,18 +137,13 @@ const HomePage = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Verificar se já está autenticado
+  // Verificar se já está autenticado - Esta lógica agora é primariamente do SmartRedirect via AuthContext
   useEffect(() => {
-    const savedUser = localStorage.getItem('fitnessUser');
-    if (savedUser) {
-      setIsAuthenticated(true);
-      if (onLogin) {
-        onLogin(JSON.parse(savedUser));
-      }
-    }
-  }, [onLogin]);
+    // O SmartRedirect já cuida do redirecionamento se globalIsAuthenticated for true.
+    // Se o usuário chegar aqui, significa que globalIsAuthenticated é false.
+    // A lógica anterior com localStorage e onLogin não é mais necessária aqui da mesma forma.
+  }, []); // Removido onLogin das dependências
 
   const showToast = (type, message) => {
     setToast({ type, message });
@@ -153,9 +152,7 @@ const HomePage = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      let result;
       if (isRegistering) {
         if (!name.trim()) {
           throw new Error('Nome é obrigatório');
@@ -163,24 +160,18 @@ const HomePage = ({ onLogin }) => {
         if (password.length < 6) {
           throw new Error('Senha deve ter pelo menos 6 caracteres');
         }
-        result = await mockAuth.signup(email, password, name);
+        await contextSignup(email, password, name); 
         showToast('success', 'Conta criada com sucesso! Bem-vindo!');
       } else {
-        result = await mockAuth.login(email, password);
+        await contextLogin(email, password);
         showToast('success', 'Login realizado com sucesso! Bem-vindo de volta!');
       }
-
-      // Salvar dados do usuário
-      localStorage.setItem('fitnessUser', JSON.stringify(result.user));
-      setIsAuthenticated(true);
-      
-      // Callback para componente pai
-      if (onLogin) {
-        setTimeout(() => onLogin(result.user), 1000);
-      }
+      // O AuthContext agora é responsável por definir o usuário e isAuthenticated,
+      // e também por interagir com o LocalStorageService.
+      // SmartRedirect deve reagir à mudança no isAuthenticated do AuthContext.
 
     } catch (error) {
-      showToast('error', error.message);
+      showToast('error', error.message || 'Ocorreu um erro.'); 
     } finally {
       setLoading(false);
     }
@@ -198,24 +189,9 @@ const HomePage = ({ onLogin }) => {
     }, 100);
   };
 
-  // Se já autenticado, mostrar tela de redirecionamento
-  if (isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="animate-spin w-16 h-16 border-4 border-purple-300 border-t-transparent rounded-full mx-auto mb-6"></div>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-            Redirecionando...
-          </h1>
-          <p className="text-purple-200">Preparando seu dashboard personalizado</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

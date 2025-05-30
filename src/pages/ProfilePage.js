@@ -404,7 +404,7 @@ const ProfilePage = () => {
                 
                 <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-800">
                   <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Recordes pessoais</p>
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{Object.keys(personalRecords).length}</p>
+                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{(personalRecords && typeof personalRecords === 'object') ? Object.keys(personalRecords).length : 0}</p>
                 </div>
               </div>
             </div>

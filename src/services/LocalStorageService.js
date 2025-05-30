@@ -85,11 +85,43 @@ const LocalStorageService = {
     // Obtém todos os usuários registrados
     getUsers: () => {
         try {
-            const users = localStorage.getItem(USERS_KEY);
-            return users ? JSON.parse(users) : [];
+            const usersData = localStorage.getItem(USERS_KEY);
+            let users = usersData ? JSON.parse(usersData) : [];
+
+            // Garante que o usuário de demonstração exista
+            const demoUserEmail = 'demo@fitness.com';
+            const demoUserExists = users.some(u => u.email === demoUserEmail);
+
+            if (!demoUserExists) {
+                const demoUser = { 
+                    email: demoUserEmail, 
+                    password: 'demo123', // A senha precisa estar armazenada para findUser funcionar
+                    name: 'Usuário Demo', 
+                    uid: 'user_demo_001' // Um UID fixo para o usuário demo
+                };
+                users.push(demoUser);
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            }
+            return users;
         } catch (error) {
-            console.error("Erro ao obter usuários do localStorage:", error);
-            return [];
+            console.error("Erro ao obter ou inicializar usuários do localStorage:", error);
+            // Como fallback em caso de erro de parse ou outro problema, 
+            // ainda tenta fornecer o usuário demo para que o login demo possa funcionar.
+            // Isso é mais um patch; o ideal é que o try/catch lide com a corrupção do LS.
+            const demoUser = { 
+                email: 'demo@fitness.com', 
+                password: 'demo123', 
+                name: 'Usuário Demo', 
+                uid: 'user_demo_001' 
+            };
+            // Se o erro foi ao parsear, USERS_KEY pode estar corrompido.
+            // Tentamos recriar com o usuário demo.
+            try {
+                localStorage.setItem(USERS_KEY, JSON.stringify([demoUser]));
+            } catch (setItemError) {
+                console.error("Erro ao tentar salvar fallback do usuário demo:", setItemError);
+            }
+            return [demoUser];
         }
     },
 
