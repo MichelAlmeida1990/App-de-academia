@@ -589,85 +589,37 @@ const ProfilePage = () => {
                   
                   {profileData && (profileData.bmi || profileData.height || profileData.weight) ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {profileData.height && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaRuler className="text-2xl text-blue-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Altura</h4>
-                          <p className="text-xl font-bold text-gray-900 dark:text-white">
-                            {profileData.height} cm
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FaRuler className="text-2xl text-blue-500 mx-auto mb-2" />
+                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Altura</h4>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                          {profileData.height} cm
+                        </p>
+                      </div>
                       
-                      {profileData.weight && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaWeight className="text-2xl text-green-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Peso</h4>
-                          <p className="text-xl font-bold text-gray-900 dark:text-white">
-                            {profileData.weight} kg
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FaWeight className="text-2xl text-green-500 mx-auto mb-2" />
+                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Peso</h4>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                          {profileData.weight} kg
+                        </p>
+                      </div>
                       
-                      {profileData.bmi && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaCalculator className="text-2xl text-purple-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">IMC</h4>
-                          <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
-                            {profileData.bmi.toFixed(1)}
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FaCalculator className="text-2xl text-purple-500 mx-auto mb-2" />
+                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">IMC</h4>
+                        <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                          {profileData.bmi.toFixed(1)}
+                        </p>
+                      </div>
                       
-                      {profileData.category && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaBullseye className="text-2xl text-orange-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Categoria IMC</h4>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white">
-                            {profileData.category}
-                          </p>
-                        </div>
-                      )}
-
-                      {profileData.bodyFat && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaWeight className="text-2xl text-yellow-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Gordura Corporal</h4>
-                          <p className="text-xl font-bold text-yellow-600 dark:text-yellow-400">
-                            {profileData.bodyFat.toFixed(1)}%
-                          </p>
-                        </div>
-                      )}
-
-                      {profileData.tdee && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaFire className="text-2xl text-red-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">TDEE</h4>
-                          <p className="text-xl font-bold text-red-600 dark:text-red-400">
-                            {Math.round(profileData.tdee)} kcal
-                          </p>
-                        </div>
-                      )}
-
-                      {profileData.bmr && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaClock className="text-2xl text-indigo-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">TMB</h4>
-                          <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                            {Math.round(profileData.bmr)} kcal
-                          </p>
-                        </div>
-                      )}
-
-                      {profileData.targetCalories && (
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <FaBullseye className="text-2xl text-teal-500 mx-auto mb-2" />
-                          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Meta Calórica</h4>
-                          <p className="text-xl font-bold text-teal-600 dark:text-teal-400">
-                            {Math.round(profileData.targetCalories)} kcal
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FaBullseye className="text-2xl text-orange-500 mx-auto mb-2" />
+                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">Categoria</h4>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">
+                          {profileData.category}
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-8">

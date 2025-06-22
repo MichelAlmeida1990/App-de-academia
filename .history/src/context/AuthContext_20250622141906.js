@@ -7,9 +7,7 @@ import {
   signInWithEmailAndPassword, 
   signOut,
   updateProfile, // Para definir o nome do usuário (displayName)
-  sendEmailVerification, // Adicione esta linha para importar o sendEmailVerification
-  GoogleAuthProvider,
-  signInWithPopup
+  sendEmailVerification // Adicione esta linha para importar o sendEmailVerification
 } from 'firebase/auth';
 import LocalStorageService from '../services/LocalStorageService'; // Manter para treinos demo
 
@@ -66,31 +64,6 @@ export const AuthProvider = ({ children }) => {
       // Exemplos de códigos de erro: auth/user-not-found, auth/wrong-password, auth/invalid-email
       console.error("Erro de login no Firebase:", err.code, err.message);
       setError(err.message || 'Falha ao fazer login.');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loginWithGoogle = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      const userCredential = await signInWithPopup(auth, provider);
-      
-      // Se é um novo usuário, criar treinos demo
-      if (userCredential.user && userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime) {
-        createAndSaveDemoWorkouts(userCredential.user.uid);
-      }
-      
-      return userCredential.user;
-    } catch (err) {
-      console.error("Erro de login com Google:", err.code, err.message);
-      setError(err.message || 'Falha ao fazer login com Google.');
       throw err;
     } finally {
       setLoading(false);
@@ -229,7 +202,6 @@ export const AuthProvider = ({ children }) => {
     error,
     setError, // Expor setError para que outros componentes possam limpar/definir erros
     login,
-    loginWithGoogle,
     signup,
     logout,
     sendVerificationEmail // Expor a nova função

@@ -72,31 +72,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      const userCredential = await signInWithPopup(auth, provider);
-      
-      // Se é um novo usuário, criar treinos demo
-      if (userCredential.user && userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime) {
-        createAndSaveDemoWorkouts(userCredential.user.uid);
-      }
-      
-      return userCredential.user;
-    } catch (err) {
-      console.error("Erro de login com Google:", err.code, err.message);
-      setError(err.message || 'Falha ao fazer login com Google.');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Função para criar treinos demo (movida para dentro para ter acesso ao setError)
   const createAndSaveDemoWorkouts = (userId) => {
     try {
@@ -229,7 +204,6 @@ export const AuthProvider = ({ children }) => {
     error,
     setError, // Expor setError para que outros componentes possam limpar/definir erros
     login,
-    loginWithGoogle,
     signup,
     logout,
     sendVerificationEmail // Expor a nova função

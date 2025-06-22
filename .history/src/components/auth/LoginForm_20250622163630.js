@@ -39,16 +39,6 @@ const LoginForm = ({ onToggleForm }) => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setError('');
-    try {
-      await loginWithGoogle();
-      // O redirecionamento será feito pelo useEffect quando isAuthenticated mudar
-    } catch (error) {
-      console.error('Erro de login com Google:', error);
-    }
-  };
-
   return (
     <Card className="max-w-md mx-auto fade-in">
       <h2 className="text-2xl font-bold mb-6 text-center">Entrar</h2>
@@ -110,33 +100,6 @@ const LoginForm = ({ onToggleForm }) => {
           {loading ? 'Entrando...' : 'Entrar'}
         </Button>
       </form>
-
-      {/* Divisor */}
-      <div className="mt-6 mb-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-              ou
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Botão do Google */}
-      <Button
-        type="button"
-        variant="outline"
-        fullWidth
-        disabled={loading}
-        onClick={handleGoogleLogin}
-        className="flex items-center justify-center space-x-2"
-      >
-        <FaGoogle className="text-red-500" />
-        <span>{loading ? 'Conectando...' : 'Continuar com Google'}</span>
-      </Button>
       
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">

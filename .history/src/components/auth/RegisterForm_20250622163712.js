@@ -11,7 +11,7 @@ const RegisterForm = ({ onToggleForm }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState('');
-  const { signup, loginWithGoogle, loading, error, currentUser } = useAuth();
+  const { signup, loading, error, currentUser } = useAuth();
   const navigate = useNavigate();
 
   // Limpar erros quando o componente é montado
@@ -49,17 +49,6 @@ const RegisterForm = ({ onToggleForm }) => {
     } catch (error) {
       setFormError(error.message || 'Erro ao registrar usuário');
       console.error('Erro de registro:', error);
-    }
-  };
-
-  const handleGoogleSignup = async () => {
-    setFormError('');
-    try {
-      await loginWithGoogle();
-      // O redirecionamento será feito pelo useEffect quando currentUser mudar
-    } catch (error) {
-      setFormError(error.message || 'Erro ao registrar com Google');
-      console.error('Erro de registro com Google:', error);
     }
   };
 
@@ -138,33 +127,6 @@ const RegisterForm = ({ onToggleForm }) => {
           {loading ? 'Registrando...' : 'Registrar'}
         </Button>
       </form>
-
-      {/* Divisor */}
-      <div className="mt-6 mb-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-              ou
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Botão do Google */}
-      <Button
-        type="button"
-        variant="outline"
-        fullWidth
-        disabled={loading}
-        onClick={handleGoogleSignup}
-        className="flex items-center justify-center space-x-2"
-      >
-        <FaGoogle className="text-red-500" />
-        <span>{loading ? 'Conectando...' : 'Registrar com Google'}</span>
-      </Button>
       
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">

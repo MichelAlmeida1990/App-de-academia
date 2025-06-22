@@ -229,7 +229,6 @@ export const AuthProvider = ({ children }) => {
     error,
     setError, // Expor setError para que outros componentes possam limpar/definir erros
     login,
-    loginWithGoogle,
     signup,
     logout,
     sendVerificationEmail // Expor a nova função
