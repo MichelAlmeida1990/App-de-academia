@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { FaSearch, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaBookmark, FaDumbbell, FaHeart, FaRegHeart, FaPlay } from 'react-icons/fa';
 import Card from '../common/Card';
+import { useSettings } from '../../context/SettingsContext';
+import ExerciseVisual from './ExerciseVisual';
 
 // Dados mockados de exercícios
 const MOCK_EXERCISES = [
@@ -121,6 +123,8 @@ const MOCK_EXERCISES = [
 
 // Componente de Card de Exercício Simplificado
 const ExerciseCard = ({ exercise, isFavorite, onToggleFavorite, onSelect }) => {
+  const { settings } = useSettings();
+  
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
     onToggleFavorite(exercise.id);
@@ -155,21 +159,11 @@ const ExerciseCard = ({ exercise, isFavorite, onToggleFavorite, onSelect }) => {
       onClick={() => onSelect(exercise)}
     >
       <div className="relative overflow-hidden">
-        {/* Imagem do exercício */}
-        <div className="aspect-video bg-gradient-to-br from-gray-700 to-gray-800 rounded-t-xl flex items-center justify-center">
-          <img
-            src={exercise.gifUrl}
-            alt={exercise.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-          <div className="hidden w-full h-full items-center justify-center">
-            <FaDumbbell className="text-4xl text-gray-500" />
-          </div>
-        </div>
+        {/* Visual do exercício */}
+        <ExerciseVisual 
+          exercise={exercise} 
+          className="aspect-video rounded-t-xl"
+        />
 
         {/* Botão de favorito */}
         <button
@@ -220,6 +214,8 @@ const ExerciseCard = ({ exercise, isFavorite, onToggleFavorite, onSelect }) => {
   );
 };
 
+
+
 // Componente de Modal de Detalhes
 const ExerciseModal = ({ exercise, isOpen, onClose }) => {
   if (!isOpen || !exercise) return null;
@@ -251,20 +247,12 @@ const ExerciseModal = ({ exercise, isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Imagem */}
-          <div className="aspect-video bg-gradient-to-br from-gray-700 to-gray-600 rounded-lg mb-6 flex items-center justify-center">
-            <img
-              src={exercise.gifUrl}
-              alt={exercise.name}
-              className="w-full h-full object-cover rounded-lg"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
+          {/* Visual do exercício */}
+          <div className="aspect-video mb-6">
+            <ExerciseVisual 
+              exercise={exercise} 
+              className="w-full h-full rounded-lg"
             />
-            <div className="hidden w-full h-full items-center justify-center">
-              <FaDumbbell className="text-6xl text-gray-500" />
-            </div>
           </div>
 
           {/* Informações */}

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaBookmark, FaShare, FaArrowLeft, FaExclamationTriangle, FaPlay, FaPause, FaDumbbell, FaInfoCircle } from 'react-icons/fa';
 import Card from '../common/Card';
+import ExerciseVisual from './ExerciseVisual';
 
 // Componente de Vídeo/GIF do Exercício
 const ExerciseVideo = ({ gifUrl, title }) => {
@@ -326,10 +327,12 @@ const ExerciseDetail = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <ExerciseVideo
-              gifUrl={exercise.gifUrl}
-              title={exercise.name}
-            />
+            <div className="aspect-video">
+              <ExerciseVisual 
+                exercise={exercise} 
+                className="w-full h-full rounded-lg"
+              />
+            </div>
           </div>
 
           <div>

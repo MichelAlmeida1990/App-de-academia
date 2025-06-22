@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import ExerciseVisual from './ExerciseVisual';
 
 const ExerciseCard = ({ exercise }) => {
   const cardBg = useColorModeValue('white', 'gray.800');
@@ -30,12 +31,12 @@ const ExerciseCard = ({ exercise }) => {
         display="flex"
         flexDirection="column"
       >
-        <Image 
-          src={exercise.gifUrl || 'https://via.placeholder.com/300x200?text=Exercise'} 
-          alt={exercise.name}
-          height="160px"
-          objectFit="cover"
-        />
+        <div style={{ height: '160px' }}>
+          <ExerciseVisual 
+            exercise={exercise} 
+            className="w-full h-full"
+          />
+        </div>
         
         <div p={4} flex="1">
           <div justifyContent="space-between" alignItems="flex-start" mb={2} style={{display: "flex"}}

@@ -6,6 +6,7 @@ import { ThemeProvider as AppThemeProvider, useTheme } from './context/ThemeCont
 import { WorkoutProvider } from './context/WorkoutContext';
 import { ExerciseProvider } from './context/ExerciseContext';
 import { ToastProvider } from './context/ToastContext';
+import { SettingsProvider } from './context/SettingsContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import ConnectionStatus from './components/ui/ConnectionStatus';
@@ -213,13 +214,15 @@ function App() {
   return (
     <AuthProvider>
       <AppThemeProvider>
-        <ToastProvider>
-          <WorkoutProvider>
-            <ExerciseProvider>
-              <ThemedAppContent />
-            </ExerciseProvider>
-          </WorkoutProvider>
-        </ToastProvider>
+        <SettingsProvider>
+          <ToastProvider>
+            <WorkoutProvider>
+              <ExerciseProvider>
+                <ThemedAppContent />
+              </ExerciseProvider>
+            </WorkoutProvider>
+          </ToastProvider>
+        </SettingsProvider>
       </AppThemeProvider>
     </AuthProvider>
   );

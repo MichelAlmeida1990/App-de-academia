@@ -1,9 +1,9 @@
 import React from 'react';
 import { FaTimes, FaDumbbell, FaClock, FaList } from 'react-icons/fa';
-import { getExerciseImage } from '../../services/exerciseMediaService';
+import { useSettings } from '../../context/SettingsContext';
+import ExerciseVisual from './ExerciseVisual';
 
 const ExerciseModal = ({ exercise, onClose }) => {
-  const imageUrl = getExerciseImage(exercise.name);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -22,19 +22,12 @@ const ExerciseModal = ({ exercise, onClose }) => {
         </div>
 
         <div className="p-4">
-          {/* Imagem de demonstração */}
-          <div className="aspect-video w-full bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden mb-6">
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={`Demonstração do exercício ${exercise.name}`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <FaDumbbell className="text-6xl text-gray-400 dark:text-gray-500" />
-              </div>
-            )}
+          {/* Visual do exercício */}
+          <div className="aspect-video w-full rounded-lg overflow-hidden mb-6">
+            <ExerciseVisual 
+              exercise={exercise} 
+              className="w-full h-full"
+            />
           </div>
 
           {/* Informações do exercício */}

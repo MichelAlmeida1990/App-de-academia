@@ -2,11 +2,14 @@
 import React, { useState } from 'react';
 import { FaDumbbell, FaHeart, FaInfoCircle } from 'react-icons/fa';
 import { getExerciseImage, getExerciseThumbnail } from '../../services/exerciseMediaService';
+import { useSettings } from '../../context/SettingsContext';
+import ExerciseVisual from './ExerciseVisual';
 
 const ExerciseCard = ({ exercise, onSelect }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const imageUrl = getExerciseImage(exercise.name);
-  const thumbnailUrl = getExerciseThumbnail(exercise.name);
+  const { settings } = useSettings();
+  const imageUrl = settings.showExerciseImages ? getExerciseImage(exercise.name) : null;
+  const thumbnailUrl = settings.showExerciseImages ? getExerciseThumbnail(exercise.name) : null;
 
   return (
     <div 
@@ -14,20 +17,12 @@ const ExerciseCard = ({ exercise, onSelect }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Container da Imagem */}
-      <div className="relative aspect-video w-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
-        {imageUrl ? (
-          <img
-            src={isHovered ? imageUrl : thumbnailUrl}
-            alt={`Demonstração do exercício ${exercise.name}`}
-            className="w-full h-full object-cover transition-opacity duration-300"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <FaDumbbell className="text-4xl text-gray-400 dark:text-gray-500" />
-          </div>
-        )}
+      {/* Container da Imagem/Visual */}
+      <div className="relative">
+        <ExerciseVisual 
+          exercise={exercise} 
+          className="aspect-video w-full"
+        />
         
         <button
           className="absolute top-2 right-2 p-2 rounded-full bg-white/80 dark:bg-gray-800/80 text-purple-500 hover:text-purple-600 transition-colors"
@@ -38,13 +33,6 @@ const ExerciseCard = ({ exercise, onSelect }) => {
         >
           <FaHeart className="text-lg" />
         </button>
-
-        {/* Overlay com informações */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-          <p className="text-white text-sm font-medium">
-            {exercise.name}
-          </p>
-        </div>
       </div>
 
       {/* Informações do Exercício */}

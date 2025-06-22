@@ -212,16 +212,28 @@ const NewWorkoutPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (workoutData.exercises.length === 0) {
-      showToast('Adicione pelo menos um exercício ao treino', 'error');
+    // Melhor validação e mensagens de erro mais claras
+    if (!workoutData.name.trim()) {
+      showToast('Erro', 'Digite o nome do treino', 'error');
       return;
+    }
+    
+    // Permitir criar treinos mesmo sem exercícios (o usuário pode adicionar depois)
+    if (workoutData.exercises.length === 0) {
+      const confirmCreate = window.confirm(
+        'Você está criando um treino sem exercícios. Deseja continuar? Você pode adicionar exercícios depois.'
+      );
+      if (!confirmCreate) {
+        return;
+      }
     }
     
     try {
       setIsSubmitting(true);
       
       // Preparar os exercícios com o formato correto
-      const formattedExercises = workoutData.exercises.map(exercise => ({
+      const formattedExercises = workoutData.exercises.map((exercise, index) => ({
+        id: index,
         name: exercise.name,
         sets: Array.isArray(exercise.sets) ? exercise.sets : Array(exercise.sets).fill(null).map(() => ({
           reps: exercise.reps,
@@ -242,12 +254,14 @@ const NewWorkoutPage = () => {
         completed: false
       };
       
+      console.log('Criando treino:', newWorkout); // Debug
+      
       await addWorkout(newWorkout);
-      showToast('Treino criado com sucesso!', 'success');
+      showToast('Sucesso', 'Treino criado com sucesso!', 'success');
       navigate('/workouts');
     } catch (error) {
       console.error('Erro ao criar treino:', error);
-      showToast('Erro ao criar treino. Tente novamente.', 'error');
+      showToast('Erro', 'Erro ao criar treino. Tente novamente.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -269,14 +283,135 @@ const NewWorkoutPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Seleção de Template */}
+          {/* Informações Básicas do Treino - SEMPRE VISÍVEL */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Informações do Treino
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nome do Treino *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={workoutData.name}
+                  onChange={handleChange}
+                  placeholder="Ex: Treino de Peito, Cardio Matinal..."
+                  className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo de Treino
+                </label>
+                <select
+                  name="type"
+                  value={workoutData.type}
+                  onChange={handleChange}
+                  className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
+                >
+                  <option value="hipertrofia">Hipertrofia</option>
+                  <option value="forca">Força</option>
+                  <option value="resistencia">Resistência</option>
+                  <option value="cardio">Cardio</option>
+                </select>
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Descrição
+                </label>
+                <textarea
+                  name="description"
+                  value={workoutData.description}
+                  onChange={handleChange}
+                  placeholder="Descreva o objetivo do seu treino..."
+                  className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
+                  rows="3"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Exercícios do Treino - SEMPRE VISÍVEL */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Exercícios do Treino
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowExerciseSelector(true)}
+                className="flex items-center text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition-colors"
+              >
+                <FiPlus className="mr-1" />
+                Adicionar Exercício
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {workoutData.exercises.map((exercise, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                >
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">
+                      {exercise.name}
+                    </h3>
+                    <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center mr-3">
+                        <FaDumbbell className="mr-1" />
+                        {exercise.sets} séries
+                      </span>
+                      <span className="flex items-center mr-3">
+                        <FiList className="mr-1" />
+                        {exercise.reps} reps
+                      </span>
+                      <span className="flex items-center">
+                        <FiClock className="mr-1" />
+                        {exercise.rest}s
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newExercises = [...workoutData.exercises];
+                      newExercises.splice(index, 1);
+                      setWorkoutData({ ...workoutData, exercises: newExercises });
+                    }}
+                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
+              ))}
+
+              {workoutData.exercises.length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                  <FiList className="mx-auto mb-2 w-8 h-8" />
+                  <p className="font-medium">Nenhum exercício adicionado</p>
+                  <p className="text-sm mt-1">Clique em "Adicionar Exercício" para começar</p>
+                  <p className="text-xs mt-2 text-gray-400">Ou escolha um template abaixo</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Seleção de Template - OPCIONAL */}
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Sugestões de Treino
+                📋 Templates de Treino (Opcional)
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Escolha uma sugestão ou explore todos os treinos disponíveis
+                Escolha um template pronto ou crie seu treino personalizado
               </p>
               <div className="flex justify-end">
                 <button
@@ -284,7 +419,7 @@ const NewWorkoutPage = () => {
                   onClick={() => setShowAllTemplates(!showAllTemplates)}
                   className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
                 >
-                  {showAllTemplates ? 'Mostrar apenas sugestões' : 'Ver todos os treinos'}
+                  {showAllTemplates ? 'Mostrar apenas sugestões' : 'Ver todos os templates'}
                 </button>
               </div>
             </div>
@@ -303,18 +438,16 @@ const NewWorkoutPage = () => {
                 onClick={() => {
                   setSelectedTemplate(template.id);
                   setWorkoutData({
-                    name: template.title,
+                    ...workoutData,
+                    name: workoutData.name || template.title,
                     type: template.type,
-                    description: template.description,
-                    date: workoutData.date,
-                    duration: 60,
+                    description: workoutData.description || template.description,
                     exercises: template.exercises.map(ex => ({
                       name: ex.name,
                       sets: ex.sets,
                       reps: ex.reps,
                       rest: ex.rest
-                    })),
-                    image: workoutData.image
+                    }))
                   });
                 }}
               >
@@ -358,128 +491,6 @@ const NewWorkoutPage = () => {
               </div>
             ))}
           </div>
-
-          {/* Informações do Treino Selecionado */}
-          {selectedTemplate && (
-            <>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mt-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Detalhes do Treino
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Nome do Treino
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={workoutData.name}
-                      onChange={handleChange}
-                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Tipo de Treino
-                    </label>
-                    <select
-                      name="type"
-                      value={workoutData.type}
-                      onChange={handleChange}
-                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
-                    >
-                      <option value="hipertrofia">Hipertrofia</option>
-                      <option value="forca">Força</option>
-                      <option value="resistencia">Resistência</option>
-                      <option value="cardio">Cardio</option>
-                    </select>
-                  </div>
-                  
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Descrição
-                    </label>
-                    <textarea
-                      name="description"
-                      value={workoutData.description}
-                      onChange={handleChange}
-                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg p-2.5"
-                      rows="3"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Lista de Exercícios do Template */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Exercícios do Treino
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowExerciseSelector(true)}
-                    className="flex items-center text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
-                  >
-                    <FiPlus className="mr-1" />
-                    Adicionar Exercício
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {workoutData.exercises.map((exercise, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                    >
-                      <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">
-                          {exercise.name}
-                        </h3>
-                        <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="flex items-center mr-3">
-                            <FaDumbbell className="mr-1" />
-                            {exercise.sets} séries
-                          </span>
-                          <span className="flex items-center mr-3">
-                            <FiList className="mr-1" />
-                            {exercise.reps} reps
-                          </span>
-                          <span className="flex items-center">
-                            <FiClock className="mr-1" />
-                            {exercise.rest}s
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newExercises = [...workoutData.exercises];
-                          newExercises.splice(index, 1);
-                          setWorkoutData({ ...workoutData, exercises: newExercises });
-                        }}
-                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <FiTrash2 size={18} />
-                      </button>
-                    </div>
-                  ))}
-
-                  {workoutData.exercises.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      <FiList className="mx-auto mb-2 w-8 h-8" />
-                      <p>Nenhum exercício adicionado</p>
-                      <p className="text-sm">Clique em "Adicionar Exercício" para começar</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
 
           {/* Botões de Ação */}
           <div className="flex justify-end space-x-3 mt-6">

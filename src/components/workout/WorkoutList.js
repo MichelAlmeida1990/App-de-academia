@@ -242,7 +242,7 @@ const WorkoutList = () => {
       
       addWorkout(newWorkout)
         .then(workout => {
-          showToast('Treino adicionado com sucesso!', 'success');
+          showToast('Sucesso', 'Treino adicionado com sucesso!', 'success');
           navigate(`/workout/${workout.id}`);
         })
         .catch(err => {

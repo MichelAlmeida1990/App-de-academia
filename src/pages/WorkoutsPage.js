@@ -286,11 +286,11 @@ const WorkoutsPage = ({ onNavigate, onCreateWorkout, onStartWorkout }) => {
     if (window.confirm(`Tem certeza que deseja excluir o treino "${workout.name}"?`)) {
       deleteWorkout(workout.id)
         .then(() => {
-          showToast('Treino excluído com sucesso!', 'success');
+          showToast('Sucesso', 'Treino excluído com sucesso!', 'success');
         })
         .catch(error => {
           console.error('Erro ao excluir treino:', error);
-          showToast('Erro ao excluir treino. Tente novamente.', 'error');
+          showToast('Erro', 'Erro ao excluir treino. Tente novamente.', 'error');
         });
     }
   };
