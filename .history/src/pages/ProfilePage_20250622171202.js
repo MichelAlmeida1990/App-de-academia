@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 const ProfilePage = () => {
-  const { currentUser: user, updateProfile } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { showToast } = useToast();
   const { 
     getWorkoutStats, 
@@ -333,7 +333,7 @@ const ProfilePage = () => {
                       onClick={handlePhotoClick}
                     >
                       <span className="text-2xl text-white font-bold">
-                        {(user?.displayName || user?.name)?.charAt(0)?.toUpperCase() || '?'}
+                        {user?.name?.charAt(0)?.toUpperCase() || '?'}
                       </span>
                     </div>
                   )}

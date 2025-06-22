@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 const ProfilePage = () => {
-  const { currentUser: user, updateProfile } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { showToast } = useToast();
   const { 
     getWorkoutStats, 
