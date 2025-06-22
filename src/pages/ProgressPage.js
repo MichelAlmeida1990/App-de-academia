@@ -16,6 +16,7 @@ import {
   FaChevronLeft,
   FaChevronRight
 } from 'react-icons/fa';
+import { useWorkout } from '../context/WorkoutContext';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -41,44 +42,155 @@ ChartJS.register(
 );
 
 const ProgressPage = () => {
+  const { 
+    workouts, 
+    getCompletedWorkouts, 
+    getWorkoutStatsByPeriod, 
+    getGeneralStats 
+  } = useWorkout();
+  
   const [activeTab, setActiveTab] = useState('overview');
   const [currentPage, setCurrentPage] = useState(1);
   const [filterPeriod, setFilterPeriod] = useState('week');
+  const [stats, setStats] = useState({
+    totalWorkouts: 0,
+    completedWorkouts: 0,
+    totalCalories: 0,
+    totalTime: 0,
+    currentStreak: 0,
+    activeDays: 0
+  });
+  const [completionRate, setCompletionRate] = useState(0);
   const itemsPerPage = 5;
 
-  // Dados mockados para demonstração
-  const stats = {
-    totalWorkouts: 45,
-    totalCalories: 12450,
-    totalTime: 2340, // em minutos
-    currentStreak: 7,
-    activeDays: 23
+  // Carregar dados reais
+  useEffect(() => {
+    if (workouts) {
+      const completed = getCompletedWorkouts();
+      const generalStats = getGeneralStats('month');
+      
+      // Calcular sequência atual
+      const calculateStreak = () => {
+        const completedDates = completed
+          .filter(w => w.completedAt)
+          .map(w => new Date(w.completedAt).toDateString())
+          .sort()
+          .reverse();
+        
+        if (completedDates.length === 0) return 0;
+        
+        let streak = 0;
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        
+        if (completedDates[0] === today || completedDates[0] === yesterday) {
+          streak = 1;
+          for (let i = 1; i < completedDates.length; i++) {
+            const currentDate = new Date(completedDates[i-1]);
+            const previousDate = new Date(completedDates[i]);
+            const dayDiff = (currentDate - previousDate) / (1000 * 60 * 60 * 24);
+            
+            if (dayDiff === 1) {
+              streak++;
+            } else {
+              break;
+            }
+          }
+        }
+        return streak;
+      };
+
+      // Calcular dias ativos no mês
+      const calculateActiveDays = () => {
+        const thisMonth = new Date().getMonth();
+        const thisYear = new Date().getFullYear();
+        return completed.filter(w => {
+          if (!w.completedAt) return false;
+          const workoutDate = new Date(w.completedAt);
+          return workoutDate.getMonth() === thisMonth && workoutDate.getFullYear() === thisYear;
+        }).length;
+      };
+
+      // Calcular calorias estimadas
+      const estimatedCalories = completed.reduce((total, workout) => {
+        // Estimativa: ~10 calorias por minuto de treino
+        const duration = workout.duration || (workout.exercises?.length * 5) || 30;
+        return total + (duration * 10);
+      }, 0);
+
+      setStats({
+        totalWorkouts: workouts.length,
+        completedWorkouts: completed.length,
+        totalCalories: estimatedCalories,
+        totalTime: generalStats.totalMinutes,
+        currentStreak: calculateStreak(),
+        activeDays: calculateActiveDays()
+      });
+
+      setCompletionRate(workouts.length > 0 ? Math.round((completed.length / workouts.length) * 100) : 0);
+    }
+  }, [workouts, getCompletedWorkouts, getGeneralStats]);
+
+  // Gerar dados do gráfico baseados nos treinos reais
+  const generateChartData = () => {
+    if (!workouts) return { labels: [], datasets: [] };
+    
+    const completed = getCompletedWorkouts();
+    const last7Days = [];
+    const workoutCounts = [];
+    const calorieEstimates = [];
+    
+    // Criar array dos últimos 7 dias
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      last7Days.push(date);
+    }
+    
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    
+    last7Days.forEach(day => {
+      const dayString = day.toDateString();
+      const workoutsOnDay = completed.filter(w => {
+        if (!w.completedAt) return false;
+        return new Date(w.completedAt).toDateString() === dayString;
+      });
+      
+      workoutCounts.push(workoutsOnDay.length);
+      
+      // Estimar calorias do dia (10 cal/min de treino)
+      const dayCalories = workoutsOnDay.reduce((total, workout) => {
+        const duration = workout.duration || (workout.exercises?.length * 5) || 30;
+        return total + (duration * 10);
+      }, 0);
+      
+      calorieEstimates.push(dayCalories / 100); // Dividir por 100 para escala do gráfico
+    });
+    
+    return {
+      labels: last7Days.map(day => dayNames[day.getDay()]),
+      datasets: [
+        {
+          label: 'Treinos Realizados',
+          data: workoutCounts,
+          borderColor: 'rgb(147, 51, 234)',
+          backgroundColor: 'rgba(147, 51, 234, 0.1)',
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: 'Calorias (centenas)',
+          data: calorieEstimates,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true,
+          tension: 0.4,
+        }
+      ]
+    };
   };
 
-  const completionRate = 78;
-
-  // Dados para o gráfico de progresso
-  const chartData = {
-    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-    datasets: [
-      {
-        label: 'Treinos Realizados',
-        data: [1, 0, 1, 1, 0, 1, 1],
-        borderColor: 'rgb(147, 51, 234)',
-        backgroundColor: 'rgba(147, 51, 234, 0.1)',
-        fill: true,
-        tension: 0.4,
-      },
-      {
-        label: 'Calorias (centenas)',
-        data: [3.2, 0, 4.1, 3.8, 0, 4.5, 3.9],
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        fill: true,
-        tension: 0.4,
-      }
-    ]
-  };
+  const chartData = generateChartData();
 
   const chartOptions = {
     responsive: true,
@@ -98,79 +210,26 @@ const ProgressPage = () => {
     },
   };
 
-  // Histórico de treinos mockado
-  const workoutHistory = [
-    {
-      id: 1,
-      date: '2024-01-15',
-      name: 'Treino de Peito e Tríceps',
-      duration: 65,
-      calories: 420,
-      exercises: 8,
-      rating: 5,
-      notes: 'Excelente treino, consegui aumentar a carga no supino.'
-    },
-    {
-      id: 2,
-      date: '2024-01-13',
-      name: 'Treino de Costas e Bíceps',
-      duration: 70,
-      calories: 450,
-      exercises: 9,
-      rating: 4,
-      notes: 'Bom treino, mas senti um pouco de cansaço no final.'
-    },
-    {
-      id: 3,
-      date: '2024-01-11',
-      name: 'Treino de Pernas',
-      duration: 80,
-      calories: 520,
-      exercises: 10,
-      rating: 5,
-      notes: 'Treino intenso! Consegui fazer mais repetições no agachamento.'
-    },
-    {
-      id: 4,
-      date: '2024-01-09',
-      name: 'Treino de Ombros e Abdômen',
-      duration: 55,
-      calories: 380,
-      exercises: 7,
-      rating: 4,
-      notes: 'Foco na técnica, treino bem executado.'
-    },
-    {
-      id: 5,
-      date: '2024-01-07',
-      name: 'Cardio + Core',
-      duration: 45,
-      calories: 350,
-      exercises: 6,
-      rating: 3,
-      notes: 'Treino mais leve, foco na recuperação.'
-    },
-    {
-      id: 6,
-      date: '2024-01-05',
-      name: 'Treino Full Body',
-      duration: 75,
-      calories: 480,
-      exercises: 12,
-      rating: 5,
-      notes: 'Treino completo, trabalhei todos os grupos musculares.'
-    },
-    {
-      id: 7,
-      date: '2024-01-03',
-      name: 'Treino de Peito e Tríceps',
-      duration: 60,
-      calories: 400,
-      exercises: 8,
-      rating: 4,
-      notes: 'Bom treino para começar o ano!'
-    }
-  ];
+  // Obter histórico real de treinos
+  const getWorkoutHistory = () => {
+    if (!workouts) return [];
+    
+    return getCompletedWorkouts()
+      .map(workout => ({
+        id: workout.id,
+        date: workout.completedAt ? new Date(workout.completedAt).toISOString().split('T')[0] : workout.date,
+        name: workout.name,
+        duration: workout.duration || (workout.exercises?.length * 5) || 30,
+        calories: (workout.duration || (workout.exercises?.length * 5) || 30) * 10, // Estimativa
+        exercises: workout.exercises?.length || 0,
+        rating: workout.rating || 4, // Rating padrão
+        notes: workout.notes || 'Treino concluído com sucesso!'
+      }))
+      .sort((a, b) => new Date(b.date) - new Date(a.date)) // Mais recentes primeiro
+      .slice(0, 10); // Limitar a 10 treinos
+  };
+
+  const workoutHistory = getWorkoutHistory();
 
   // Recordes pessoais
   const personalRecords = [

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   FaUser,
   FaEdit,
@@ -25,9 +25,15 @@ import {
   FaEyeSlash
 } from 'react-icons/fa';
 import { ThemeContext } from '../context/ThemeContext';
+import { useWorkout } from '../context/WorkoutContext';
 
 const ProfilePage = () => {
   const { darkMode } = useContext(ThemeContext);
+  const { 
+    workouts, 
+    getCompletedWorkouts, 
+    getGeneralStats 
+  } = useWorkout();
   
   // Estados para edição do perfil
   const [isEditing, setIsEditing] = useState(false);
@@ -45,6 +51,18 @@ const ProfilePage = () => {
     goal: 'Ganho de massa muscular',
     experience: 'Intermediário',
     avatar: null
+  });
+
+  // Estados para estatísticas reais
+  const [userStats, setUserStats] = useState({
+    totalWorkouts: 0,
+    totalTime: 0,
+    totalCalories: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    averageWorkoutTime: 0,
+    favoriteExercise: 'Nenhum ainda',
+    memberSince: new Date().toISOString().split('T')[0]
   });
 
   // Estados para configurações
@@ -80,17 +98,83 @@ const ProfilePage = () => {
     confirm: false
   });
 
-  // Dados de estatísticas do usuário
-  const userStats = {
-    totalWorkouts: 127,
-    totalTime: 8540, // em minutos
-    totalCalories: 25680,
-    currentStreak: 12,
-    longestStreak: 28,
-    averageWorkoutTime: 67,
-    favoriteExercise: 'Supino Reto',
-    memberSince: '2023-03-15'
-  };
+  // Carregar estatísticas reais
+  useEffect(() => {
+    if (workouts) {
+      const completed = getCompletedWorkouts();
+      const generalStats = getGeneralStats('all');
+      
+      // Calcular sequência atual
+      const calculateStreak = () => {
+        const completedDates = completed
+          .filter(w => w.completedAt)
+          .map(w => new Date(w.completedAt).toDateString())
+          .sort()
+          .reverse();
+        
+        if (completedDates.length === 0) return 0;
+        
+        let currentStreak = 0;
+        let longestStreak = 0;
+        let tempStreak = 0;
+        
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        
+        if (completedDates[0] === today || completedDates[0] === yesterday) {
+          currentStreak = 1;
+          tempStreak = 1;
+          for (let i = 1; i < completedDates.length; i++) {
+            const currentDate = new Date(completedDates[i-1]);
+            const previousDate = new Date(completedDates[i]);
+            const dayDiff = (currentDate - previousDate) / (1000 * 60 * 60 * 24);
+            
+            if (dayDiff === 1) {
+              currentStreak++;
+              tempStreak++;
+            } else {
+              longestStreak = Math.max(longestStreak, tempStreak);
+              tempStreak = 1;
+            }
+          }
+          longestStreak = Math.max(longestStreak, tempStreak);
+        }
+        
+        return { currentStreak, longestStreak };
+      };
+
+      // Encontrar exercício mais frequente
+      const findFavoriteExercise = () => {
+        const exerciseCount = {};
+        completed.forEach(workout => {
+          workout.exercises?.forEach(exercise => {
+            exerciseCount[exercise.name] = (exerciseCount[exercise.name] || 0) + 1;
+          });
+        });
+        
+        return Object.keys(exerciseCount).length > 0 
+          ? Object.keys(exerciseCount).reduce((a, b) => exerciseCount[a] > exerciseCount[b] ? a : b)
+          : 'Nenhum ainda';
+      };
+
+      const { currentStreak, longestStreak } = calculateStreak();
+      const estimatedCalories = completed.reduce((total, workout) => {
+        const duration = workout.duration || (workout.exercises?.length * 5) || 30;
+        return total + (duration * 10);
+      }, 0);
+
+      setUserStats({
+        totalWorkouts: completed.length,
+        totalTime: generalStats.totalMinutes,
+        totalCalories: estimatedCalories,
+        currentStreak,
+        longestStreak,
+        averageWorkoutTime: generalStats.averageMinutes,
+        favoriteExercise: findFavoriteExercise(),
+        memberSince: '2023-03-15' // Você pode salvar isso no localStorage também
+      });
+    }
+  }, [workouts, getCompletedWorkouts, getGeneralStats]);
 
   // Função para salvar alterações do perfil
   const handleSaveProfile = () => {
