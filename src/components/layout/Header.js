@@ -232,7 +232,7 @@ const Header = () => {
                         </div>
 
                         <Link
-                          to="/profile"
+                          to="/stats"
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300"
                           onClick={() => setIsDropdownOpen(false)}
                         >
@@ -401,7 +401,7 @@ const Header = () => {
 
                     <nav className="space-y-2 px-4">
                       <Link
-                        to="/profile"
+                        to="/stats"
                         onClick={closeMobileMenu}
                         className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 text-white/80 hover:text-white hover:bg-white/10"
                       >

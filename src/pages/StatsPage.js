@@ -26,15 +26,29 @@ import {
   FaCalculator,
   FaSpinner
 } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../context/ThemeContext';
 import { useWorkout } from '../context/WorkoutContext';
 import { useAuth } from '../context/AuthContext';
 import userDataService from '../services/UserDataService';
 
+/**
+ * Página consolidada de Perfil e Estatísticas
+ * 
+ * Esta página serve como fonte única de informações do usuário, incluindo:
+ * - Perfil pessoal (aba padrão)
+ * - Estatísticas de treino
+ * - Configurações
+ * - Segurança
+ * 
+ * Todas as rotas de "Perfil" redirecionam para esta página (aba 'profile')
+ * para evitar duplicação de informações.
+ */
 const ProfilePage = () => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { 
     workouts, 
     getCompletedWorkouts, 
@@ -218,6 +232,24 @@ const ProfilePage = () => {
     }
     console.log('Todas as chaves do localStorage:', allKeys);
   }, []);
+
+  // Detectar se o usuário veio de um link e ajustar a aba ativa  
+  useEffect(() => {
+    // Se chegou na página sem especificar aba, abrir na aba perfil por padrão
+    // Isso centraliza as informações do usuário em um local único
+    if (location.pathname === '/stats') {
+      // Verifica se há um parâmetro de query para especificar a aba
+      const searchParams = new URLSearchParams(location.search);
+      const tabParam = searchParams.get('tab');
+      
+      if (tabParam && ['profile', 'stats', 'settings', 'security'].includes(tabParam)) {
+        setActiveTab(tabParam);
+      } else {
+        // Padrão: sempre abre na aba de perfil (fonte única de informações)
+        setActiveTab('profile');
+      }
+    }
+  }, [location]);
 
   // Carregar estatísticas reais
   useEffect(() => {
@@ -547,10 +579,14 @@ const ProfilePage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Meu Perfil
+            {activeTab === 'profile' ? 'Meu Perfil' : 
+             activeTab === 'stats' ? 'Estatísticas' :
+             activeTab === 'settings' ? 'Configurações' : 'Segurança'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Gerencie suas informações pessoais e configurações
+            {activeTab === 'profile' ? 'Gerencie suas informações pessoais e foto de perfil' :
+             activeTab === 'stats' ? 'Acompanhe seu progresso e desempenho nos treinos' :
+             activeTab === 'settings' ? 'Configure preferências e notificações' : 'Gerencie senha e privacidade'}
           </p>
         </div>
 

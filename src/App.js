@@ -24,7 +24,6 @@ import WorkoutDetailPage from './pages/WorkoutDetailPage';
 import NewWorkoutPage from './pages/NewWorkoutPage';
 import ExercisesPage from './pages/ExercisesPage';
 import ExerciseDetailPage from './pages/ExerciseDetailPage';
-import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
 import ProgressPage from './pages/ProgressPage';
@@ -158,15 +157,7 @@ const ThemedAppContent = () => {
                 }
               />
 
-              {/* Rotas de perfil e configurações */}
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Rotas de configurações */}
               <Route
                 path="/settings"
                 element={

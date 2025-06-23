@@ -15,7 +15,7 @@ const Footer = () => {
     { name: 'Treinos', path: '/workouts' },
     { name: 'Exercícios', path: '/exercises' },
     { name: 'Estatísticas', path: '/stats' },
-    { name: 'Perfil', path: '/profile' },
+    { name: 'Perfil', path: '/stats' },
     { name: 'Configurações', path: '/settings' },
   ];
 
