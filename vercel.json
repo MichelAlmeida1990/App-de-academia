@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "app-de-academia",
   "builds": [
     {
       "src": "package.json",
@@ -26,5 +25,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "installCommand": "npm install",
-  "framework": "create-react-app"
+  "framework": "create-react-app",
+  "alias": ["app-de-academia.vercel.app"]
 } 
