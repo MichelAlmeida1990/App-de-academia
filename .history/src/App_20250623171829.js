@@ -10,7 +10,6 @@ import { SettingsProvider } from './context/SettingsContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import ConnectionStatus from './components/ui/ConnectionStatus';
-import ClearDataButton from './components/dev/ClearDataButton';
 
 // Limpeza automática de dados antigos sem isolamento
 import './utils/cleanupToolsHistory';
@@ -206,8 +205,7 @@ const ThemedAppContent = () => {
           </Routes>
 
           {/* Componentes globais que aparecem em todas as páginas */}
-          <ConnectionStatus />
-          <ClearDataButton />
+                  <ConnectionStatus />
         </div>
       </Router>
     </MuiThemeProvider>
@@ -219,11 +217,6 @@ const ThemedAppContent = () => {
  * Envolve toda a aplicação com os provedores de contexto necessários.
  */
 function App() {
-  // Executa limpeza automática apenas em produção
-  React.useEffect(() => {
-    autoCleanForProduction();
-  }, []);
-
   return (
     <AuthProvider>
       <AppThemeProvider>
