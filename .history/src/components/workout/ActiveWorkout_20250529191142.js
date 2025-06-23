@@ -1,22 +1,16 @@
 // src/components/workout/ActiveWorkout.js
 import React, { useState, useEffect, useRef } from 'react';
-import { FaArrowLeft, FaCheck, FaStopwatch, FaDumbbell, FaUndo, FaFlag, FaPause, FaPlay, FaFire, FaTimes, FaChevronRight, FaPlus, FaMinus, FaEdit, FaCheckCircle, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaStopwatch, FaDumbbell, FaUndo, FaFlag, FaPause, FaPlay, FaFire, FaTimes, FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useWorkout } from '../../context/WorkoutContext';
 import Card from '../common/Card';
 
-// Componente de Timer Circular Melhorado
-const CircularTimer = ({ timeLeft, totalTime, size = 120, isFullscreen = false }) => {
+// Componente de Timer Circular
+const CircularTimer = ({ timeLeft, totalTime, size = 120 }) => {
   const radius = (size - 8) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = totalTime > 0 ? (totalTime - timeLeft) / totalTime : 0;
   const strokeDashoffset = circumference - (progress * circumference);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -32,7 +26,7 @@ const CircularTimer = ({ timeLeft, totalTime, size = 120, isFullscreen = false }
           cy={size / 2}
           r={radius}
           stroke="currentColor"
-          strokeWidth={isFullscreen ? "8" : "4"}
+          strokeWidth="4"
           fill="none"
           className="text-gray-600 opacity-30"
         />
@@ -43,294 +37,75 @@ const CircularTimer = ({ timeLeft, totalTime, size = 120, isFullscreen = false }
           cy={size / 2}
           r={radius}
           stroke="currentColor"
-          strokeWidth={isFullscreen ? "8" : "4"}
+          strokeWidth="4"
           fill="none"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
-          className={`transition-all duration-1000 ease-linear ${
-            timeLeft <= 10 ? 'text-red-400' : timeLeft <= 30 ? 'text-yellow-400' : 'text-purple-400'
-          }`}
+          className="text-purple-400 transition-all duration-1000 ease-linear"
         />
       </svg>
       
       {/* Time display */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`font-bold text-white ${isFullscreen ? 'text-6xl' : 'text-2xl'}`}>
-          {isFullscreen ? formatTime(timeLeft) : timeLeft}
-        </span>
-        {isFullscreen && (
-          <span className="text-gray-300 text-lg mt-2">DESCANSO</span>
-        )}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-2xl font-bold text-white">{timeLeft}</span>
       </div>
     </div>
   );
 };
 
-// Componente de Input de Peso
-const WeightInput = ({ value, onChange, exerciseName }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempValue, setTempValue] = useState(value.toString());
-
-  const handleSave = () => {
-    const numValue = parseFloat(tempValue) || 0;
-    onChange(numValue);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setTempValue(value.toString());
-    setIsEditing(false);
-  };
-
-  const increment = () => {
-    const newValue = value + 2.5;
-    onChange(newValue);
-  };
-
-  const decrement = () => {
-    const newValue = Math.max(0, value - 2.5);
-    onChange(newValue);
-  };
-
-  if (isEditing) {
-    return (
-      <div className="flex items-center space-x-2 bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg">
-        <input
-          type="number"
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          className="w-16 px-2 py-1 text-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
-          step="0.5"
-          min="0"
-          autoFocus
-          onKeyPress={(e) => e.key === 'Enter' && handleSave()}
-        />
-        <span className="text-sm text-gray-600 dark:text-gray-400">kg</span>
-        <button
-          onClick={handleSave}
-          className="p-1 text-green-600 hover:text-green-700"
-        >
-          <FaCheck size={12} />
-        </button>
-        <button
-          onClick={handleCancel}
-          className="p-1 text-red-600 hover:text-red-700"
-        >
-          <FaTimes size={12} />
-        </button>
-      </div>
-    );
-  }
-
+// Componente de Set Individual
+const SetCard = ({ set, index, isActive, isCompleted, onComplete, onSkip }) => {
   return (
-    <div className="flex items-center space-x-2">
-      <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-        <button
-          onClick={decrement}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-        >
-          <FaMinus size={12} />
-        </button>
-        
-        <div 
-          className="px-3 py-2 min-w-[60px] text-center font-medium text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-          onClick={() => setIsEditing(true)}
-        >
-          {value > 0 ? `${value}kg` : '--'}
-        </div>
-        
-        <button
-          onClick={increment}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-        >
-          <FaPlus size={12} />
-        </button>
-      </div>
-      
-      <button
-        onClick={() => setIsEditing(true)}
-        className="p-2 text-gray-500 hover:text-purple-600 transition-colors"
-      >
-        <FaEdit size={12} />
-      </button>
-    </div>
-  );
-};
-
-// Componente de Set Individual Melhorado
-const EnhancedSetCard = ({ set, index, isActive, isCompleted, onComplete, onSkip, onWeightChange, exerciseName }) => {
-  const [weight, setWeight] = useState(set.weight || 0);
-  const [isCompleting, setIsCompleting] = useState(false);
-
-  const handleWeightChange = (newWeight) => {
-    setWeight(newWeight);
-    if (onWeightChange) {
-      onWeightChange(index, newWeight);
-    }
-  };
-
-  const handleComplete = () => {
-    setIsCompleting(true);
-    setTimeout(() => {
-      onComplete();
-      setIsCompleting(false);
-    }, 200);
-  };
-
-  return (
-    <div className={`relative overflow-hidden rounded-xl border-2 transition-all duration-300 ${
+    <div className={`p-3 rounded-lg border-2 transition-all duration-300 ${
       isCompleted 
-        ? 'bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border-purple-500 scale-[0.98]' 
+        ? 'bg-white dark:bg-purple-900/30 border-purple-600' 
         : isActive 
-          ? 'bg-white dark:bg-gray-800 border-purple-500 shadow-lg shadow-purple-500/20' 
+          ? 'bg-white dark:bg-purple-900/30 border-purple-600' 
           : 'bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-600'
     }`}>
-      
-      {/* Indicador de progresso animado */}
-      {isCompleting && (
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-purple-600/20 animate-pulse" />
-      )}
-      
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-              isCompleted 
-                ? 'bg-purple-600 text-white scale-110' 
-                : isActive 
-                  ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-            }`}>
-              {isCompleted ? <FaCheckCircle size={14} /> : index + 1}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+            isCompleted 
+              ? 'bg-purple-600 text-white' 
+              : isActive 
+                ? 'bg-purple-600 text-white' 
+                : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+          }`}>
+            {isCompleted ? <FaCheck size={12} /> : index + 1}
+          </div>
+          
+          <div>
+            <div className="text-gray-900 dark:text-white font-medium">
+              {set.reps} reps {set.weight && `• ${set.weight}kg`}
             </div>
-            
-            <div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                {set.reps} repetições
+            {set.rest && (
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Descanso: {set.rest}s
               </div>
-              {set.rest && (
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Descanso: {set.rest}s
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
-
-        {/* Input de peso */}
+        
         {isActive && !isCompleted && (
-          <div className="mb-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Peso usado:</div>
-            <WeightInput
-              value={weight}
-              onChange={handleWeightChange}
-              exerciseName={exerciseName}
-            />
-          </div>
-        )}
-
-        {/* Botões de ação */}
-        {isActive && !isCompleted && (
-          <div className="flex space-x-3">
+          <div className="flex space-x-2">
             <button
-              onClick={handleComplete}
-              disabled={isCompleting}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 ${
-                isCompleting 
-                  ? 'bg-green-500 scale-105' 
-                  : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 hover:scale-105 shadow-lg hover:shadow-purple-500/25'
-              }`}
+              onClick={onComplete}
+              className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              {isCompleting ? (
-                <div className="flex items-center justify-center">
-                  <FaCheckCircle className="mr-2" />
-                  Concluída!
-                </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <FaCheck className="mr-2" />
-                  Marcar como Concluída
-                </div>
-              )}
+              <FaCheck size={12} />
             </button>
-            
             {onSkip && (
               <button
                 onClick={onSkip}
-                className="px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl font-medium transition-all duration-300 hover:scale-105"
+                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
               >
                 Pular
               </button>
             )}
           </div>
         )}
-
-        {/* Peso exibido para séries completadas */}
-        {isCompleted && weight > 0 && (
-          <div className="mt-2 text-sm text-purple-600 dark:text-purple-400 font-medium">
-            ✓ Realizada com {weight}kg
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Componente de Timer de Descanso em Tela Cheia
-const FullscreenRestTimer = ({ timeLeft, totalTime, onSkip, onAddTime, onSubtractTime, isSoundEnabled, onToggleSound }) => {
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 z-50 flex items-center justify-center">
-      <div className="text-center">
-        <CircularTimer 
-          timeLeft={timeLeft} 
-          totalTime={totalTime} 
-          size={200} 
-          isFullscreen={true}
-        />
-        
-        {/* Controles de tempo */}
-        <div className="flex items-center justify-center space-x-4 mt-8 mb-6">
-          <button
-            onClick={onSubtractTime}
-            className="p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-colors"
-          >
-            <FaMinus />
-          </button>
-          
-          <span className="text-white text-lg font-medium min-w-[100px]">
-            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-          </span>
-          
-          <button
-            onClick={onAddTime}
-            className="p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-colors"
-          >
-            <FaPlus />
-          </button>
-        </div>
-
-        {/* Controles */}
-        <div className="flex items-center justify-center space-x-4">
-          <button
-            onClick={onToggleSound}
-            className="p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-colors"
-          >
-            {isSoundEnabled ? <FaVolumeUp /> : <FaVolumeMute />}
-          </button>
-          
-          <button
-            onClick={onSkip}
-            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-all hover:scale-105"
-          >
-            Pular Descanso
-          </button>
-        </div>
-
-        {/* Motivação */}
-        <div className="mt-8 text-gray-300 text-lg">
-          {timeLeft <= 10 ? '🔥 Vamos lá!' : timeLeft <= 30 ? '⚡ Quase pronto!' : '💪 Descanse bem!'}
-        </div>
       </div>
     </div>
   );
@@ -350,7 +125,6 @@ const ActiveWorkout = ({ workoutId }) => {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [calories, setCalories] = useState(0);
   const [showExerciseInstructions, setShowExerciseInstructions] = useState(false);
-  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   
   const timerRef = useRef(null);
   const restTimerRef = useRef(null);
@@ -399,7 +173,7 @@ const ActiveWorkout = ({ workoutId }) => {
     return () => clearInterval(timerRef.current);
   }, [isTimerPaused]);
 
-  // Timer de descanso com notificações
+  // Timer de descanso
   useEffect(() => {
     if (isResting && restTimeLeft > 0) {
       restTimerRef.current = setInterval(() => {
@@ -407,15 +181,7 @@ const ActiveWorkout = ({ workoutId }) => {
           if (prev <= 1) {
             setIsResting(false);
             clearInterval(restTimerRef.current);
-            // Notificação sonora (se habilitada)
-            if (isSoundEnabled) {
-              playNotificationSound();
-            }
             return 0;
-          }
-          // Notificações de contagem regressiva
-          if (isSoundEnabled && prev <= 3 && prev > 0) {
-            playTickSound();
           }
           return prev - 1;
         });
@@ -425,22 +191,7 @@ const ActiveWorkout = ({ workoutId }) => {
     }
 
     return () => clearInterval(restTimerRef.current);
-  }, [isResting, restTimeLeft, isSoundEnabled]);
-
-  // Funções de som
-  const playNotificationSound = () => {
-    // Implementar som de notificação
-    if ('vibrate' in navigator) {
-      navigator.vibrate([200, 100, 200]);
-    }
-  };
-
-  const playTickSound = () => {
-    // Implementar som de tick
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
-  };
+  }, [isResting, restTimeLeft]);
 
   if (!workout) {
     return (
@@ -499,16 +250,6 @@ const ActiveWorkout = ({ workoutId }) => {
     });
   };
 
-  // Atualizar peso de uma série
-  const updateSetWeight = (exerciseIndex, setIndex, weight) => {
-    setWorkout(prev => {
-      const newWorkout = { ...prev };
-      newWorkout.exercises[exerciseIndex].sets[setIndex].weight = weight;
-      updateWorkout(newWorkout);
-      return newWorkout;
-    });
-  };
-
   // Iniciar descanso
   const startRest = (seconds) => {
     setIsResting(true);
@@ -523,18 +264,6 @@ const ActiveWorkout = ({ workoutId }) => {
     setRestTotalTime(0);
   };
 
-  // Adicionar tempo ao descanso
-  const addRestTime = () => {
-    setRestTimeLeft(prev => prev + 30);
-    setRestTotalTime(prev => prev + 30);
-  };
-
-  // Subtrair tempo do descanso
-  const subtractRestTime = () => {
-    setRestTimeLeft(prev => Math.max(10, prev - 30));
-    setRestTotalTime(prev => Math.max(10, prev - 30));
-  };
-
   // Resetar progresso
   const resetProgress = () => {
     if (window.confirm('Tem certeza que deseja resetar todo o progresso?')) {
@@ -545,7 +274,7 @@ const ActiveWorkout = ({ workoutId }) => {
             ...ex,
             completed: false,
             currentSet: 0,
-            sets: ex.sets.map(set => ({ ...set, completed: false, weight: 0 }))
+            sets: ex.sets.map(set => ({ ...set, completed: false }))
           }))
         };
         
@@ -648,21 +377,45 @@ const ActiveWorkout = ({ workoutId }) => {
             <span className="text-sm font-medium text-gray-900 dark:text-white">Progresso do treino</span>
             <span className="text-sm font-medium text-gray-900 dark:text-white">{progressPercentage}%</span>
           </div>
-          <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+          <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
             <div 
-              className="bg-gradient-to-r from-purple-600 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out"
+              className="bg-purple-600 h-2.5 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
         </Card>
 
+        {/* Timer de descanso */}
+        {isResting && (
+          <Card className="p-4 mb-6 border-2 border-purple-600 bg-white dark:bg-gray-800">
+            <div className="text-center">
+              <div className="text-sm text-purple-600 dark:text-purple-400 mb-1">DESCANSO</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {restTimeLeft}s
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 mb-3">
+                <div 
+                  className="bg-purple-600 h-1.5 rounded-full transition-all duration-200"
+                  style={{ width: `${(restTimeLeft / restTotalTime) * 100}%` }}
+                />
+              </div>
+              <button
+                onClick={skipRest}
+                className="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
+              >
+                Pular descanso
+              </button>
+            </div>
+          </Card>
+        )}
+
         {/* Exercício atual */}
         {currentExercise && !isResting && (
-          <Card className="p-6 mb-6 border-2 border-purple-500 bg-white dark:bg-gray-800 shadow-lg shadow-purple-500/20">
-            <div className="flex items-center justify-between mb-4">
+          <Card className="p-4 mb-6 border-2 border-purple-600 bg-white dark:bg-gray-800">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="text-sm text-purple-600 dark:text-purple-400 mb-1 font-medium">EXERCÍCIO ATUAL</div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{currentExercise.name}</h3>
+                <div className="text-sm text-purple-600 dark:text-purple-400 mb-1">EXERCÍCIO ATUAL</div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{currentExercise.name}</h3>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   Exercício {currentExerciseIndex + 1} de {workout.exercises.length}
                 </div>
@@ -670,7 +423,7 @@ const ActiveWorkout = ({ workoutId }) => {
               
               <button
                 onClick={() => setShowExerciseInstructions(true)}
-                className="p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-all hover:scale-105"
+                className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
               >
                 <FaChevronRight />
               </button>
@@ -678,33 +431,29 @@ const ActiveWorkout = ({ workoutId }) => {
 
             {/* Série atual */}
             {currentSet && (
-              <div className="mb-6">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-3 font-medium">Série Atual:</div>
-                <EnhancedSetCard
+              <div className="mb-4">
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Série Atual:</div>
+                <SetCard
                   set={currentSet}
                   index={currentExercise.currentSet}
                   isActive={true}
                   isCompleted={currentSet.completed}
                   onComplete={() => completeSet(currentExerciseIndex, currentExercise.currentSet)}
-                  onWeightChange={(setIndex, weight) => updateSetWeight(currentExerciseIndex, setIndex, weight)}
-                  exerciseName={currentExercise.name}
                 />
               </div>
             )}
 
             {/* Todas as séries */}
-            <div className="space-y-3">
-              <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Todas as séries:</div>
+            <div className="space-y-2">
+              <div className="text-sm text-gray-500 dark:text-gray-400">Todas as séries:</div>
               {currentExercise.sets.map((set, setIndex) => (
-                <EnhancedSetCard
+                <SetCard
                   key={setIndex}
                   set={set}
                   index={setIndex}
                   isActive={setIndex === currentExercise.currentSet}
                   isCompleted={set.completed}
                   onComplete={() => completeSet(currentExerciseIndex, setIndex)}
-                  onWeightChange={(index, weight) => updateSetWeight(currentExerciseIndex, index, weight)}
-                  exerciseName={currentExercise.name}
                 />
               ))}
             </div>
@@ -786,19 +535,6 @@ const ActiveWorkout = ({ workoutId }) => {
           </button>
         </div>
       </div>
-
-      {/* Timer de descanso em tela cheia */}
-      {isResting && (
-        <FullscreenRestTimer
-          timeLeft={restTimeLeft}
-          totalTime={restTotalTime}
-          onSkip={skipRest}
-          onAddTime={addRestTime}
-          onSubtractTime={subtractRestTime}
-          isSoundEnabled={isSoundEnabled}
-          onToggleSound={() => setIsSoundEnabled(!isSoundEnabled)}
-        />
-      )}
 
       {/* Modal de instruções */}
       {showExerciseInstructions && currentExercise && (
