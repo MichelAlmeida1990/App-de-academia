@@ -163,11 +163,6 @@ const EnhancedSetCard = ({ set, index, isActive, isCompleted, onComplete, onSkip
   const [weight, setWeight] = useState(set.weight || 0);
   const [isCompleting, setIsCompleting] = useState(false);
 
-  // Atualizar peso quando o set muda
-  useEffect(() => {
-    setWeight(set.weight || 0);
-  }, [set.weight]);
-
   const handleWeightChange = (newWeight) => {
     setWeight(newWeight);
     if (onWeightChange) {
@@ -457,33 +452,7 @@ const ActiveWorkout = ({ workoutId }) => {
 
   // Encontrar exercício atual
   const currentExercise = workout.exercises[currentExerciseIndex];
-  
-  // CORREÇÃO PRINCIPAL: Melhor lógica para encontrar o currentSet
-  const getCurrentSet = () => {
-    if (!currentExercise || !currentExercise.sets) return null;
-    
-    // Encontrar a primeira série não completada
-    const nextIncompleteSet = currentExercise.sets.find(set => !set.completed);
-    if (nextIncompleteSet) {
-      const nextIncompleteIndex = currentExercise.sets.indexOf(nextIncompleteSet);
-      // Atualizar o currentSet se necessário
-      if (currentExercise.currentSet !== nextIncompleteIndex) {
-        // Atualizar silenciosamente o índice da série atual
-        setWorkout(prev => {
-          const newWorkout = { ...prev };
-          newWorkout.exercises[currentExerciseIndex].currentSet = nextIncompleteIndex;
-          return newWorkout;
-        });
-      }
-      return nextIncompleteSet;
-    }
-    
-    // Se todas as séries estão completadas, retornar null
-    return null;
-  };
-
-  const currentSet = getCurrentSet();
-  const currentSetIndex = currentSet ? currentExercise.sets.indexOf(currentSet) : -1;
+  const currentSet = currentExercise?.sets[currentExercise.currentSet];
 
   // Calcular progresso
   const totalSets = workout.exercises.reduce((total, ex) => total + ex.sets.length, 0);
@@ -492,48 +461,33 @@ const ActiveWorkout = ({ workoutId }) => {
   );
   const progressPercentage = Math.round((completedSets / totalSets) * 100);
 
-  // CORREÇÃO: Função completeSet melhorada
+  // Completar série
   const completeSet = (exerciseIndex, setIndex) => {
     setWorkout(prev => {
       const newWorkout = { ...prev };
-      
-      // Verificar se o índice é válido
-      if (!newWorkout.exercises[exerciseIndex] || !newWorkout.exercises[exerciseIndex].sets[setIndex]) {
-        console.error('Índice de série inválido:', { exerciseIndex, setIndex });
-        return prev;
-      }
-      
-      // Marcar a série como completada
       newWorkout.exercises[exerciseIndex].sets[setIndex].completed = true;
       
+      // Verificar se o exercício foi completado
       const exercise = newWorkout.exercises[exerciseIndex];
       const allSetsCompleted = exercise.sets.every(set => set.completed);
       
       if (allSetsCompleted) {
-        // Exercício completado
         exercise.completed = true;
-        
-        // Procurar próximo exercício não completado
-        const nextExerciseIndex = newWorkout.exercises.findIndex((ex, idx) => 
-          idx > exerciseIndex && !ex.completed
-        );
-        
-        if (nextExerciseIndex !== -1) {
+        // Avançar para próximo exercício
+        const nextExerciseIndex = exerciseIndex + 1;
+        if (nextExerciseIndex < newWorkout.exercises.length) {
           setCurrentExerciseIndex(nextExerciseIndex);
         } else {
           // Todos os exercícios completados
           setShowCompletionModal(true);
         }
       } else {
-        // Encontrar próxima série não completada
-        const nextIncompleteIndex = exercise.sets.findIndex(set => !set.completed);
-        if (nextIncompleteIndex !== -1) {
-          exercise.currentSet = nextIncompleteIndex;
-        }
+        // Avançar para próxima série
+        exercise.currentSet = setIndex + 1;
         
         // Iniciar descanso se houver
         const completedSet = exercise.sets[setIndex];
-        if (completedSet.rest && completedSet.rest > 0) {
+        if (completedSet.rest) {
           startRest(completedSet.rest);
         }
       }
@@ -549,10 +503,8 @@ const ActiveWorkout = ({ workoutId }) => {
   const updateSetWeight = (exerciseIndex, setIndex, weight) => {
     setWorkout(prev => {
       const newWorkout = { ...prev };
-      if (newWorkout.exercises[exerciseIndex] && newWorkout.exercises[exerciseIndex].sets[setIndex]) {
-        newWorkout.exercises[exerciseIndex].sets[setIndex].weight = weight;
-        updateWorkout(newWorkout);
-      }
+      newWorkout.exercises[exerciseIndex].sets[setIndex].weight = weight;
+      updateWorkout(newWorkout);
       return newWorkout;
     });
   };
@@ -704,7 +656,7 @@ const ActiveWorkout = ({ workoutId }) => {
           </div>
         </Card>
 
-        {/* CORREÇÃO: Exercício atual - condição melhorada */}
+        {/* Exercício atual */}
         {currentExercise && !isResting && (
           <Card className="p-6 mb-6 border-2 border-purple-500 bg-white dark:bg-gray-800 shadow-lg shadow-purple-500/20">
             <div className="flex items-center justify-between mb-4">
@@ -724,36 +676,19 @@ const ActiveWorkout = ({ workoutId }) => {
               </button>
             </div>
 
-            {/* CORREÇÃO: Série atual - sempre mostrar se houver série não completada */}
-            {currentSet && currentSetIndex !== -1 && (
+            {/* Série atual */}
+            {currentSet && (
               <div className="mb-6">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-3 font-medium">
-                  Série Atual ({currentSetIndex + 1} de {currentExercise.sets.length}):
-                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-3 font-medium">Série Atual:</div>
                 <EnhancedSetCard
                   set={currentSet}
-                  index={currentSetIndex}
+                  index={currentExercise.currentSet}
                   isActive={true}
                   isCompleted={currentSet.completed}
-                  onComplete={() => completeSet(currentExerciseIndex, currentSetIndex)}
-                  onWeightChange={(setIndex, weight) => updateSetWeight(currentExerciseIndex, currentSetIndex, weight)}
+                  onComplete={() => completeSet(currentExerciseIndex, currentExercise.currentSet)}
+                  onWeightChange={(setIndex, weight) => updateSetWeight(currentExerciseIndex, setIndex, weight)}
                   exerciseName={currentExercise.name}
                 />
-              </div>
-            )}
-
-            {/* Mensagem quando todas as séries estão completadas */}
-            {!currentSet && currentExercise.completed && (
-              <div className="mb-6">
-                <div className="text-center py-4 px-6 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                  <FaCheckCircle className="text-green-600 text-2xl mx-auto mb-2" />
-                  <div className="text-green-800 dark:text-green-300 font-medium">
-                    Exercício Completado!
-                  </div>
-                  <div className="text-green-600 dark:text-green-400 text-sm">
-                    Todas as séries foram finalizadas
-                  </div>
-                </div>
               </div>
             )}
 
@@ -765,7 +700,7 @@ const ActiveWorkout = ({ workoutId }) => {
                   key={setIndex}
                   set={set}
                   index={setIndex}
-                  isActive={setIndex === currentSetIndex}
+                  isActive={setIndex === currentExercise.currentSet}
                   isCompleted={set.completed}
                   onComplete={() => completeSet(currentExerciseIndex, setIndex)}
                   onWeightChange={(index, weight) => updateSetWeight(currentExerciseIndex, index, weight)}
