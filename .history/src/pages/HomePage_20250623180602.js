@@ -427,7 +427,7 @@ const HomePage = () => {
           
           .mobile-login-form {
             max-width: 100%;
-            padding: 0 0.25rem;
+            padding: 0 0.5rem;
             margin: 0 auto 1.5rem auto;
           }
 
@@ -558,7 +558,7 @@ const HomePage = () => {
           <div className="homepage-grid max-w-7xl mx-auto w-full">
             
             {/* Left Side - Branding & Features */}
-            <div className="space-y-6 md:space-y-8 animate-slideInLeft mobile-content">
+            <div className="space-y-6 md:space-y-8 animate-slideInLeft mobile-content px-2 md:px-0">
               {/* Main Branding */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow mobile-text-small">
