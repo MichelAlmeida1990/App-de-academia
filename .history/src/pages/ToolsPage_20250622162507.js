@@ -70,23 +70,16 @@ const ToolsPage = () => {
 
   const handleExportData = () => {
     try {
-      // Importar a função de exportação PDF dinamicamente
-      import('../utils/pdfExport').then(({ exportToolsDataToPDF }) => {
-        exportToolsDataToPDF(userData, currentUser);
-      }).catch(error => {
-        console.error('Erro ao carregar módulo PDF:', error);
-        // Fallback para JSON se houver erro
-        const exportData = UserDataService.exportUserData();
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
-        const exportFileDefaultName = `fitness_data_${currentUser?.email || 'user'}_${new Date().toISOString().split('T')[0]}.json`;
-        
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
-      });
+      const exportData = UserDataService.exportUserData();
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `fitness_data_${currentUser?.email || 'user'}_${new Date().toISOString().split('T')[0]}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
     } catch (error) {
       console.error('Erro ao exportar dados:', error);
     }
@@ -172,7 +165,7 @@ const ToolsPage = () => {
               className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <FaDownload />
-              <span>Exportar Relatório PDF</span>
+              <span>Exportar Dados</span>
             </button>
           )}
         </div>

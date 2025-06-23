@@ -1214,7 +1214,7 @@ const ProfilePage = () => {
                   className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   <FaDownload />
-                  <span>Exportar Relatório PDF</span>
+                  <span>Exportar Dados</span>
                 </button>
                 
                 <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">

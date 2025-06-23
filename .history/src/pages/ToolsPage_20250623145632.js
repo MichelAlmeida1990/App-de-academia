@@ -172,7 +172,7 @@ const ToolsPage = () => {
               className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <FaDownload />
-              <span>Exportar Relatório PDF</span>
+              <span>Exportar Dados</span>
             </button>
           )}
         </div>

@@ -547,34 +547,23 @@ const ProfilePage = () => {
 
   // Função para exportar dados
   const handleExportData = () => {
-    try {
-      // Importar a função de exportação PDF dinamicamente
-      import('../utils/pdfExport').then(({ exportProfileDataToPDF }) => {
-        exportProfileDataToPDF(userData, userStats, settings);
-      }).catch(error => {
-        console.error('Erro ao carregar módulo PDF:', error);
-        // Fallback para JSON se houver erro
-        const dataToExport = {
-          profile: userData,
-          stats: userStats,
-          settings: settings,
-          exportDate: new Date().toISOString()
-        };
-        
-        const dataStr = JSON.stringify(dataToExport, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `workout-data-${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        
-        URL.revokeObjectURL(url);
-      });
-    } catch (error) {
-      console.error('Erro ao exportar dados:', error);
-    }
+    const dataToExport = {
+      profile: userData,
+      stats: userStats,
+      settings: settings,
+      exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(dataToExport, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `workout-data-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
   };
 
   const tabs = [
@@ -1214,7 +1203,7 @@ const ProfilePage = () => {
                   className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   <FaDownload />
-                  <span>Exportar Relatório PDF</span>
+                  <span>Exportar Dados</span>
                 </button>
                 
                 <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
