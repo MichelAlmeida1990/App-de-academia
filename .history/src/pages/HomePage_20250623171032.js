@@ -421,7 +421,7 @@ const HomePage = () => {
         /* Small mobile breakpoint */
         @media (max-width: 480px) {
           .homepage-grid {
-            gap: 1.5rem;
+            gap: 1rem;
             padding: 0 1rem;
           }
           
@@ -492,12 +492,6 @@ const HomePage = () => {
         }
 
         /* Ultra small mobile devices */
-        @media (max-width: 420px) {
-          .mobile-hide-stats {
-            display: none !important;
-          }
-        }
-
         @media (max-width: 375px) {
           .homepage-grid {
             padding: 0 0.75rem;
@@ -553,7 +547,7 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 w-full px-6 py-8 md:px-8 md:py-8 min-h-screen overflow-hidden">
+        <div className="relative z-10 w-full px-6 py-6 md:px-8 md:py-8 min-h-screen overflow-hidden">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto w-full">
             
@@ -574,7 +568,7 @@ const HomePage = () => {
               </div>
 
               {/* Feature Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-4">
                 <FeatureCard
                   icon={<FaChartLine />}
                   title="Analytics Avançado"
@@ -605,7 +599,7 @@ const HomePage = () => {
               </div>
 
               {/* Statistics */}
-              <div className="grid grid-cols-3 gap-3 md:gap-4 mobile-hide-stats">
+              <div className="grid grid-cols-3 gap-3 md:gap-4">
                 <StatCard
                   number="10k+"
                   label="Atletas"
@@ -659,8 +653,8 @@ const HomePage = () => {
             <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
               <div className="w-full max-w-md">
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8 shadow-2xl mobile-form-padding">
-                                      {/* Form Header */}
-                    <div className="text-center mb-8 md:mb-8">
+                  {/* Form Header */}
+                  <div className="text-center mb-6 md:mb-8">
                     <div className="flex justify-center mb-3 md:mb-4">
                       <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                         <FaShieldAlt className="text-white text-xl md:text-2xl" />
@@ -772,7 +766,7 @@ const HomePage = () => {
                       Experimentar Demo
                     </button>
 
-                    <div className="text-center space-y-4">
+                    <div className="text-center space-y-3">
                       <button
                         type="button"
                         onClick={() => setIsRegistering(!isRegistering)}

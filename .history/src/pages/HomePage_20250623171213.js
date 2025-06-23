@@ -553,7 +553,7 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 w-full px-6 py-8 md:px-8 md:py-8 min-h-screen overflow-hidden">
+        <div className="relative z-10 w-full px-6 py-6 md:px-8 md:py-8 min-h-screen overflow-hidden">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto w-full">
             
@@ -574,7 +574,7 @@ const HomePage = () => {
               </div>
 
               {/* Feature Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-4">
                 <FeatureCard
                   icon={<FaChartLine />}
                   title="Analytics Avançado"
@@ -772,7 +772,7 @@ const HomePage = () => {
                       Experimentar Demo
                     </button>
 
-                    <div className="text-center space-y-4">
+                    <div className="text-center space-y-3">
                       <button
                         type="button"
                         onClick={() => setIsRegistering(!isRegistering)}

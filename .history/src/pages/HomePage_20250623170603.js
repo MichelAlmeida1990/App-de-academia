@@ -370,7 +370,7 @@ const HomePage = () => {
         /* Mobile breakpoint */
         @media (max-width: 768px) {
           .homepage-grid {
-            gap: 2rem;
+            gap: 1.5rem;
             padding: 0 1.5rem;
             display: flex;
             flex-direction: column;
@@ -389,7 +389,7 @@ const HomePage = () => {
             margin: 0 auto 2rem auto;
             order: 1;
             flex-shrink: 0;
-            padding: 0 0.5rem;
+            padding: 0;
           }
           
           .mobile-content {
@@ -410,24 +410,18 @@ const HomePage = () => {
           body {
             overflow-x: hidden !important;
           }
-
-          /* Global minimum margin on mobile */
-          * {
-            margin-left: max(0px, env(safe-area-inset-left));
-            margin-right: max(0px, env(safe-area-inset-right));
-          }
         }
 
         /* Small mobile breakpoint */
         @media (max-width: 480px) {
           .homepage-grid {
-            gap: 1.5rem;
+            gap: 1rem;
             padding: 0 1rem;
           }
           
           .mobile-login-form {
             max-width: 100%;
-            padding: 0 0.5rem;
+            padding: 0;
             margin: 0 auto 1.5rem auto;
           }
 
@@ -455,11 +449,11 @@ const HomePage = () => {
           }
           
           .mobile-form-padding {
-            padding: 2rem !important;
+            padding: 1.5rem !important;
           }
           
           .mobile-space-y {
-            gap: 1.5rem !important;
+            gap: 1rem !important;
           }
           
           .mobile-stats-text {
@@ -492,21 +486,14 @@ const HomePage = () => {
         }
 
         /* Ultra small mobile devices */
-        @media (max-width: 420px) {
-          .mobile-hide-stats {
-            display: none !important;
-          }
-        }
-
         @media (max-width: 375px) {
           .homepage-grid {
-            padding: 0 0.75rem;
+            padding: 0 0.25rem;
             gap: 0.75rem;
           }
 
           .mobile-login-form {
             margin: 0 auto 1rem auto;
-            padding: 0 0.25rem;
           }
 
           .mobile-form-padding {
@@ -553,12 +540,12 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 w-full px-6 py-8 md:px-8 md:py-8 min-h-screen overflow-hidden">
+        <div className="relative z-10 w-full px-4 py-6 md:px-6 md:py-8 min-h-screen overflow-hidden">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto w-full">
             
             {/* Left Side - Branding & Features */}
-            <div className="space-y-6 md:space-y-8 animate-slideInLeft mobile-content">
+            <div className="space-y-4 md:space-y-8 animate-slideInLeft mobile-content">
               {/* Main Branding */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow mobile-text-small">
@@ -574,7 +561,7 @@ const HomePage = () => {
               </div>
 
               {/* Feature Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <FeatureCard
                   icon={<FaChartLine />}
                   title="Analytics Avançado"
@@ -605,7 +592,7 @@ const HomePage = () => {
               </div>
 
               {/* Statistics */}
-              <div className="grid grid-cols-3 gap-3 md:gap-4 mobile-hide-stats">
+              <div className="grid grid-cols-3 gap-2 md:gap-4">
                 <StatCard
                   number="10k+"
                   label="Atletas"
@@ -627,7 +614,7 @@ const HomePage = () => {
               </div>
 
               {/* Key Benefits */}
-              <div className="hidden sm:block bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-6">
                 <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 flex items-center gap-3">
                   <FaStar className="text-yellow-400" />
                   <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
@@ -658,9 +645,9 @@ const HomePage = () => {
             {/* Right Side - Login Form */}
             <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
               <div className="w-full max-w-md">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8 shadow-2xl mobile-form-padding">
-                                      {/* Form Header */}
-                    <div className="text-center mb-8 md:mb-8">
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-8 shadow-2xl mobile-form-padding">
+                  {/* Form Header */}
+                  <div className="text-center mb-6 md:mb-8">
                     <div className="flex justify-center mb-3 md:mb-4">
                       <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                         <FaShieldAlt className="text-white text-xl md:text-2xl" />
@@ -677,7 +664,7 @@ const HomePage = () => {
                   </div>
 
                   {/* Login Form */}
-                  <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                     {isRegistering && (
                       <div>
                         <label className="block text-white font-medium mb-2 flex items-center gap-2">
@@ -772,7 +759,7 @@ const HomePage = () => {
                       Experimentar Demo
                     </button>
 
-                    <div className="text-center space-y-4">
+                    <div className="text-center space-y-3">
                       <button
                         type="button"
                         onClick={() => setIsRegistering(!isRegistering)}
