@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/App-de-academia/static/css/main.10f96fe5.css",
-    "main.js": "/App-de-academia/static/js/main.bd8cffb7.js",
+    "main.css": "/App-de-academia/static/css/main.a7948abd.css",
+    "main.js": "/App-de-academia/static/js/main.30fd2638.js",
     "static/js/750.8d70e6f8.chunk.js": "/App-de-academia/static/js/750.8d70e6f8.chunk.js",
     "static/js/239.1e2d2769.chunk.js": "/App-de-academia/static/js/239.1e2d2769.chunk.js",
     "static/js/977.9e90355d.chunk.js": "/App-de-academia/static/js/977.9e90355d.chunk.js",
     "static/js/732.0219ce77.chunk.js": "/App-de-academia/static/js/732.0219ce77.chunk.js",
     "static/js/762.c80fa395.chunk.js": "/App-de-academia/static/js/762.c80fa395.chunk.js",
     "index.html": "/App-de-academia/index.html",
-    "main.10f96fe5.css.map": "/App-de-academia/static/css/main.10f96fe5.css.map",
-    "main.bd8cffb7.js.map": "/App-de-academia/static/js/main.bd8cffb7.js.map",
+    "main.a7948abd.css.map": "/App-de-academia/static/css/main.a7948abd.css.map",
+    "main.30fd2638.js.map": "/App-de-academia/static/js/main.30fd2638.js.map",
     "750.8d70e6f8.chunk.js.map": "/App-de-academia/static/js/750.8d70e6f8.chunk.js.map",
     "239.1e2d2769.chunk.js.map": "/App-de-academia/static/js/239.1e2d2769.chunk.js.map",
     "977.9e90355d.chunk.js.map": "/App-de-academia/static/js/977.9e90355d.chunk.js.map",
@@ -17,7 +17,7 @@
     "762.c80fa395.chunk.js.map": "/App-de-academia/static/js/762.c80fa395.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.10f96fe5.css",
-    "static/js/main.bd8cffb7.js"
+    "static/css/main.a7948abd.css",
+    "static/js/main.30fd2638.js"
   ]
 }
