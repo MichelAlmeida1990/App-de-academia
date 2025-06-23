@@ -534,7 +534,7 @@ const HomePage = () => {
 
           .mobile-login-form {
             order: 2;
-            max-width: 500px;
+            max-width: 400px;
           }
 
           .mobile-content {

@@ -427,13 +427,13 @@ const HomePage = () => {
           
           .mobile-login-form {
             max-width: 100%;
-            padding: 0 0.5rem;
+            padding: 0 1rem;
             margin: 0 auto 1.5rem auto;
           }
 
           /* Smaller form padding on very small screens */
           .mobile-form-padding {
-            padding: 1.5rem 1rem !important;
+            padding: 1.5rem !important;
           }
         }
 
@@ -506,11 +506,11 @@ const HomePage = () => {
 
           .mobile-login-form {
             margin: 0 auto 1rem auto;
-            padding: 0 0.25rem;
+            padding: 0 0.75rem;
           }
 
           .mobile-form-padding {
-            padding: 1rem 0.75rem !important;
+            padding: 1rem !important;
           }
 
           .mobile-text-small {
@@ -534,7 +534,7 @@ const HomePage = () => {
 
           .mobile-login-form {
             order: 2;
-            max-width: 500px;
+            max-width: 400px;
           }
 
           .mobile-content {
@@ -656,7 +656,7 @@ const HomePage = () => {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
+            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form px-2 md:px-0">
               <div className="w-full max-w-lg md:max-w-md">
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8 shadow-2xl mobile-form-padding">
                                       {/* Form Header */}
