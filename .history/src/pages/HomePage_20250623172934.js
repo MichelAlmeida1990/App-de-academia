@@ -427,13 +427,13 @@ const HomePage = () => {
           
           .mobile-login-form {
             max-width: 100%;
-            padding: 0 1rem;
+            padding: 0 0.5rem;
             margin: 0 auto 1.5rem auto;
           }
 
           /* Smaller form padding on very small screens */
           .mobile-form-padding {
-            padding: 1.5rem !important;
+            padding: 1rem !important;
           }
         }
 
@@ -455,7 +455,7 @@ const HomePage = () => {
           }
           
           .mobile-form-padding {
-            padding: 2.5rem !important;
+            padding: 2rem !important;
           }
           
           .mobile-space-y {
@@ -500,17 +500,17 @@ const HomePage = () => {
 
         @media (max-width: 375px) {
           .homepage-grid {
-            padding: 0 1rem;
+            padding: 0 0.75rem;
             gap: 0.75rem;
           }
 
           .mobile-login-form {
             margin: 0 auto 1rem auto;
-            padding: 0 0.75rem;
+            padding: 0 0.25rem;
           }
 
           .mobile-form-padding {
-            padding: 1rem !important;
+            padding: 0.75rem !important;
           }
 
           .mobile-text-small {
@@ -553,12 +553,12 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 w-full px-8 py-8 md:px-10 md:py-8 min-h-screen overflow-hidden">
+        <div className="relative z-10 w-full px-6 py-8 md:px-8 md:py-8 min-h-screen overflow-hidden">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto w-full">
             
             {/* Left Side - Branding & Features */}
-            <div className="space-y-6 md:space-y-8 animate-slideInLeft mobile-content px-2 md:px-0">
+            <div className="space-y-6 md:space-y-8 animate-slideInLeft mobile-content">
               {/* Main Branding */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow mobile-text-small">
@@ -656,7 +656,7 @@ const HomePage = () => {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form px-2 md:px-0">
+            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
               <div className="w-full max-w-md">
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8 shadow-2xl mobile-form-padding">
                                       {/* Form Header */}

@@ -656,7 +656,7 @@ const HomePage = () => {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form px-2 md:px-0">
+            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
               <div className="w-full max-w-md">
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8 shadow-2xl mobile-form-padding">
                                       {/* Form Header */}
