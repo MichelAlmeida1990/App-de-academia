@@ -638,50 +638,30 @@ const ProfilePage = () => {
                     </div>
                     
                     {isEditing && (
-                      <>
-                        <label className={`absolute bottom-0 right-0 bg-purple-500 text-white p-2 rounded-full transition-colors ${
-                          isUploadingAvatar 
-                            ? 'cursor-not-allowed opacity-50' 
-                            : 'cursor-pointer hover:bg-purple-600'
-                        }`}>
-                          {isUploadingAvatar ? (
-                            <FaSpinner className="animate-spin" />
-                          ) : (
-                            <FaCamera />
-                          )}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/webp"
-                            onChange={handleAvatarUpload}
-                            disabled={isUploadingAvatar}
-                            className="hidden"
-                          />
-                        </label>
-                        
-                        {/* Botão para remover foto */}
-                        {userData.avatar && !isUploadingAvatar && (
-                          <button
-                            onClick={handleRemoveAvatar}
-                            className="absolute bottom-0 left-0 bg-red-500 text-white p-2 rounded-full cursor-pointer hover:bg-red-600 transition-colors"
-                            title="Remover foto"
-                          >
-                            <FaTrash className="text-sm" />
-                          </button>
+                      <label className={`absolute bottom-0 right-0 bg-purple-500 text-white p-2 rounded-full transition-colors ${
+                        isUploadingAvatar 
+                          ? 'cursor-not-allowed opacity-50' 
+                          : 'cursor-pointer hover:bg-purple-600'
+                      }`}>
+                        {isUploadingAvatar ? (
+                          <FaSpinner className="animate-spin" />
+                        ) : (
+                          <FaCamera />
                         )}
-                      </>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          onChange={handleAvatarUpload}
+                          disabled={isUploadingAvatar}
+                          className="hidden"
+                        />
+                      </label>
                     )}
                   </div>
                   <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">
                     {userData.name}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">{userData.email}</p>
-                  
-                  {/* Dica sobre upload de foto */}
-                  {isEditing && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-xs">
-                      📸 Clique no ícone da câmera para alterar sua foto. Formatos aceitos: JPEG, PNG, WebP (máx. 5MB)
-                    </p>
-                  )}
                 </div>
               </div>
 

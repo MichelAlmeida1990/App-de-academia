@@ -675,13 +675,6 @@ const ProfilePage = () => {
                     {userData.name}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">{userData.email}</p>
-                  
-                  {/* Dica sobre upload de foto */}
-                  {isEditing && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-xs">
-                      📸 Clique no ícone da câmera para alterar sua foto. Formatos aceitos: JPEG, PNG, WebP (máx. 5MB)
-                    </p>
-                  )}
                 </div>
               </div>
 

@@ -386,30 +386,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Função para remover foto de perfil
-  const handleRemoveAvatar = async () => {
-    if (!userData.avatar) return;
-    
-    const confirm = window.confirm('❓ Tem certeza que deseja remover sua foto de perfil?');
-    if (!confirm) return;
-    
-    try {
-      // Atualizar estado local
-      const newUserData = { ...userData, avatar: null };
-      setUserData(newUserData);
-      
-      // Salvar no localStorage
-      await userDataService.saveUserProfile({ avatar: null });
-      
-      console.log('✅ Foto de perfil removida com sucesso!');
-      alert('✅ Foto de perfil removida com sucesso!');
-      
-    } catch (error) {
-      console.error('❌ Erro ao remover foto:', error);
-      alert('❌ Erro ao remover foto. Tente novamente.');
-    }
-  };
-
   // Função para comprimir e redimensionar imagem
   const compressImage = (file) => {
     return new Promise((resolve, reject) => {
@@ -618,70 +594,33 @@ const ProfilePage = () => {
               <div className="lg:col-span-1">
                 <div className="text-center">
                   <div className="relative inline-block">
-                    <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center overflow-hidden relative">
+                    <div className="w-32 h-32 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                       {userData.avatar ? (
                         <img
                           src={userData.avatar}
                           alt="Avatar"
-                          className={`w-full h-full object-cover transition-opacity ${isUploadingAvatar ? 'opacity-50' : 'opacity-100'}`}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <FaUser className={`text-4xl text-gray-400 transition-opacity ${isUploadingAvatar ? 'opacity-50' : 'opacity-100'}`} />
-                      )}
-                      
-                      {/* Loading overlay */}
-                      {isUploadingAvatar && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                          <FaSpinner className="text-white text-2xl animate-spin" />
-                        </div>
+                        <FaUser className="text-4xl text-gray-400" />
                       )}
                     </div>
-                    
                     {isEditing && (
-                      <>
-                        <label className={`absolute bottom-0 right-0 bg-purple-500 text-white p-2 rounded-full transition-colors ${
-                          isUploadingAvatar 
-                            ? 'cursor-not-allowed opacity-50' 
-                            : 'cursor-pointer hover:bg-purple-600'
-                        }`}>
-                          {isUploadingAvatar ? (
-                            <FaSpinner className="animate-spin" />
-                          ) : (
-                            <FaCamera />
-                          )}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/webp"
-                            onChange={handleAvatarUpload}
-                            disabled={isUploadingAvatar}
-                            className="hidden"
-                          />
-                        </label>
-                        
-                        {/* Botão para remover foto */}
-                        {userData.avatar && !isUploadingAvatar && (
-                          <button
-                            onClick={handleRemoveAvatar}
-                            className="absolute bottom-0 left-0 bg-red-500 text-white p-2 rounded-full cursor-pointer hover:bg-red-600 transition-colors"
-                            title="Remover foto"
-                          >
-                            <FaTrash className="text-sm" />
-                          </button>
-                        )}
-                      </>
+                      <label className="absolute bottom-0 right-0 bg-purple-500 text-white p-2 rounded-full cursor-pointer hover:bg-purple-600 transition-colors">
+                        <FaCamera />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarUpload}
+                          className="hidden"
+                        />
+                      </label>
                     )}
                   </div>
                   <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">
                     {userData.name}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">{userData.email}</p>
-                  
-                  {/* Dica sobre upload de foto */}
-                  {isEditing && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-xs">
-                      📸 Clique no ícone da câmera para alterar sua foto. Formatos aceitos: JPEG, PNG, WebP (máx. 5MB)
-                    </p>
-                  )}
                 </div>
               </div>
 
