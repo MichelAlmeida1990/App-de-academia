@@ -11,10 +11,8 @@ import {
   FaBed,
   FaUtensils
 } from 'react-icons/fa';
-import { useAuth } from '../../context/AuthContext';
 
 const CalorieCalculator = ({ onSave, savedData }) => {
-  const { currentUser } = useAuth();
   const [formula, setFormula] = useState('mifflin'); // mifflin, harris, katch
   const [gender, setGender] = useState(savedData?.gender || 'male');
   const [age, setAge] = useState(savedData?.age || '');
@@ -28,13 +26,11 @@ const CalorieCalculator = ({ onSave, savedData }) => {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    if (currentUser?.uid) {
-      const savedHistory = localStorage.getItem(`calorie-history-${currentUser.uid}`);
-      if (savedHistory) {
-        setHistory(JSON.parse(savedHistory));
-      }
+    const savedHistory = localStorage.getItem('calorie-history');
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
     }
-  }, [currentUser]);
+  }, []);
 
   // Fórmula Mifflin-St Jeor (mais precisa)
   const calculateMifflin = () => {
@@ -136,9 +132,7 @@ const CalorieCalculator = ({ onSave, savedData }) => {
     // Salvar no histórico
     const newHistory = [newResult, ...history.slice(0, 9)];
     setHistory(newHistory);
-    if (currentUser?.uid) {
-      localStorage.setItem(`calorie-history-${currentUser.uid}`, JSON.stringify(newHistory));
-    }
+    localStorage.setItem('calorie-history', JSON.stringify(newHistory));
 
     // Callback para salvar no perfil
     if (onSave) {

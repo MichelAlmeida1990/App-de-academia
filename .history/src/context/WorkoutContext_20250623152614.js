@@ -171,6 +171,9 @@ export const WorkoutProvider = ({ children }) => {
     // Esta função estava criando treinos sem userId, causando vazamento entre usuários
     console.warn('⚠️ createDemoWorkouts() foi removida - use AuthContext.createAndSaveDemoWorkouts() com userId');
     return [];
+    
+    console.log(`Treinos de demonstração criados:`, demoWorkouts);
+    return demoWorkouts;
   };
 
   const getCompletedWorkouts = () => {

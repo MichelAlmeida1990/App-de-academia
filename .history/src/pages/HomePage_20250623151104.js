@@ -55,17 +55,17 @@ const mockAuth = {
 const FeatureCard = ({ icon, title, description, delay = 0 }) => {
   return (
     <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 md:p-6 text-center text-white hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
+      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 text-center text-white hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
       style={{ 
         animationDelay: `${delay}ms`,
         animation: 'fadeInUp 0.8s ease-out forwards'
       }}
     >
-      <div className="text-2xl md:text-4xl mb-2 md:mb-4 animate-bounce">{icon}</div>
-      <h3 className="font-bold text-sm md:text-lg mb-2 md:mb-3 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+      <div className="text-4xl mb-4 animate-bounce">{icon}</div>
+      <h3 className="font-bold text-lg mb-3 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
         {title}
       </h3>
-      <p className="text-xs md:text-sm text-white/80">{description}</p>
+      <p className="text-sm text-white/80">{description}</p>
     </div>
   );
 };
@@ -74,16 +74,16 @@ const FeatureCard = ({ icon, title, description, delay = 0 }) => {
 const StatCard = ({ number, label, icon, delay = 0 }) => {
   return (
     <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 md:p-4 text-center hover:bg-white/15 transition-all duration-500 hover:scale-105"
+      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 text-center hover:bg-white/15 transition-all duration-500 hover:scale-105"
       style={{ 
         animationDelay: `${delay}ms`,
         animation: 'fadeInUp 0.8s ease-out forwards'
       }}
     >
-      <div className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-1 md:mb-2 mobile-stats-text">
+      <div className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-2">
         {number}
       </div>
-      <div className="text-white/80 text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2">
+      <div className="text-white/80 text-sm font-medium flex items-center justify-center gap-2">
         {icon} {label}
       </div>
     </div>
@@ -336,7 +336,7 @@ const HomePage = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 3rem;
-          align-items: start;
+          align-items: center;
           min-height: calc(100vh - 8rem);
         }
 
@@ -347,16 +347,6 @@ const HomePage = () => {
             gap: 2rem;
             min-height: auto;
             padding: 0 1rem;
-            align-items: stretch;
-          }
-          
-          /* Reverse order on mobile - form first, then content */
-          .mobile-login-form {
-            order: 1;
-          }
-          
-          .mobile-content {
-            order: 2;
           }
         }
 
@@ -365,34 +355,10 @@ const HomePage = () => {
           .homepage-grid {
             gap: 1.5rem;
             padding: 0 0.5rem;
-            display: flex;
-            flex-direction: column;
-            min-height: auto;
           }
           
           .floating-bg {
             display: none; /* Hide floating backgrounds on mobile */
-          }
-          
-          /* Ensure login form is visible and properly sized */
-          .mobile-login-form {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 2rem auto;
-            order: 1;
-            flex-shrink: 0;
-          }
-          
-          .mobile-content {
-            order: 2;
-            width: 100%;
-            flex: 1;
-          }
-          
-          /* Override container to ensure proper scrolling */
-          .min-h-screen {
-            min-height: auto !important;
-            padding-bottom: 2rem;
           }
         }
 
@@ -401,11 +367,6 @@ const HomePage = () => {
           .homepage-grid {
             gap: 1rem;
             padding: 0;
-          }
-          
-          .mobile-login-form {
-            max-width: 100%;
-            padding: 0 0.5rem;
           }
         }
 
@@ -474,12 +435,12 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 container mx-auto px-2 py-4 md:px-4 md:py-8 min-h-screen">
+        <div className="relative z-10 container mx-auto px-2 py-4 md:px-4 md:py-8">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto">
             
             {/* Left Side - Branding & Features */}
-            <div className="space-y-4 md:space-y-8 animate-slideInLeft mobile-content">
+            <div className="space-y-4 md:space-y-8 animate-slideInLeft">
               {/* Main Branding */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow mobile-text-small">
@@ -495,7 +456,7 @@ const HomePage = () => {
               </div>
 
               {/* Feature Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FeatureCard
                   icon={<FaChartLine />}
                   title="Analytics Avançado"
@@ -526,7 +487,7 @@ const HomePage = () => {
               </div>
 
               {/* Statistics */}
-              <div className="grid grid-cols-3 gap-2 md:gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <StatCard
                   number="10k+"
                   label="Atletas"
@@ -548,14 +509,14 @@ const HomePage = () => {
               </div>
 
               {/* Key Benefits */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-6">
-                <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 flex items-center gap-3">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
                   <FaStar className="text-yellow-400" />
                   <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
                     Por que escolher o FitnessTracker?
                   </span>
                 </h3>
-                <div className="grid grid-cols-1 gap-2 md:gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   <div className="flex items-center gap-3 text-white/90">
                     <span className="text-green-400">✓</span>
                     <span className="text-sm">Interface intuitiva e moderna</span>
@@ -577,28 +538,28 @@ const HomePage = () => {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
+            <div className="flex justify-center lg:justify-end animate-slideInRight">
               <div className="w-full max-w-md">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-8 shadow-2xl mobile-form-padding">
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 shadow-2xl">
                   {/* Form Header */}
-                  <div className="text-center mb-6 md:mb-8">
-                    <div className="flex justify-center mb-3 md:mb-4">
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <FaShieldAlt className="text-white text-xl md:text-2xl" />
+                  <div className="text-center mb-8">
+                    <div className="flex justify-center mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <FaShieldAlt className="text-white text-2xl" />
                       </div>
                     </div>
-                    <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+                    <h2 className="text-2xl font-bold text-white mb-2">
                       <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
                         Acesso Premium
                       </span>
                     </h2>
-                    <p className="text-white/80 text-sm md:text-base">
+                    <p className="text-white/80">
                       {isRegistering ? 'Bem-vindo de volta, atleta!' : 'Bem-vindo de volta, atleta!'}
                     </p>
                   </div>
 
                   {/* Login Form */}
-                  <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     {isRegistering && (
                       <div>
                         <label className="block text-white font-medium mb-2 flex items-center gap-2">

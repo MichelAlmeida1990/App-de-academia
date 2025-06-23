@@ -11,8 +11,10 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import ConnectionStatus from './components/ui/ConnectionStatus';
 
-// Limpeza automática de dados antigos sem isolamento
-import './utils/cleanupToolsHistory';
+// Debug utils para desenvolvimento
+import './utils/authDebug';
+import './utils/emergencyCleanup';
+import DebugPanel from './components/DebugPanel';
 
 // MUI Imports (se estiver usando Material-UI)
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
@@ -202,7 +204,10 @@ const ThemedAppContent = () => {
           </Routes>
 
           {/* Componentes globais que aparecem em todas as páginas */}
-                  <ConnectionStatus />
+          <ConnectionStatus />
+          
+          {/* Debug Panel - apenas em desenvolvimento */}
+          {process.env.NODE_ENV === 'development' && <DebugPanel />}
         </div>
       </Router>
     </MuiThemeProvider>

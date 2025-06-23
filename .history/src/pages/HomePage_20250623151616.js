@@ -367,7 +367,6 @@ const HomePage = () => {
             padding: 0 0.5rem;
             display: flex;
             flex-direction: column;
-            min-height: auto;
           }
           
           .floating-bg {
@@ -378,21 +377,13 @@ const HomePage = () => {
           .mobile-login-form {
             width: 100%;
             max-width: 400px;
-            margin: 0 auto 2rem auto;
+            margin: 0 auto;
             order: 1;
-            flex-shrink: 0;
           }
           
           .mobile-content {
             order: 2;
             width: 100%;
-            flex: 1;
-          }
-          
-          /* Override container to ensure proper scrolling */
-          .min-h-screen {
-            min-height: auto !important;
-            padding-bottom: 2rem;
           }
         }
 
@@ -474,7 +465,7 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 container mx-auto px-2 py-4 md:px-4 md:py-8 min-h-screen">
+        <div className="relative z-10 container mx-auto px-2 py-4 md:px-4 md:py-8">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto">
             

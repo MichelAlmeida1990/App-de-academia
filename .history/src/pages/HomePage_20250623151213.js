@@ -336,7 +336,7 @@ const HomePage = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 3rem;
-          align-items: start;
+          align-items: center;
           min-height: calc(100vh - 8rem);
         }
 
@@ -347,16 +347,6 @@ const HomePage = () => {
             gap: 2rem;
             min-height: auto;
             padding: 0 1rem;
-            align-items: stretch;
-          }
-          
-          /* Reverse order on mobile - form first, then content */
-          .mobile-login-form {
-            order: 1;
-          }
-          
-          .mobile-content {
-            order: 2;
           }
         }
 
@@ -365,34 +355,10 @@ const HomePage = () => {
           .homepage-grid {
             gap: 1.5rem;
             padding: 0 0.5rem;
-            display: flex;
-            flex-direction: column;
-            min-height: auto;
           }
           
           .floating-bg {
             display: none; /* Hide floating backgrounds on mobile */
-          }
-          
-          /* Ensure login form is visible and properly sized */
-          .mobile-login-form {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 2rem auto;
-            order: 1;
-            flex-shrink: 0;
-          }
-          
-          .mobile-content {
-            order: 2;
-            width: 100%;
-            flex: 1;
-          }
-          
-          /* Override container to ensure proper scrolling */
-          .min-h-screen {
-            min-height: auto !important;
-            padding-bottom: 2rem;
           }
         }
 
@@ -401,11 +367,6 @@ const HomePage = () => {
           .homepage-grid {
             gap: 1rem;
             padding: 0;
-          }
-          
-          .mobile-login-form {
-            max-width: 100%;
-            padding: 0 0.5rem;
           }
         }
 
@@ -474,12 +435,12 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 container mx-auto px-2 py-4 md:px-4 md:py-8 min-h-screen">
+        <div className="relative z-10 container mx-auto px-2 py-4 md:px-4 md:py-8">
           {/* Main Grid Layout */}
           <div className="homepage-grid max-w-7xl mx-auto">
             
             {/* Left Side - Branding & Features */}
-            <div className="space-y-4 md:space-y-8 animate-slideInLeft mobile-content">
+            <div className="space-y-4 md:space-y-8 animate-slideInLeft">
               {/* Main Branding */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow mobile-text-small">
@@ -577,7 +538,7 @@ const HomePage = () => {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
+            <div className="flex justify-center lg:justify-end animate-slideInRight">
               <div className="w-full max-w-md">
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-8 shadow-2xl mobile-form-padding">
                   {/* Form Header */}

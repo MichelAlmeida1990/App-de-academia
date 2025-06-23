@@ -136,8 +136,62 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ❌ FUNÇÃO REMOVIDA - createAndSaveDemoWorkouts
-  // Usuários devem criar seus próprios treinos através da interface
+  // Função para criar treinos demo (movida para dentro para ter acesso ao setError)
+  const createAndSaveDemoWorkouts = (userId) => {
+    try {
+      console.log('🏋️ Criando treinos demo para usuário:', userId);
+      
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+      const demoWorkouts = [];
+      
+      const day19Date = new Date(currentYear, currentMonth, 19);
+      demoWorkouts.push({
+        id: `demo_day19_${userId}`, 
+        name: `Treino D - Ombros e Abdômen`,
+        category: 'Ombros e Abdômen',
+        date: day19Date.toISOString(),
+        completedAt: day19Date.toISOString(),
+        duration: 55,
+        exercises: [
+          { id: 0, name: 'Desenvolvimento com halteres', sets: 3, reps: 12, completed: true },
+          { id: 1, name: 'Elevação lateral', sets: 3, reps: 15, completed: true },
+          { id: 2, name: 'Abdominal crunch', sets: 4, reps: 20, completed: true },
+          { id: 3, name: 'Prancha', sets: 3, reps: 30, completed: true }
+        ],
+        completed: true,
+        progress: 100,
+        userId: userId 
+      });
+      
+      const day22Date = new Date(currentYear, currentMonth, 22);
+      demoWorkouts.push({
+        id: `demo_day22_${userId}`,
+        name: `Treino A - Peito e Tríceps`,
+        category: 'Peito e Tríceps',
+        date: day22Date.toISOString(),
+        completedAt: day22Date.toISOString(),
+        duration: 55,
+        exercises: [
+          { id: 0, name: 'Supino reto', sets: 3, reps: 10, completed: true },
+          { id: 1, name: 'Crucifixo', sets: 3, reps: 12, completed: true },
+          { id: 2, name: 'Tríceps corda', sets: 3, reps: 15, completed: true },
+          { id: 3, name: 'Tríceps francês', sets: 3, reps: 12, completed: true }
+        ],
+        completed: true,
+        progress: 100,
+        userId: userId
+      });
+      
+      LocalStorageService.saveInitialDemoWorkouts(userId, demoWorkouts);
+      console.log('✅ Treinos demo criados com sucesso');
+    } catch (e) {
+      console.error("❌ Erro ao criar treinos demo:", e);
+      // Não vamos propagar o erro para não quebrar o fluxo de signup
+      // setError("Houve um problema ao configurar os treinos de demonstração.");
+    }
+  };
 
   const signup = async (email, password, name) => {
     setError(null);

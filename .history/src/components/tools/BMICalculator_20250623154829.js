@@ -82,9 +82,7 @@ const BMICalculator = ({ onSave, savedData }) => {
       
       const updatedHistory = [newEntry, ...history].slice(0, 10); // Manter apenas os 10 mais recentes
       setHistory(updatedHistory);
-      if (currentUser?.uid) {
-        localStorage.setItem(`bmi-history-${currentUser.uid}`, JSON.stringify(updatedHistory));
-      }
+      localStorage.setItem('bmi-history', JSON.stringify(updatedHistory));
       
       // Callback para salvar no perfil do usuário
       if (onSave) {

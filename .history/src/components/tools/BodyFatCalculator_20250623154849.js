@@ -38,13 +38,11 @@ const BodyFatCalculator = ({ onSave, savedData }) => {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    if (currentUser?.uid) {
-      const savedHistory = localStorage.getItem(`bodyfat-history-${currentUser.uid}`);
-      if (savedHistory) {
-        setHistory(JSON.parse(savedHistory));
-      }
+    const savedHistory = localStorage.getItem('bodyfat-history');
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
     }
-  }, [currentUser]);
+  }, []);
 
   // Método Navy (US Navy)
   const calculateNavyMethod = () => {
@@ -137,9 +135,7 @@ const BodyFatCalculator = ({ onSave, savedData }) => {
     // Salvar no histórico
     const newHistory = [newResult, ...history.slice(0, 9)];
     setHistory(newHistory);
-    if (currentUser?.uid) {
-      localStorage.setItem(`bodyfat-history-${currentUser.uid}`, JSON.stringify(newHistory));
-    }
+    localStorage.setItem('bodyfit-history', JSON.stringify(newHistory));
 
     // Callback para salvar no perfil
     if (onSave) {

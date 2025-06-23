@@ -167,10 +167,52 @@ export const WorkoutProvider = ({ children }) => {
   };
 
   const createDemoWorkouts = () => {
-    // ❌ FUNÇÃO OBSOLETA - REMOVIDA PARA EVITAR VAZAMENTO DE DADOS
-    // Esta função estava criando treinos sem userId, causando vazamento entre usuários
-    console.warn('⚠️ createDemoWorkouts() foi removida - use AuthContext.createAndSaveDemoWorkouts() com userId');
-    return [];
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    
+    console.log(`Criando treinos de demonstração para ${currentMonth + 1}/${currentYear}`);
+    
+    const demoWorkouts = [];
+    
+    const day19Date = new Date(currentYear, currentMonth, 19);
+    demoWorkouts.push({
+      id: `demo_day19`,
+      name: `Treino D - Ombros e Abdômen`,
+      category: 'Ombros e Abdômen',
+      date: day19Date.toISOString(),
+      completedAt: day19Date.toISOString(),
+      duration: 55,
+      exercises: [
+        { id: 0, name: 'Desenvolvimento com halteres', sets: 3, reps: 12, completed: true },
+        { id: 1, name: 'Elevação lateral', sets: 3, reps: 15, completed: true },
+        { id: 2, name: 'Abdominal crunch', sets: 4, reps: 20, completed: true },
+        { id: 3, name: 'Prancha', sets: 3, reps: 30, completed: true }
+      ],
+      completed: true,
+      progress: 100,
+    });
+    
+    const day22Date = new Date(currentYear, currentMonth, 22);
+    demoWorkouts.push({
+      id: `demo_day22`,
+      name: `Treino A - Peito e Tríceps`,
+      category: 'Peito e Tríceps',
+      date: day22Date.toISOString(),
+      completedAt: day22Date.toISOString(),
+      duration: 55,
+      exercises: [
+        { id: 0, name: 'Supino reto', sets: 3, reps: 10, completed: true },
+        { id: 1, name: 'Crucifixo', sets: 3, reps: 12, completed: true },
+        { id: 2, name: 'Tríceps corda', sets: 3, reps: 15, completed: true },
+        { id: 3, name: 'Tríceps francês', sets: 3, reps: 12, completed: true }
+      ],
+      completed: true,
+      progress: 100,
+    });
+    
+    console.log(`Treinos de demonstração criados:`, demoWorkouts);
+    return demoWorkouts;
   };
 
   const getCompletedWorkouts = () => {

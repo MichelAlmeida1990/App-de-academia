@@ -367,7 +367,6 @@ const HomePage = () => {
             padding: 0 0.5rem;
             display: flex;
             flex-direction: column;
-            min-height: auto;
           }
           
           .floating-bg {
@@ -378,21 +377,13 @@ const HomePage = () => {
           .mobile-login-form {
             width: 100%;
             max-width: 400px;
-            margin: 0 auto 2rem auto;
+            margin: 0 auto;
             order: 1;
-            flex-shrink: 0;
           }
           
           .mobile-content {
             order: 2;
             width: 100%;
-            flex: 1;
-          }
-          
-          /* Override container to ensure proper scrolling */
-          .min-h-screen {
-            min-height: auto !important;
-            padding-bottom: 2rem;
           }
         }
 

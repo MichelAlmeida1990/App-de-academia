@@ -10,7 +10,6 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 const BMICalculator = ({ onSave, savedData }) => {
-  const { currentUser } = useAuth();
   const [height, setHeight] = useState(savedData?.height || '');
   const [weight, setWeight] = useState(savedData?.weight || '');
   const [bmi, setBmi] = useState(null);
@@ -18,15 +17,13 @@ const BMICalculator = ({ onSave, savedData }) => {
   const [categoryColor, setCategoryColor] = useState('');
   const [history, setHistory] = useState([]);
 
-  // Carregar histórico do localStorage com isolamento por usuário
+  // Carregar histórico do localStorage
   useEffect(() => {
-    if (currentUser?.uid) {
-      const savedHistory = localStorage.getItem(`bmi-history-${currentUser.uid}`);
-      if (savedHistory) {
-        setHistory(JSON.parse(savedHistory));
-      }
+    const savedHistory = localStorage.getItem('bmi-history');
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
     }
-  }, [currentUser]);
+  }, []);
 
   // Calcular IMC
   const calculateBMI = () => {
@@ -82,9 +79,7 @@ const BMICalculator = ({ onSave, savedData }) => {
       
       const updatedHistory = [newEntry, ...history].slice(0, 10); // Manter apenas os 10 mais recentes
       setHistory(updatedHistory);
-      if (currentUser?.uid) {
-        localStorage.setItem(`bmi-history-${currentUser.uid}`, JSON.stringify(updatedHistory));
-      }
+      localStorage.setItem('bmi-history', JSON.stringify(updatedHistory));
       
       // Callback para salvar no perfil do usuário
       if (onSave) {

@@ -11,8 +11,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import ConnectionStatus from './components/ui/ConnectionStatus';
 
-// Limpeza automática de dados antigos sem isolamento
-import './utils/cleanupToolsHistory';
+// Debug removido - problema de isolamento resolvido
 
 // MUI Imports (se estiver usando Material-UI)
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';

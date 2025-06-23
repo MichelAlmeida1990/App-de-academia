@@ -136,9 +136,7 @@ const CalorieCalculator = ({ onSave, savedData }) => {
     // Salvar no histórico
     const newHistory = [newResult, ...history.slice(0, 9)];
     setHistory(newHistory);
-    if (currentUser?.uid) {
-      localStorage.setItem(`calorie-history-${currentUser.uid}`, JSON.stringify(newHistory));
-    }
+    localStorage.setItem('calorie-history', JSON.stringify(newHistory));
 
     // Callback para salvar no perfil
     if (onSave) {
