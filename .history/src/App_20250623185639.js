@@ -205,6 +205,7 @@ const ThemedAppContent = () => {
 
           {/* Componentes globais que aparecem em todas as páginas */}
           <ConnectionStatus />
+          <ClearDataButton />
         </div>
       </Router>
     </MuiThemeProvider>
