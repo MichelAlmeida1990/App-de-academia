@@ -14,11 +14,7 @@ import {
   FaSpinner,
   FaCheckCircle,
   FaExclamationTriangle,
-  FaGoogle,
-  FaShieldAlt,
-  FaHeart,
-  FaBullseye,
-  FaStar
+  FaGoogle
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
@@ -74,16 +70,16 @@ const FeatureCard = ({ icon, title, description, delay = 0 }) => {
 const StatCard = ({ number, label, icon, delay = 0 }) => {
   return (
     <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 text-center hover:bg-white/15 transition-all duration-500 hover:scale-105"
+      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 text-center hover:bg-white/15 transition-all duration-500 hover:scale-105"
       style={{ 
         animationDelay: `${delay}ms`,
         animation: 'fadeInUp 0.8s ease-out forwards'
       }}
     >
-      <div className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-2">
+      <div className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">
         {number}
       </div>
-      <div className="text-white/80 text-sm font-medium flex items-center justify-center gap-2">
+      <div className="text-white/80 text-lg font-medium flex items-center justify-center gap-2">
         {icon} {label}
       </div>
     </div>
@@ -232,17 +228,6 @@ const HomePage = () => {
           }
         }
 
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
         @keyframes float {
           0%, 100% {
             transform: translateY(0px);
@@ -271,10 +256,6 @@ const HomePage = () => {
 
         .animate-slideInRight {
           animation: slideInRight 0.5s ease-out;
-        }
-
-        .animate-slideInLeft {
-          animation: slideInLeft 0.6s ease-out;
         }
 
         .form-input {
@@ -330,23 +311,6 @@ const HomePage = () => {
         .floating-bg:nth-child(3) { animation-delay: 4s; }
         .floating-bg:nth-child(4) { animation-delay: 1s; }
         .floating-bg:nth-child(5) { animation-delay: 3s; }
-
-        /* Responsive grid layout */
-        .homepage-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 3rem;
-          align-items: center;
-          min-height: calc(100vh - 12rem);
-        }
-
-        @media (max-width: 1024px) {
-          .homepage-grid {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            min-height: auto;
-          }
-        }
       `}</style>
 
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 relative overflow-hidden">
@@ -359,139 +323,121 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          {/* Main Grid Layout */}
-          <div className="homepage-grid max-w-7xl mx-auto">
-            
-            {/* Left Side - Branding & Features */}
-            <div className="space-y-8 animate-slideInLeft">
-              {/* Main Branding */}
-              <div className="text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow">
-                  <span className="text-6xl lg:text-7xl animate-float">🏋️</span>
-                  <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    FitnessTracker
-                  </span>
-                </h1>
-                <p className="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-8">
-                  Transforme sua jornada fitness com tecnologia de ponta. 
-                  Monitore progresso • Alcance objetivos • Supere limites
-                </p>
-              </div>
+        <div className="relative z-10 container mx-auto px-4 py-8 min-h-screen">
+          {/* Header */}
+          <div className="text-center mb-16" style={{ animation: 'fadeInUp 1s ease-out' }}>
+            <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 flex items-center justify-center gap-4 animate-glow">
+              <span className="text-7xl md:text-8xl animate-float">🏋️</span>
+              <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+                FitnessTracker
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              Sua jornada fitness começa aqui! Acompanhe treinos, monitore progresso e alcance seus objetivos com estilo.
+            </p>
+          </div>
 
-              {/* Feature Cards Grid */}
-              <div className="grid grid-cols-2 gap-4">
+          {/* Main Content */}
+          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+            
+            {/* Left Side - Features */}
+            <div className="space-y-8">
+              {/* Feature Cards */}
+              <div className="grid grid-cols-2 gap-6">
                 <FeatureCard
-                  icon={<FaChartLine />}
-                  title="Analytics Avançado"
-                  description="Gráficos detalhados do seu progresso"
+                  icon="📊"
+                  title="Progresso"
+                  description="Acompanhe sua evolução com gráficos detalhados"
                   delay={100}
                 />
                 
                 <FeatureCard
-                  icon={<FaBullseye />}
-                  title="IA Personalizada"
-                  description="Treinos adaptados aos seus objetivos"
+                  icon="🏋️"
+                  title="Exercícios"
+                  description="Biblioteca completa com instruções"
                   delay={200}
                 />
                 
                 <FeatureCard
-                  icon={<FaFire />}
-                  title="Gamificação"
-                  description="Sistema de conquistas e desafios"
+                  icon="🔥"
+                  title="Treinos"
+                  description="Personalizados para seus objetivos"
                   delay={300}
                 />
                 
                 <FeatureCard
-                  icon={<FaUsers />}
-                  title="Comunidade Ativa"
-                  description="Conecte-se com outros atletas"
+                  icon="👥"
+                  title="Comunidade"
+                  description="Conecte-se e motive-se"
                   delay={400}
                 />
               </div>
 
-              {/* Statistics */}
-              <div className="grid grid-cols-3 gap-4">
-                <StatCard
-                  number="10k+"
-                  label="Atletas"
-                  icon={<FaUsers />}
-                  delay={500}
-                />
-                <StatCard
-                  number="500+"
-                  label="Exercícios"
-                  icon={<FaDumbbell />}
-                  delay={600}
-                />
-                <StatCard
-                  number="24/7"
-                  label="Suporte"
-                  icon={<FaShieldAlt />}
-                  delay={700}
-                />
-              </div>
-
-              {/* Key Benefits */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-                  <FaStar className="text-yellow-400" />
+              {/* Ready to Start Section */}
+              <div 
+                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 hover:bg-white/15 transition-all duration-500"
+                style={{ 
+                  animationDelay: '500ms',
+                  animation: 'fadeInUp 0.8s ease-out forwards'
+                }}
+              >
+                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                  <span className="animate-float">🚀</span> 
                   <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    Por que escolher o FitnessTracker?
+                    Pronto para começar?
                   </span>
                 </h3>
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Interface intuitiva e moderna</span>
+                <div className="space-y-4 text-white/90">
+                  <div className="flex items-center gap-4 p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-xl">✨</span>
+                    <span className="font-medium">Crie treinos personalizados</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Sincronização em tempo real</span>
+                  <div className="flex items-center gap-4 p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-xl">📈</span>
+                    <span className="font-medium">Acompanhe seu progresso</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Relatórios personalizados</span>
+                  <div className="flex items-center gap-4 p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-xl">📚</span>
+                    <span className="font-medium">Acesse biblioteca de exercícios</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Suporte especializado</span>
+                  <div className="flex items-center gap-4 p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-xl">📊</span>
+                    <span className="font-medium">Monitore estatísticas detalhadas</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight">
+            <div className="flex justify-center">
               <div className="w-full max-w-md">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 shadow-2xl">
-                  {/* Form Header */}
+                <div 
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 shadow-2xl hover:bg-white/15 transition-all duration-500"
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards'
+                  }}
+                >
                   <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <FaShieldAlt className="text-white text-2xl" />
-                      </div>
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">
+                    <h2 className="text-3xl font-bold text-white mb-3 flex items-center justify-center gap-3">
+                      <span className="animate-float">{isRegistering ? '✨' : '🔐'}</span>
                       <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                        Acesso Premium
+                        {isRegistering ? 'Criar Conta' : 'Fazer Login'}
                       </span>
                     </h2>
-                    <p className="text-white/80">
-                      {isRegistering ? 'Bem-vindo de volta, atleta!' : 'Bem-vindo de volta, atleta!'}
+                    <p className="text-white/80 text-lg">
+                      {isRegistering ? 'Junte-se a nós e transforme sua vida!' : 'Bem-vindo de volta, campeão!'}
                     </p>
                   </div>
 
-                  {/* Login Form */}
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {isRegistering && (
-                      <div>
+                      <div style={{ animation: 'fadeInUp 0.5s ease-out' }}>
                         <label className="block text-white font-medium mb-2 flex items-center gap-2">
                           <FaUser className="text-purple-300" /> Nome
                         </label>
                         <input
                           type="text"
-                          placeholder="seu@email.com"
+                          placeholder="Seu nome completo"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           required={isRegistering}
@@ -549,13 +495,11 @@ const HomePage = () => {
                         </>
                       ) : (
                         <>
-                          <FaUser />
-                          <span>{isRegistering ? 'Acessar Plataforma' : 'Acessar Plataforma'}</span>
+                          <span>{isRegistering ? <FaRocket /> : <FaUser />}</span>
+                          <span>{isRegistering ? 'Registrar' : 'Entrar'}</span>
                         </>
                       )}
                     </button>
-
-                    <div className="text-center text-white/60 text-sm">ou continue com</div>
 
                     {/* Google Auth Button */}
                     <button
@@ -569,24 +513,27 @@ const HomePage = () => {
                     </button>
 
                     {/* Demo Login Button */}
-                    <button
-                      type="button"
-                      onClick={handleDemoLogin}
-                      className="w-full py-3 bg-orange-500/20 border border-orange-500/30 text-orange-200 rounded-lg font-medium hover:bg-orange-500/30 transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <span>🎯</span>
-                      Experimentar Demo
-                    </button>
+                    {!isRegistering && (
+                      <button
+                        type="button"
+                        onClick={handleDemoLogin}
+                        className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2"
+                      >
+                        <span>🎯</span>
+                        Testar com conta demo
+                      </button>
+                    )}
 
                     <div className="text-center space-y-3">
                       <button
                         type="button"
                         onClick={() => setIsRegistering(!isRegistering)}
-                        className="text-white/80 hover:text-white text-sm font-medium underline transition-colors duration-300"
+                        className="text-white/80 hover:text-white text-sm font-medium underline transition-colors duration-300 flex items-center justify-center gap-2 mx-auto"
                       >
+                        <span>{isRegistering ? '🔙' : '📝'}</span>
                         {isRegistering ? 
-                          '🔙 Não tem conta? Registre-se' : 
-                          '📝 Não tem conta? Registre-se'
+                          'Já tem conta? Faça login' : 
+                          'Não tem conta? Registre-se'
                         }
                       </button>
                       
@@ -594,9 +541,10 @@ const HomePage = () => {
                         <div>
                           <button 
                             type="button"
-                            className="text-white/70 hover:text-white text-sm underline transition-colors duration-300"
+                            className="text-white/70 hover:text-white text-sm underline transition-colors duration-300 flex items-center justify-center gap-2 mx-auto"
                           >
-                            🔑 Esqueceu sua senha?
+                            <span>🔑</span>
+                            Esqueceu sua senha?
                           </button>
                         </div>
                       )}
@@ -604,6 +552,53 @@ const HomePage = () => {
                   </form>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Bottom Statistics */}
+          <div 
+            className="mt-20 text-center"
+            style={{ 
+              animationDelay: '800ms',
+              animation: 'fadeInUp 0.8s ease-out forwards'
+            }}
+          >
+            <p className="text-white/90 text-xl mb-12 font-medium">
+              🌟 Junte-se a milhares de pessoas que já transformaram suas vidas! 🌟
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <StatCard
+                number="1000+"
+                label="Usuários Ativos"
+                icon={<FaUsers />}
+                delay={100}
+              />
+              <StatCard
+                number="50+"
+                label="Exercícios"
+                icon={<FaDumbbell />}
+                delay={200}
+              />
+              <StatCard
+                number="24/7"
+                label="Disponível"
+                icon={<span>🌍</span>}
+                delay={300}
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-16 text-center">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-2xl mx-auto">
+              <p className="text-white/70 text-sm flex items-center justify-center gap-2 flex-wrap">
+                <span>© 2025 FitnessTracker.</span>
+                <span>Todos os direitos reservados.</span>
+                <span className="flex items-center gap-1">
+                  <span>❤️</span> Feito com <span>💪</span> para fitness
+                </span>
+              </p>
             </div>
           </div>
         </div>

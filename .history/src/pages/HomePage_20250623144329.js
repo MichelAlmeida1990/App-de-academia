@@ -389,7 +389,7 @@ const HomePage = () => {
                 />
                 
                 <FeatureCard
-                  icon={<FaBullseye />}
+                  icon={<FaTarget />}
                   title="IA Personalizada"
                   description="Treinos adaptados aos seus objetivos"
                   delay={200}

@@ -14,11 +14,7 @@ import {
   FaSpinner,
   FaCheckCircle,
   FaExclamationTriangle,
-  FaGoogle,
-  FaShieldAlt,
-  FaHeart,
-  FaBullseye,
-  FaStar
+  FaGoogle
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
@@ -55,79 +51,77 @@ const mockAuth = {
 const FeatureCard = ({ icon, title, description, delay = 0 }) => {
   return (
     <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 text-center text-white hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
+      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-6 text-center text-white hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
       style={{ 
         animationDelay: `${delay}ms`,
         animation: 'fadeInUp 0.8s ease-out forwards'
       }}
     >
-      <div className="text-4xl mb-4 animate-bounce">{icon}</div>
-      <h3 className="font-bold text-lg mb-3 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+      <div className="text-2xl sm:text-4xl mb-2 sm:mb-4 animate-bounce">{icon}</div>
+      <h3 className="font-bold text-sm sm:text-lg mb-2 sm:mb-3 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
         {title}
       </h3>
-      <p className="text-sm text-white/80">{description}</p>
+      <p className="text-xs sm:text-sm text-white/80">{description}</p>
     </div>
   );
 };
 
-// Componente de Estatística
+// Componente de estatística
 const StatCard = ({ number, label, icon, delay = 0 }) => {
   return (
     <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 text-center hover:bg-white/15 transition-all duration-500 hover:scale-105"
+      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-6 text-center text-white hover:bg-white/15 transition-all duration-500"
       style={{ 
         animationDelay: `${delay}ms`,
         animation: 'fadeInUp 0.8s ease-out forwards'
       }}
     >
-      <div className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-2">
-        {number}
-      </div>
-      <div className="text-white/80 text-sm font-medium flex items-center justify-center gap-2">
-        {icon} {label}
-      </div>
+      <div className="text-2xl sm:text-3xl mb-2 text-purple-300">{icon}</div>
+      <div className="text-2xl sm:text-3xl font-bold mb-1">{number}</div>
+      <div className="text-xs sm:text-sm text-white/80">{label}</div>
     </div>
   );
 };
 
-// Componente de Toast de Notificação
+// Componente de notificação Toast
 const Toast = ({ type, message, onClose }) => {
   useEffect(() => {
-    const timer = setTimeout(onClose, 5000);
+    const timer = setTimeout(onClose, 4000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   const getToastStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-900/90 border-green-500 text-green-100';
+        return 'bg-green-500 border-green-400';
       case 'error':
-        return 'bg-red-900/90 border-red-500 text-red-100';
+        return 'bg-red-500 border-red-400';
       default:
-        return 'bg-purple-900/90 border-purple-500 text-purple-100';
+        return 'bg-blue-500 border-blue-400';
     }
   };
 
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <FaCheckCircle className="text-green-400" />;
+        return <FaCheckCircle />;
       case 'error':
-        return <FaExclamationTriangle className="text-red-400" />;
+        return <FaExclamationTriangle />;
       default:
-        return <FaCheckCircle className="text-purple-400" />;
+        return <span>ℹ️</span>;
     }
   };
 
   return (
-    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg border backdrop-blur-md ${getToastStyles()} animate-slideInRight`}>
-      <div className="flex items-center gap-3">
-        {getIcon()}
-        <span>{message}</span>
-        <button onClick={onClose} className="ml-2 hover:opacity-70">
-          ×
-        </button>
-      </div>
+    <div 
+      className={`fixed top-4 right-4 z-50 ${getToastStyles()} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slideInRight max-w-sm`}
+      style={{ animation: 'slideInRight 0.5s ease-out' }}
+    >
+      {getIcon()}
+      <span className="text-sm font-medium">{message}</span>
+      <button onClick={onClose} className="ml-auto hover:opacity-75">
+        ✕
+      </button>
     </div>
   );
 };
@@ -232,17 +226,6 @@ const HomePage = () => {
           }
         }
 
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
         @keyframes float {
           0%, 100% {
             transform: translateY(0px);
@@ -271,10 +254,6 @@ const HomePage = () => {
 
         .animate-slideInRight {
           animation: slideInRight 0.5s ease-out;
-        }
-
-        .animate-slideInLeft {
-          animation: slideInLeft 0.6s ease-out;
         }
 
         .form-input {
@@ -331,27 +310,17 @@ const HomePage = () => {
         .floating-bg:nth-child(4) { animation-delay: 1s; }
         .floating-bg:nth-child(5) { animation-delay: 3s; }
 
-        /* Responsive grid layout */
-        .homepage-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 3rem;
-          align-items: center;
-          min-height: calc(100vh - 12rem);
-        }
-
-        @media (max-width: 1024px) {
-          .homepage-grid {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            min-height: auto;
+        /* Responsividade melhorada */
+        @media (max-width: 768px) {
+          .floating-bg {
+            display: none;
           }
         }
       `}</style>
 
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 relative overflow-hidden">
-        {/* Background decorativo */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Background decorativo - oculto em mobile */}
+        <div className="absolute inset-0 pointer-events-none hidden md:block">
           <div className="floating-bg top-20 left-20 w-32 h-32 bg-white"></div>
           <div className="floating-bg bottom-20 right-20 w-48 h-48 bg-white"></div>
           <div className="floating-bg top-1/2 left-1/4 w-24 h-24 bg-purple-300"></div>
@@ -359,149 +328,131 @@ const HomePage = () => {
           <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          {/* Main Grid Layout */}
-          <div className="homepage-grid max-w-7xl mx-auto">
-            
-            {/* Left Side - Branding & Features */}
-            <div className="space-y-8 animate-slideInLeft">
-              {/* Main Branding */}
-              <div className="text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow">
-                  <span className="text-6xl lg:text-7xl animate-float">🏋️</span>
-                  <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    FitnessTracker
-                  </span>
-                </h1>
-                <p className="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-8">
-                  Transforme sua jornada fitness com tecnologia de ponta. 
-                  Monitore progresso • Alcance objetivos • Supere limites
-                </p>
-              </div>
+        <div className="relative z-10 container mx-auto px-4 py-4 sm:py-8 min-h-screen">
+          {/* Header - Responsivo */}
+          <div className="text-center mb-8 sm:mb-16" style={{ animation: 'fadeInUp 1s ease-out' }}>
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-white mb-4 sm:mb-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 animate-glow">
+              <span className="text-5xl sm:text-7xl md:text-8xl animate-float">🏋️</span>
+              <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent text-3xl sm:text-6xl md:text-7xl">
+                FitnessTracker
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed px-4">
+              Sua jornada fitness começa aqui! Acompanhe treinos, monitore progresso e alcance seus objetivos com estilo.
+            </p>
+          </div>
 
-              {/* Feature Cards Grid */}
-              <div className="grid grid-cols-2 gap-4">
+          {/* Main Content - Layout responsivo */}
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 items-start lg:items-center max-w-7xl mx-auto">
+            
+            {/* Left Side - Features - Ajustado para mobile */}
+            <div className="w-full space-y-6 sm:space-y-8 order-2 lg:order-1">
+              {/* Feature Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-6">
                 <FeatureCard
-                  icon={<FaChartLine />}
-                  title="Analytics Avançado"
-                  description="Gráficos detalhados do seu progresso"
+                  icon="📊"
+                  title="Progresso"
+                  description="Acompanhe sua evolução"
                   delay={100}
                 />
                 
                 <FeatureCard
-                  icon={<FaBullseye />}
-                  title="IA Personalizada"
-                  description="Treinos adaptados aos seus objetivos"
+                  icon="🏋️"
+                  title="Exercícios"
+                  description="Biblioteca completa"
                   delay={200}
                 />
                 
                 <FeatureCard
-                  icon={<FaFire />}
-                  title="Gamificação"
-                  description="Sistema de conquistas e desafios"
+                  icon="🔥"
+                  title="Treinos"
+                  description="Personalizados"
                   delay={300}
                 />
                 
                 <FeatureCard
-                  icon={<FaUsers />}
-                  title="Comunidade Ativa"
-                  description="Conecte-se com outros atletas"
+                  icon="👥"
+                  title="Comunidade"
+                  description="Conecte-se"
                   delay={400}
                 />
               </div>
 
-              {/* Statistics */}
-              <div className="grid grid-cols-3 gap-4">
-                <StatCard
-                  number="10k+"
-                  label="Atletas"
-                  icon={<FaUsers />}
-                  delay={500}
-                />
-                <StatCard
-                  number="500+"
-                  label="Exercícios"
-                  icon={<FaDumbbell />}
-                  delay={600}
-                />
-                <StatCard
-                  number="24/7"
-                  label="Suporte"
-                  icon={<FaShieldAlt />}
-                  delay={700}
-                />
-              </div>
-
-              {/* Key Benefits */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-                  <FaStar className="text-yellow-400" />
+              {/* Ready to Start Section - Compacto no mobile */}
+              <div 
+                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-8 hover:bg-white/15 transition-all duration-500"
+                style={{ 
+                  animationDelay: '500ms',
+                  animation: 'fadeInUp 0.8s ease-out forwards'
+                }}
+              >
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-3">
+                  <span className="animate-float">🚀</span> 
                   <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    Por que escolher o FitnessTracker?
+                    Pronto para começar?
                   </span>
                 </h3>
-                <div className="grid grid-cols-1 gap-3">
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Interface intuitiva e moderna</span>
+                <div className="space-y-2 sm:space-y-4 text-white/90">
+                  <div className="flex items-center gap-3 p-2 sm:p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-lg sm:text-xl">✨</span>
+                    <span className="font-medium text-sm sm:text-base">Crie treinos personalizados</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Sincronização em tempo real</span>
+                  <div className="flex items-center gap-3 p-2 sm:p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-lg sm:text-xl">📈</span>
+                    <span className="font-medium text-sm sm:text-base">Acompanhe seu progresso</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Relatórios personalizados</span>
+                  <div className="flex items-center gap-3 p-2 sm:p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-lg sm:text-xl">📚</span>
+                    <span className="font-medium text-sm sm:text-base">Acesse biblioteca de exercícios</span>
                   </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Suporte especializado</span>
+                  <div className="flex items-center gap-3 p-2 sm:p-3 rounded-lg bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10">
+                    <span className="text-green-300 text-lg sm:text-xl">📊</span>
+                    <span className="font-medium text-sm sm:text-base">Monitore estatísticas detalhadas</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight">
+            {/* Right Side - Login Form - Prioridade no mobile */}
+            <div className="w-full flex justify-center order-1 lg:order-2">
               <div className="w-full max-w-md">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 shadow-2xl">
-                  {/* Form Header */}
-                  <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <FaShieldAlt className="text-white text-2xl" />
-                      </div>
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">
+                <div 
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-8 shadow-2xl hover:bg-white/15 transition-all duration-500"
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards'
+                  }}
+                >
+                  <div className="text-center mb-6 sm:mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                      <span className="animate-float text-2xl sm:text-3xl">{isRegistering ? '✨' : '🔐'}</span>
                       <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                        Acesso Premium
+                        {isRegistering ? 'Criar Conta' : 'Fazer Login'}
                       </span>
                     </h2>
-                    <p className="text-white/80">
-                      {isRegistering ? 'Bem-vindo de volta, atleta!' : 'Bem-vindo de volta, atleta!'}
+                    <p className="text-white/80 text-base sm:text-lg">
+                      {isRegistering ? 'Junte-se a nós e transforme sua vida!' : 'Bem-vindo de volta, campeão!'}
                     </p>
                   </div>
 
-                  {/* Login Form */}
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     {isRegistering && (
-                      <div>
-                        <label className="block text-white font-medium mb-2 flex items-center gap-2">
+                      <div style={{ animation: 'fadeInUp 0.5s ease-out' }}>
+                        <label className="block text-white font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
                           <FaUser className="text-purple-300" /> Nome
                         </label>
                         <input
                           type="text"
-                          placeholder="seu@email.com"
+                          placeholder="Seu nome completo"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           required={isRegistering}
-                          className="form-input"
+                          className="form-input text-sm sm:text-base"
                         />
                       </div>
                     )}
 
                     <div>
-                      <label className="block text-white font-medium mb-2 flex items-center gap-2">
+                      <label className="block text-white font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
                         <FaEnvelope className="text-purple-300" /> Email
                       </label>
                       <input
@@ -510,12 +461,12 @@ const HomePage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="form-input"
+                        className="form-input text-sm sm:text-base"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-white font-medium mb-2 flex items-center gap-2">
+                      <label className="block text-white font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
                         <FaLock className="text-purple-300" /> Senha
                       </label>
                       <div className="relative">
@@ -525,7 +476,7 @@ const HomePage = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="form-input pr-12"
+                          className="form-input pr-12 text-sm sm:text-base"
                         />
                         <button
                           type="button"
@@ -540,7 +491,7 @@ const HomePage = () => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="btn-gradient w-full py-4 text-lg font-bold flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="btn-gradient w-full py-3 sm:py-4 text-base sm:text-lg font-bold flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <>
@@ -549,44 +500,45 @@ const HomePage = () => {
                         </>
                       ) : (
                         <>
-                          <FaUser />
-                          <span>{isRegistering ? 'Acessar Plataforma' : 'Acessar Plataforma'}</span>
+                          <span>{isRegistering ? <FaRocket /> : <FaUser />}</span>
+                          <span>{isRegistering ? 'Registrar' : 'Entrar'}</span>
                         </>
                       )}
                     </button>
-
-                    <div className="text-center text-white/60 text-sm">ou continue com</div>
 
                     {/* Google Auth Button */}
                     <button
                       type="button"
                       onClick={handleGoogleAuth}
                       disabled={loading}
-                      className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                     >
                       <FaGoogle className="text-red-400" />
                       {loading ? 'Conectando...' : (isRegistering ? 'Registrar com Google' : 'Continuar com Google')}
                     </button>
 
                     {/* Demo Login Button */}
-                    <button
-                      type="button"
-                      onClick={handleDemoLogin}
-                      className="w-full py-3 bg-orange-500/20 border border-orange-500/30 text-orange-200 rounded-lg font-medium hover:bg-orange-500/30 transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <span>🎯</span>
-                      Experimentar Demo
-                    </button>
+                    {!isRegistering && (
+                      <button
+                        type="button"
+                        onClick={handleDemoLogin}
+                        className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base"
+                      >
+                        <span>🎯</span>
+                        Testar com conta demo
+                      </button>
+                    )}
 
-                    <div className="text-center space-y-3">
+                    <div className="text-center space-y-2 sm:space-y-3">
                       <button
                         type="button"
                         onClick={() => setIsRegistering(!isRegistering)}
-                        className="text-white/80 hover:text-white text-sm font-medium underline transition-colors duration-300"
+                        className="text-white/80 hover:text-white text-xs sm:text-sm font-medium underline transition-colors duration-300 flex items-center justify-center gap-2 mx-auto"
                       >
+                        <span>{isRegistering ? '🔙' : '📝'}</span>
                         {isRegistering ? 
-                          '🔙 Não tem conta? Registre-se' : 
-                          '📝 Não tem conta? Registre-se'
+                          'Já tem conta? Faça login' : 
+                          'Não tem conta? Registre-se'
                         }
                       </button>
                       
@@ -594,9 +546,10 @@ const HomePage = () => {
                         <div>
                           <button 
                             type="button"
-                            className="text-white/70 hover:text-white text-sm underline transition-colors duration-300"
+                            className="text-white/70 hover:text-white text-xs sm:text-sm underline transition-colors duration-300 flex items-center justify-center gap-2 mx-auto"
                           >
-                            🔑 Esqueceu sua senha?
+                            <span>🔑</span>
+                            Esqueceu sua senha?
                           </button>
                         </div>
                       )}
@@ -604,6 +557,53 @@ const HomePage = () => {
                   </form>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Bottom Statistics - Responsivo */}
+          <div 
+            className="mt-12 sm:mt-20 text-center"
+            style={{ 
+              animationDelay: '800ms',
+              animation: 'fadeInUp 0.8s ease-out forwards'
+            }}
+          >
+            <p className="text-white/90 text-lg sm:text-xl mb-8 sm:mb-12 font-medium px-4">
+              🌟 Junte-se a milhares de pessoas que já transformaram suas vidas! 🌟
+            </p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto">
+              <StatCard
+                number="1000+"
+                label="Usuários Ativos"
+                icon={<FaUsers />}
+                delay={100}
+              />
+              <StatCard
+                number="50+"
+                label="Exercícios"
+                icon={<FaDumbbell />}
+                delay={200}
+              />
+              <StatCard
+                number="24/7"
+                label="Disponível"
+                icon={<span>🌍</span>}
+                delay={300}
+              />
+            </div>
+          </div>
+
+          {/* Footer - Compacto no mobile */}
+          <div className="mt-8 sm:mt-16 text-center">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 sm:p-6 max-w-2xl mx-auto">
+              <p className="text-white/70 text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                <span>© 2025 FitnessTracker.</span>
+                <span>Todos os direitos reservados.</span>
+                <span className="flex items-center gap-1">
+                  <span>❤️</span> Feito com <span>💪</span> para fitness
+                </span>
+              </p>
             </div>
           </div>
         </div>

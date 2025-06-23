@@ -17,7 +17,7 @@ import {
   FaGoogle,
   FaShieldAlt,
   FaHeart,
-  FaBullseye,
+  FaTarget,
   FaStar
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
@@ -389,7 +389,7 @@ const HomePage = () => {
                 />
                 
                 <FeatureCard
-                  icon={<FaBullseye />}
+                  icon={<FaTarget />}
                   title="IA Personalizada"
                   description="Treinos adaptados aos seus objetivos"
                   delay={200}
