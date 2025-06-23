@@ -43,7 +43,7 @@ const ExerciseItem = memo(({
           <div>
             <h3 className="font-medium text-gray-900 dark:text-white">{exercise.name}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {Array.isArray(exercise.sets) ? exercise.sets.length : exercise.sets} séries × {exercise.reps} repetições
+              {exercise.sets} séries × {exercise.reps} repetições
             </p>
           </div>
         </div>

@@ -44,32 +44,15 @@ class UserDataService {
 
   saveUserProfile(profileData) {
     const userId = this.getCurrentUserId();
-    const profileKey = USER_PROFILE_KEY + userId;
-    
-    console.log('💾 saveUserProfile - Debug:');
-    console.log('- User ID:', userId);
-    console.log('- Profile Key:', profileKey);
-    console.log('- auth.currentUser:', auth.currentUser?.uid);
-    console.log('- Data to save:', profileData);
-    
     try {
       const existingData = this.getUserProfile();
-      console.log('- Existing data:', existingData);
-      
       const updatedData = {
         ...existingData,
         ...profileData,
         userId,
         lastUpdated: new Date().toISOString()
       };
-      
-      console.log('- Final data to save:', updatedData);
-      localStorage.setItem(profileKey, JSON.stringify(updatedData));
-      
-      // Verificar se foi salvo corretamente
-      const verification = localStorage.getItem(profileKey);
-      console.log('- Verification read:', verification);
-      
+      localStorage.setItem(USER_PROFILE_KEY + userId, JSON.stringify(updatedData));
       return updatedData;
     } catch (error) {
       console.error('Erro ao salvar perfil do usuário:', error);

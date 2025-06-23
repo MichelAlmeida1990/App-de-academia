@@ -47,15 +47,15 @@ const ProfilePage = () => {
   
   // Estados para dados do usuário - agora serão carregados do localStorage
   const [userData, setUserData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    birthDate: '',
-    gender: '',
-    height: '',
-    weight: '',
-    goal: '',
-    experience: '',
+    name: 'João Silva',
+    email: 'joao.silva@email.com',
+    phone: '(11) 99999-9999',
+    birthDate: '1990-05-15',
+    gender: 'masculino',
+    height: 175,
+    weight: 75,
+    goal: 'Ganho de massa muscular',
+    experience: 'Intermediário',
     avatar: null
   });
 
@@ -128,48 +128,36 @@ const ProfilePage = () => {
   useEffect(() => {
     const loadUserProfile = () => {
       try {
-        console.log('=== CARREGANDO PERFIL DO USUÁRIO ===');
-        console.log('Current User UID:', currentUser?.uid);
-        console.log('Current User displayName:', currentUser?.displayName);
-        console.log('Current User email:', currentUser?.email);
-        
         const savedProfile = userDataService.getUserProfile();
-        console.log('Perfil retornado pelo UserDataService:', savedProfile);
         
-        // Se há dados salvos, usar eles completamente
-        if (savedProfile && Object.keys(savedProfile).length > 0 && savedProfile.name) {
-          console.log('✅ Carregando dados salvos:', savedProfile);
+        // Se há dados salvos, usar eles; senão, usar dados do Firebase/Auth + dados padrão
+        if (savedProfile && Object.keys(savedProfile).length > 0) {
           const loadedData = {
-            name: savedProfile.name || '',
-            email: savedProfile.email || '',
-            phone: savedProfile.phone || '',
-            birthDate: savedProfile.birthDate || '',
-            gender: savedProfile.gender || '',
-            height: savedProfile.height || '',
-            weight: savedProfile.weight || '',
-            goal: savedProfile.goal || '',
-            experience: savedProfile.experience || '',
+            name: savedProfile.name || currentUser?.displayName || 'João Silva',
+            email: savedProfile.email || currentUser?.email || 'joao.silva@email.com',
+            phone: savedProfile.phone || '(11) 99999-9999',
+            birthDate: savedProfile.birthDate || '1990-05-15',
+            gender: savedProfile.gender || 'masculino',
+            height: savedProfile.height || 175,
+            weight: savedProfile.weight || 75,
+            goal: savedProfile.goal || 'Ganho de massa muscular',
+            experience: savedProfile.experience || 'Intermediário',
             avatar: savedProfile.avatar || null
           };
           setUserData(loadedData);
           setOriginalUserData(loadedData);
         } else {
-          // Se não há dados salvos, usar apenas nome e email do currentUser, resto em branco
-          console.log('❌ Nenhum dado salvo encontrado, usando dados básicos do usuário');
-          console.log('Condição falhou porque:');
-          console.log('- savedProfile existe?', !!savedProfile);
-          console.log('- savedProfile tem chaves?', savedProfile ? Object.keys(savedProfile).length : 0);
-          console.log('- savedProfile tem name?', savedProfile?.name);
+          // Se não há dados salvos, usar dados do currentUser se disponível
           const defaultData = {
-            name: currentUser?.displayName || '',
-            email: currentUser?.email || '',
-            phone: '',
-            birthDate: '',
-            gender: '',
-            height: '',
-            weight: '',
-            goal: '',
-            experience: '',
+            name: currentUser?.displayName || 'João Silva',
+            email: currentUser?.email || 'joao.silva@email.com',
+            phone: '(11) 99999-9999',
+            birthDate: '1990-05-15',
+            gender: 'masculino',
+            height: 175,
+            weight: 75,
+            goal: 'Ganho de massa muscular',
+            experience: 'Intermediário',
             avatar: null
           };
           setUserData(defaultData);
@@ -177,45 +165,12 @@ const ProfilePage = () => {
         }
       } catch (error) {
         console.error('Erro ao carregar perfil do usuário:', error);
-        // Em caso de erro, usar apenas dados básicos
-        const fallbackData = {
-          name: currentUser?.displayName || '',
-          email: currentUser?.email || '',
-          phone: '',
-          birthDate: '',
-          gender: '',
-          height: '',
-          weight: '',
-          goal: '',
-          experience: '',
-          avatar: null
-        };
-        setUserData(fallbackData);
-        setOriginalUserData(fallbackData);
+        // Em caso de erro, manter dados padrão
       }
     };
 
-    if (currentUser) {
-      loadUserProfile();
-    } else {
-      console.log('Usuário não autenticado ainda');
-    }
+    loadUserProfile();
   }, [currentUser]);
-
-  // Debug para verificar se o userDataService está funcionando
-  useEffect(() => {
-    console.log('UserDataService disponível:', userDataService);
-    console.log('Método getUserProfile disponível:', typeof userDataService.getUserProfile);
-    console.log('Método saveUserProfile disponível:', typeof userDataService.saveUserProfile);
-    
-    // Debug do localStorage
-    console.log('LocalStorage keys:', Object.keys(localStorage));
-    const allKeys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      allKeys.push(localStorage.key(i));
-    }
-    console.log('Todas as chaves do localStorage:', allKeys);
-  }, []);
 
   // Carregar estatísticas reais
   useEffect(() => {
@@ -298,29 +253,16 @@ const ProfilePage = () => {
   // Função para salvar alterações do perfil
   const handleSaveProfile = async () => {
     try {
-      // Validação básica
-      if (!userData.name.trim()) {
-        alert('O nome é obrigatório!');
-        return;
-      }
-
-      console.log('Salvando dados do perfil:', userData);
-      
       // Salvar no UserDataService (localStorage)
       const savedData = userDataService.saveUserProfile(userData);
-      console.log('Perfil salvo com sucesso no localStorage:', savedData);
+      console.log('Perfil salvo com sucesso:', savedData);
       
       // Atualizar os dados originais
       setOriginalUserData({ ...userData });
       setIsEditing(false);
       
-      // Mostrar feedback visual
+      // Mostrar feedback visual (você pode implementar um toast aqui)
       alert('Perfil atualizado com sucesso!');
-      
-      // Verificar se foi realmente salvo
-      const verification = userDataService.getUserProfile();
-      console.log('Verificação dos dados salvos:', verification);
-      
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       alert('Erro ao salvar perfil. Tente novamente.');
@@ -550,13 +492,10 @@ const ProfilePage = () => {
                         type="text"
                         value={userData.name}
                         onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-                        placeholder="Digite seu nome completo"
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900 dark:text-white">
-                        {userData.name || <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white">{userData.name}</p>
                     )}
                   </div>
 
@@ -569,13 +508,10 @@ const ProfilePage = () => {
                         type="email"
                         value={userData.email}
                         onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                        placeholder="Digite seu email"
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900 dark:text-white">
-                        {userData.email || <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white">{userData.email}</p>
                     )}
                   </div>
 
@@ -588,13 +524,10 @@ const ProfilePage = () => {
                         type="tel"
                         value={userData.phone}
                         onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
-                        placeholder="(11) 99999-9999"
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900 dark:text-white">
-                        {userData.phone || <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white">{userData.phone}</p>
                     )}
                   </div>
 
@@ -611,10 +544,7 @@ const ProfilePage = () => {
                       />
                     ) : (
                       <p className="text-gray-900 dark:text-white">
-                        {userData.birthDate ? 
-                          new Date(userData.birthDate).toLocaleDateString('pt-BR') : 
-                          <span className="text-gray-400 italic">Não informado</span>
-                        }
+                        {new Date(userData.birthDate).toLocaleDateString('pt-BR')}
                       </p>
                     )}
                   </div>
@@ -629,15 +559,12 @@ const ProfilePage = () => {
                         onChange={(e) => setUserData({ ...userData, gender: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
-                        <option value="">Selecione seu gênero</option>
                         <option value="masculino">Masculino</option>
                         <option value="feminino">Feminino</option>
                         <option value="outro">Outro</option>
                       </select>
                     ) : (
-                      <p className="text-gray-900 dark:text-white capitalize">
-                        {userData.gender || <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white capitalize">{userData.gender}</p>
                     )}
                   </div>
 
@@ -649,14 +576,11 @@ const ProfilePage = () => {
                       <input
                         type="number"
                         value={userData.height}
-                        onChange={(e) => setUserData({ ...userData, height: e.target.value ? parseInt(e.target.value) : '' })}
-                        placeholder="Ex: 175"
+                        onChange={(e) => setUserData({ ...userData, height: parseInt(e.target.value) })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900 dark:text-white">
-                        {userData.height ? `${userData.height} cm` : <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white">{userData.height} cm</p>
                     )}
                   </div>
 
@@ -668,14 +592,11 @@ const ProfilePage = () => {
                       <input
                         type="number"
                         value={userData.weight}
-                        onChange={(e) => setUserData({ ...userData, weight: e.target.value ? parseInt(e.target.value) : '' })}
-                        placeholder="Ex: 75"
+                        onChange={(e) => setUserData({ ...userData, weight: parseInt(e.target.value) })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900 dark:text-white">
-                        {userData.weight ? `${userData.weight} kg` : <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white">{userData.weight} kg</p>
                     )}
                   </div>
 
@@ -689,7 +610,6 @@ const ProfilePage = () => {
                         onChange={(e) => setUserData({ ...userData, goal: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
-                        <option value="">Selecione seu objetivo</option>
                         <option value="Perda de peso">Perda de peso</option>
                         <option value="Ganho de massa muscular">Ganho de massa muscular</option>
                         <option value="Manutenção">Manutenção</option>
@@ -697,9 +617,7 @@ const ProfilePage = () => {
                         <option value="Força">Força</option>
                       </select>
                     ) : (
-                      <p className="text-gray-900 dark:text-white">
-                        {userData.goal || <span className="text-gray-400 italic">Não informado</span>}
-                      </p>
+                      <p className="text-gray-900 dark:text-white">{userData.goal}</p>
                     )}
                   </div>
                 </div>

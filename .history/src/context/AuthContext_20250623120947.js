@@ -189,35 +189,39 @@ export const AuthProvider = ({ children }) => {
     // Não precisa de setError ou setLoading aqui, pois é uma operação geralmente rápida
     // e o onAuthStateChanged cuidará da atualização do estado.
     try {
-      // Manter dados do usuário no localStorage para persistência
-      // Apenas limpar dados temporários ou de sessão se necessário
+      // Limpar dados do localStorage específicos do usuário
+      // Mas manter dados gerais do app (treinos de demo, etc.)
       if (currentUser) {
-        console.log('Logout realizado - mantendo dados do perfil salvos para persistência');
-        // Comentado: limpeza de dados que queremos manter
-        // Se futuramente quiser limpar dados específicos no logout, pode descomentar e ajustar aqui
-        
-        /*
+        // Limpar apenas dados específicos do usuário atual
         try {
           const keysToRemove = [];
           
-          // Exemplo: limpar apenas dados temporários/cache
+          // Percorrer localStorage e identificar chaves do usuário atual
           for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             
-            // Limpar apenas dados de sessão temporária, se houver
-            if (key && key.includes('temp_session_data')) {
+            // Limpar apenas dados sensíveis, mas manter o perfil do usuário
+            if (key && (
+              // Não limpar o perfil: key.includes(`fitness_user_profile_${currentUser.uid}`) ||
+              key.includes(`fitness_bmi_history_${currentUser.uid}`) ||
+              key.includes(`fitness_bodyfat_history_${currentUser.uid}`) ||
+              key.includes(`fitness_calorie_history_${currentUser.uid}`) ||
+              key.includes(`fitness_onerm_history_${currentUser.uid}`)
+            )) {
               keysToRemove.push(key);
             }
           }
           
+          // Remover as chaves identificadas
           keysToRemove.forEach(key => {
             localStorage.removeItem(key);
           });
           
+          console.log('Dados do usuário limpos do localStorage no logout');
         } catch (localStorageError) {
-          console.warn('Erro ao limpar dados temporários no logout:', localStorageError);
+          console.warn('Erro ao limpar localStorage no logout:', localStorageError);
+          // Não propagar o erro, pois o logout deve continuar mesmo se a limpeza falhar
         }
-        */
       }
       
       await signOut(auth);

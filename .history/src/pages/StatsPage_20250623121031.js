@@ -155,11 +155,7 @@ const ProfilePage = () => {
           setOriginalUserData(loadedData);
         } else {
           // Se não há dados salvos, usar apenas nome e email do currentUser, resto em branco
-          console.log('❌ Nenhum dado salvo encontrado, usando dados básicos do usuário');
-          console.log('Condição falhou porque:');
-          console.log('- savedProfile existe?', !!savedProfile);
-          console.log('- savedProfile tem chaves?', savedProfile ? Object.keys(savedProfile).length : 0);
-          console.log('- savedProfile tem name?', savedProfile?.name);
+          console.log('Nenhum dado salvo encontrado, usando dados básicos do usuário');
           const defaultData = {
             name: currentUser?.displayName || '',
             email: currentUser?.email || '',
