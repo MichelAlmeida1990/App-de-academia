@@ -13,8 +13,7 @@ import {
   FaEyeSlash,
   FaSpinner,
   FaCheckCircle,
-  FaExclamationTriangle,
-  FaGoogle
+  FaExclamationTriangle
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
@@ -173,19 +172,6 @@ const HomePage = () => {
 
     } catch (error) {
       showToast('error', error.message || 'Ocorreu um erro.'); 
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    try {
-      setLoading(true);
-      await loginWithGoogle();
-      showToast('success', 'Login com Google realizado com sucesso!');
-    } catch (error) {
-      console.error('Erro no Google Auth:', error);
-      showToast('error', error.message || 'Erro ao fazer login com Google');
     } finally {
       setLoading(false);
     }
@@ -505,11 +491,10 @@ const HomePage = () => {
                     <button
                       type="button"
                       onClick={handleGoogleAuth}
-                      disabled={loading}
-                      className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2"
                     >
-                      <FaGoogle className="text-red-400" />
-                      {loading ? 'Conectando...' : (isRegistering ? 'Registrar com Google' : 'Continuar com Google')}
+                      <span>🔴</span>
+                      {isRegistering ? 'Registrar com Google' : 'Continuar com Google'}
                     </button>
 
                     {/* Demo Login Button */}

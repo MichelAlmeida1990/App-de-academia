@@ -77,62 +77,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      // Forçar seleção de conta a cada login
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
       provider.addScope('email');
       provider.addScope('profile');
       
       const userCredential = await signInWithPopup(auth, provider);
       
-      // Verificar se é realmente um usuário novo
-      const isNewUser = userCredential._tokenResponse?.isNewUser || 
-                       userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
-      
-      console.log('🔍 Google Login Debug:');
-      console.log('- User ID:', userCredential.user.uid);
-      console.log('- Is New User:', isNewUser);
-      console.log('- Creation Time:', userCredential.user.metadata.creationTime);
-      console.log('- Last Sign In:', userCredential.user.metadata.lastSignInTime);
-      
-      // Verificar se já existe treinos para este usuário
-      const existingWorkouts = LocalStorageService.getWorkouts(userCredential.user.uid);
-      console.log('- Existing Workouts:', existingWorkouts.length);
-      
-      // Só criar treinos demo se for novo usuário E não tiver treinos
-      if (isNewUser && existingWorkouts.length === 0) {
-        console.log('✅ Criando treinos demo para novo usuário Google');
+      // Se é um novo usuário, criar treinos demo
+      if (userCredential.user && userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime) {
         createAndSaveDemoWorkouts(userCredential.user.uid);
-      } else {
-        console.log('❌ Não criando treinos demo - usuário existente ou já tem treinos');
       }
       
       return userCredential.user;
     } catch (err) {
       console.error("Erro de login com Google:", err.code, err.message);
-      
-      // Mapear erros específicos do Google Auth
-      let errorMessage = 'Falha ao fazer login com Google.';
-      
-      switch (err.code) {
-        case 'auth/popup-closed-by-user':
-          errorMessage = 'Login cancelado pelo usuário.';
-          break;
-        case 'auth/popup-blocked':
-          errorMessage = 'Pop-up bloqueado pelo navegador. Permita pop-ups para este site.';
-          break;
-        case 'auth/cancelled-popup-request':
-          errorMessage = 'Solicitação de login cancelada.';
-          break;
-        case 'auth/network-request-failed':
-          errorMessage = 'Erro de rede. Verifique sua conexão.';
-          break;
-        default:
-          errorMessage = err.message || 'Falha ao fazer login com Google.';
-      }
-      
-      setError(errorMessage);
+      setError(err.message || 'Falha ao fazer login com Google.');
       throw err;
     } finally {
       setLoading(false);
@@ -142,8 +100,6 @@ export const AuthProvider = ({ children }) => {
   // Função para criar treinos demo (movida para dentro para ter acesso ao setError)
   const createAndSaveDemoWorkouts = (userId) => {
     try {
-      console.log('🏋️ Criando treinos demo para usuário:', userId);
-      
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth();
@@ -186,11 +142,9 @@ export const AuthProvider = ({ children }) => {
         progress: 100,
         userId: userId
       });
-      
       LocalStorageService.saveInitialDemoWorkouts(userId, demoWorkouts);
-      console.log('✅ Treinos demo criados com sucesso');
     } catch (e) {
-      console.error("❌ Erro ao criar treinos demo:", e);
+      console.error("Erro ao criar treinos demo:", e);
       // Não vamos propagar o erro para não quebrar o fluxo de signup
       // setError("Houve um problema ao configurar os treinos de demonstração.");
     }
@@ -216,21 +170,8 @@ export const AuthProvider = ({ children }) => {
         });
         setIsAuthenticated(true); // Definir como autenticado imediatamente
 
-        console.log('🔍 Signup Debug:');
-        console.log('- New User ID:', userCredential.user.uid);
-        console.log('- Email:', userCredential.user.email);
-        
-        // Verificar se já existem treinos (não deveria existir para usuário novo)
-        const existingWorkouts = LocalStorageService.getWorkouts(userCredential.user.uid);
-        console.log('- Existing Workouts on Signup:', existingWorkouts.length);
-        
-        // Só criar treinos demo se não existir nenhum
-        if (existingWorkouts.length === 0) {
-          console.log('✅ Criando treinos demo para novo usuário (signup)');
-          createAndSaveDemoWorkouts(userCredential.user.uid);
-        } else {
-          console.log('❌ Usuário já tem treinos - não criando demos');
-        }
+        // Salvar treinos de demonstração para o novo usuário
+        createAndSaveDemoWorkouts(userCredential.user.uid);
       }
       // O onAuthStateChanged também vai disparar, mas já atualizamos o estado aqui.
       return userCredential.user;
@@ -331,5 +272,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;

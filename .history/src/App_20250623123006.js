@@ -11,9 +11,6 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import ConnectionStatus from './components/ui/ConnectionStatus';
 
-// Debug utils para desenvolvimento
-import './utils/authDebug';
-
 // MUI Imports (se estiver usando Material-UI)
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
