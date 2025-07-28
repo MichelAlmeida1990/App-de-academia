@@ -1,182 +1,259 @@
 // src/pages/HomePage.js
 import React, { useState, useEffect } from 'react';
-import { 
-  FaUser, 
-  FaEnvelope, 
-  FaLock, 
-  FaRocket, 
-  FaChartLine, 
-  FaDumbbell, 
-  FaFire, 
-  FaUsers,
-  FaEye,
-  FaEyeSlash,
-  FaSpinner,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaGoogle,
-  FaShieldAlt,
-  FaHeart,
-  FaBullseye,
-  FaStar
-} from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+// Remover import do useToast pois não está sendo usado corretamente
+import { 
+  FaPlay, 
+  FaArrowRight, 
+  FaChartLine, 
+  FaBrain, 
+  FaTrophy, 
+  FaUsers, 
+  FaDumbbell, 
+  FaMobile,
+  FaPalette,
+  FaCheckCircle,
+  FaStar,
+  FaFire,
+  FaClock,
+  FaHeart,
+  FaUser
+} from 'react-icons/fa';
+import HeroSection from '../components/common/HeroSection';
+import FeaturesSection from '../components/common/FeaturesSection';
+import ImageCard from '../components/common/ImageCard';
+import { 
+  HERO_IMAGES, 
+  FEATURE_IMAGES, 
+  COLOR_PALETTES, 
+  setActivePalette, 
+  getPaletteColors 
+} from '../utils/imageAssets';
 
-// Simulação de autenticação - ESTE MOCK NÃO SERÁ MAIS USADO DIRETAMENTE NO HANDLESUBMIT
-/*
-const mockAuth = {
-  login: (email, password) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email === 'demo@fitness.com' && password === 'demo123') {
-          resolve({ user: { name: 'Demo User', email } });
-        } else {
-          reject(new Error('Email ou senha incorretos'));
-        }
-      }, 1500);
-    });
-  },
-  
-  signup: (email, password, name) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email && password && name) {
-          resolve({ user: { name, email } });
-        } else {
-          reject(new Error('Todos os campos são obrigatórios'));
-        }
-      }, 1500);
-    });
-  }
-};
-*/
-
-// Componente de Feature Card
-const FeatureCard = ({ icon, title, description, delay = 0 }) => {
-  return (
-    <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 md:p-6 text-center text-white hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
-      style={{ 
-        animationDelay: `${delay}ms`,
-        animation: 'fadeInUp 0.8s ease-out forwards'
-      }}
-    >
-      <div className="text-2xl md:text-4xl mb-2 md:mb-4 animate-bounce">{icon}</div>
-      <h3 className="font-bold text-sm md:text-lg mb-2 md:mb-3 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-        {title}
-      </h3>
-      <p className="text-xs md:text-sm text-white/80">{description}</p>
-    </div>
-  );
-};
-
-// Componente de Estatística
-const StatCard = ({ number, label, icon, delay = 0 }) => {
-  return (
-    <div 
-      className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 md:p-4 text-center hover:bg-white/15 transition-all duration-500 hover:scale-105"
-      style={{ 
-        animationDelay: `${delay}ms`,
-        animation: 'fadeInUp 0.8s ease-out forwards'
-      }}
-    >
-      <div className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-1 md:mb-2 mobile-stats-text">
-        {number}
-      </div>
-      <div className="text-white/80 text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2">
-        {icon} {label}
-      </div>
-    </div>
-  );
-};
-
-// Componente de Toast de Notificação
+// Componente Toast
 const Toast = ({ type, message, onClose }) => {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 5000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
   const getToastStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-900/90 border-green-500 text-green-100';
+        return 'bg-green-500 text-white';
       case 'error':
-        return 'bg-red-900/90 border-red-500 text-red-100';
+        return 'bg-red-500 text-white';
       default:
-        return 'bg-purple-900/90 border-purple-500 text-purple-100';
+        return 'bg-blue-500 text-white';
     }
   };
 
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <FaCheckCircle className="text-green-400" />;
+        return <FaCheckCircle />;
       case 'error':
-        return <FaExclamationTriangle className="text-red-400" />;
+        return <FaHeart />;
       default:
-        return <FaCheckCircle className="text-purple-400" />;
+        return <FaStar />;
     }
   };
 
   return (
-    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg border backdrop-blur-md ${getToastStyles()} animate-slideInRight`}>
-      <div className="flex items-center gap-3">
-        {getIcon()}
-        <span>{message}</span>
-        <button onClick={onClose} className="ml-2 hover:opacity-70">
-          ×
-        </button>
+    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-2 ${getToastStyles()}`}>
+      {getIcon()}
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-2">×</button>
+    </div>
+  );
+};
+
+// Componente AuthForm
+const AuthForm = ({ onSubmit, loading, toast, setToast, onGoogleAuth, palette }) => {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !password || (isRegistering && !name)) {
+      setToast({ type: 'error', message: 'Por favor, preencha todos os campos' });
+      return;
+    }
+    await onSubmit(email, password, name, isRegistering);
+  };
+
+  const handleGoogleClick = async () => {
+    try {
+      await onGoogleAuth();
+    } catch (error) {
+      setToast({ type: 'error', message: 'Erro no login com Google' });
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md mx-auto">
+      <div
+        className="backdrop-blur-2xl border border-white/30 rounded-3xl p-10 shadow-2xl relative overflow-hidden"
+        style={{
+          background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)`,
+          boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.1)`,
+          border: '2px solid rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(20px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(200%)'
+        }}
+      >
+        {/* Glow effect */}
+        <div 
+          className="absolute -inset-1 rounded-3xl opacity-50"
+          style={{ 
+            background: palette.gradient,
+            filter: 'blur(15px)',
+            zIndex: -1
+          }}
+        />
+        
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: palette.gradient }}>
+            <FaUser className="text-white text-2xl" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-2">
+            {isRegistering ? 'Criar Conta' : 'Entrar'}
+          </h2>
+          <p className="text-white/80 text-lg">
+            {isRegistering ? 'Junte-se à nossa comunidade fitness' : 'Bem-vindo de volta!'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {isRegistering && (
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-6 py-4 bg-white/15 border-2 border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-4 transition-all duration-300 text-lg"
+              style={{
+                boxShadow: `0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)`,
+                borderColor: palette.primary,
+                outlineColor: palette.primary,
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
+              }}
+              placeholder="Seu nome completo"
+              required
+            />
+          )}
+
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-6 py-4 bg-white/15 border-2 border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-4 transition-all duration-300 text-lg"
+            style={{
+              boxShadow: `0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)`,
+              borderColor: palette.primary,
+              outlineColor: palette.primary,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
+            }}
+            placeholder="Seu email"
+            required
+          />
+
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-6 py-4 bg-white/15 border-2 border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-4 transition-all duration-300 text-lg"
+            style={{
+              boxShadow: `0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)`,
+              borderColor: palette.primary,
+              outlineColor: palette.primary,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
+            }}
+            placeholder="Sua senha"
+            required
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 px-8 rounded-xl font-bold text-white transition-all duration-300 flex items-center justify-center gap-3 text-lg hover:scale-105 active:scale-95"
+            style={{
+              background: palette.gradient,
+              boxShadow: `0 10px 30px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)`,
+              border: '2px solid rgba(255,255,255,0.2)'
+            }}
+          >
+            {loading ? (
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+            ) : (
+              <>
+                <FaCheckCircle className="text-xl" />
+                {isRegistering ? 'Criar Conta' : 'Entrar'}
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6">
+          <button
+            onClick={handleGoogleClick}
+            className="w-full py-4 px-8 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-3 text-lg hover:scale-105 active:scale-95 border-2 border-white/30 hover:bg-white/10"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+              boxShadow: `0 4px 20px rgba(0,0,0,0.1)`
+            }}
+          >
+            <FaStar className="text-xl" />
+            Continuar com Google
+          </button>
+        </div>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="text-white/80 hover:text-white transition-all duration-300 font-medium hover:scale-105"
+            style={{
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+            }}
+          >
+            {isRegistering ? 'Já tem uma conta? Entrar' : 'Não tem conta? Criar conta'}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-// Componente principal
+// Componente HomePage
 const HomePage = () => {
-  const { login: contextLogin, signup: contextSignup, loginWithGoogle, isAuthenticated: globalIsAuthenticated } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const { currentUser, loginWithGoogle } = useAuth();
+  // Remover useToast pois não está sendo usado corretamente
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [currentPalette, setCurrentPalette] = useState('ice');
+  const [showPaletteSelector, setShowPaletteSelector] = useState(false);
 
-  // Verificar se já está autenticado - Esta lógica agora é primariamente do SmartRedirect via AuthContext
+  const globalIsAuthenticated = !!currentUser;
+
   useEffect(() => {
-    // O SmartRedirect já cuida do redirecionamento se globalIsAuthenticated for true.
-    // Se o usuário chegar aqui, significa que globalIsAuthenticated é false.
-    // A lógica anterior com localStorage e onLogin não é mais necessária aqui da mesma forma.
-  }, []); // Removido onLogin das dependências
+    setActivePalette(currentPalette);
+  }, [currentPalette]);
 
-  const showToast = (type, message) => {
+  const palette = getPaletteColors();
+
+  const handleShowToast = (type, message) => {
     setToast({ type, message });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (email, password, name, isRegistering) => {
     setLoading(true);
     try {
+      // Simular login/registro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      handleShowToast('success', isRegistering ? 'Conta criada com sucesso!' : 'Login realizado com sucesso!');
       if (isRegistering) {
-        if (!name.trim()) {
-          throw new Error('Nome é obrigatório');
-        }
-        if (password.length < 6) {
-          throw new Error('Senha deve ter pelo menos 6 caracteres');
-        }
-        await contextSignup(email, password, name); 
-        showToast('success', 'Conta criada com sucesso! Bem-vindo!');
-      } else {
-        await contextLogin(email, password);
-        showToast('success', 'Login realizado com sucesso! Bem-vindo de volta!');
+        navigate('/dashboard');
       }
-      // O AuthContext agora é responsável por definir o usuário e isAuthenticated,
-      // e também por interagir com o LocalStorageService.
-      // SmartRedirect deve reagir à mudança no isAuthenticated do AuthContext.
-
     } catch (error) {
-      showToast('error', error.message || 'Ocorreu um erro.'); 
+      handleShowToast('error', 'Erro no processo. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -184,43 +261,33 @@ const HomePage = () => {
 
   const handleGoogleAuth = async () => {
     try {
-      setLoading(true);
       await loginWithGoogle();
-      showToast('success', 'Login com Google realizado com sucesso!');
+      handleShowToast('success', 'Login com Google realizado com sucesso!');
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Erro no Google Auth:', error);
-      showToast('error', error.message || 'Erro ao fazer login com Google');
-    } finally {
-      setLoading(false);
+      handleShowToast('error', 'Erro no login com Google');
     }
   };
 
-  const handleDemoLogin = async () => {
-    setEmail('demo@fitness.com');
-    setPassword('demo123');
-    setIsRegistering(false);
-    
-    setTimeout(() => {
-      document.querySelector('form').dispatchEvent(
-        new Event('submit', { cancelable: true, bubbles: true })
-      );
-    }, 100);
+  const handleComecarAgora = () => {
+    if (globalIsAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleComecarGratuitamente = () => {
+    if (globalIsAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
   };
 
   return (
     <>
       <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
         @keyframes slideInRight {
           from {
             opacity: 0;
@@ -232,585 +299,180 @@ const HomePage = () => {
           }
         }
 
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-
-        @keyframes glow {
-          0%, 100% {
-            text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
-          }
-          50% {
-            text-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
-          }
-        }
-
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        .animate-glow {
-          animation: glow 2s ease-in-out infinite;
-        }
-
         .animate-slideInRight {
           animation: slideInRight 0.5s ease-out;
         }
 
-        .animate-slideInLeft {
-          animation: slideInLeft 0.6s ease-out;
-        }
-
-        .form-input {
-          width: 100%;
-          padding: 12px 16px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 8px;
-          color: white;
-          backdrop-filter: blur(10px);
+        .palette-transition {
           transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-          outline: none;
-          border-color: rgba(168, 85, 247, 0.6);
-          box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
-          background: rgba(255, 255, 255, 0.15);
-        }
-
-        .form-input::placeholder {
-          color: rgba(255, 255, 255, 0.6);
-        }
-
-        .btn-gradient {
-          background: linear-gradient(135deg, #8b5cf6, #ec4899);
-          border: none;
-          border-radius: 8px;
-          color: white;
-          font-weight: bold;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
-        }
-
-        .btn-gradient:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
-        }
-
-        .btn-gradient:active:not(:disabled) {
-          transform: translateY(0);
-        }
-
-        .floating-bg {
-          position: absolute;
-          border-radius: 50%;
-          opacity: 0.1;
-          animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-bg:nth-child(1) { animation-delay: 0s; }
-        .floating-bg:nth-child(2) { animation-delay: 2s; }
-        .floating-bg:nth-child(3) { animation-delay: 4s; }
-        .floating-bg:nth-child(4) { animation-delay: 1s; }
-        .floating-bg:nth-child(5) { animation-delay: 3s; }
-
-        /* Responsive grid layout */
-        .homepage-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 3rem;
-          align-items: start;
-          min-height: calc(100vh - 8rem);
-          width: 100%;
-        }
-
-        /* Tablet breakpoint */
-        @media (max-width: 1024px) {
-          .homepage-grid {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            min-height: auto;
-            padding: 0;
-            align-items: stretch;
-            display: flex;
-            flex-direction: column;
-          }
-          
-          /* Form first, then content on tablet/mobile */
-          .mobile-login-form {
-            order: 1;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto 2rem auto;
-          }
-          
-          .mobile-content {
-            order: 2;
-            width: 100%;
-          }
-        }
-
-        /* Mobile breakpoint */
-        @media (max-width: 768px) {
-          .homepage-grid {
-            gap: 1.5rem;
-            padding: 0 1rem;
-            display: flex;
-            flex-direction: column;
-            min-height: auto;
-            align-items: stretch;
-          }
-          
-          .floating-bg {
-            display: none; /* Hide floating backgrounds on mobile */
-          }
-          
-          /* Ensure login form is visible and properly sized */
-          .mobile-login-form {
-            width: 100%;
-            max-width: 420px;
-            margin: 0 auto 2rem auto;
-            order: 1;
-            flex-shrink: 0;
-            padding: 0 0.5rem;
-          }
-          
-          .mobile-content {
-            order: 2;
-            width: 100%;
-            flex: 1;
-            padding: 0;
-          }
-          
-          /* Override container to ensure proper scrolling */
-          .min-h-screen {
-            min-height: 100vh !important;
-            min-height: 100dvh !important;
-            padding-bottom: 2rem;
-          }
-
-          /* Ensure proper overflow handling */
-          body {
-            overflow-x: hidden !important;
-          }
-
-          /* Global minimum margin on mobile */
-          * {
-            margin-left: max(0px, env(safe-area-inset-left));
-            margin-right: max(0px, env(safe-area-inset-right));
-          }
-        }
-
-        /* Small mobile breakpoint */
-        @media (max-width: 480px) {
-          .homepage-grid {
-            gap: 1rem;
-            padding: 0 0.75rem;
-          }
-          
-          .mobile-login-form {
-            max-width: 100%;
-            padding: 0 0.25rem;
-            margin: 0 auto 1.5rem auto;
-          }
-
-          /* Smaller form padding on very small screens */
-          .mobile-form-padding {
-            padding: 1rem 0.75rem !important;
-          }
-        }
-
-        /* Mobile-specific classes */
-        @media (max-width: 768px) {
-          .mobile-text-small {
-            font-size: 2.5rem !important;
-            line-height: 1.1 !important;
-            margin-bottom: 1rem !important;
-          }
-          
-          .mobile-text-small .text-6xl {
-            font-size: 3rem !important;
-          }
-          
-          .mobile-description {
-            font-size: 1rem !important;
-            margin-bottom: 1.5rem !important;
-          }
-          
-          .mobile-form-padding {
-            padding: 1.5rem 1rem !important;
-          }
-          
-          .mobile-space-y {
-            gap: 1.5rem !important;
-          }
-          
-          .mobile-stats-text {
-            font-size: 1.5rem !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .mobile-text-small {
-            font-size: 2rem !important;
-            margin-bottom: 0.5rem !important;
-          }
-          
-          .mobile-text-small .text-6xl {
-            font-size: 2.5rem !important;
-          }
-          
-          .mobile-description {
-            font-size: 0.9rem !important;
-            margin-bottom: 1rem !important;
-          }
-          
-          .mobile-form-padding {
-            padding: 1rem !important;
-          }
-          
-          .mobile-stats-text {
-            font-size: 1.25rem !important;
-          }
-        }
-
-        /* Ultra small mobile devices */
-        @media (max-width: 420px) {
-          .mobile-hide-stats {
-            display: none !important;
-          }
-        }
-
-        @media (max-width: 375px) {
-          .homepage-grid {
-            padding: 0 0.5rem;
-            gap: 0.5rem;
-          }
-
-          .mobile-login-form {
-            margin: 0 auto 1rem auto;
-            padding: 0 0.25rem;
-          }
-
-          .mobile-form-padding {
-            padding: 0.75rem 0.5rem !important;
-          }
-
-          .mobile-text-small {
-            font-size: 1.75rem !important;
-          }
-
-          .mobile-text-small .text-6xl {
-            font-size: 2rem !important;
-          }
-        }
-
-        /* Landscape mobile orientation */
-        @media (max-width: 768px) and (orientation: landscape) {
-          .homepage-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
-            min-height: auto;
-          }
-
-          .mobile-login-form {
-            order: 2;
-            max-width: 500px;
-          }
-
-          .mobile-content {
-            order: 1;
-          }
         }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 relative overflow-hidden">
-        {/* Background decorativo */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="floating-bg top-20 left-20 w-32 h-32 bg-white"></div>
-          <div className="floating-bg bottom-20 right-20 w-48 h-48 bg-white"></div>
-          <div className="floating-bg top-1/2 left-1/4 w-24 h-24 bg-purple-300"></div>
-          <div className="floating-bg top-1/3 right-1/3 w-36 h-36 bg-pink-300"></div>
-          <div className="floating-bg bottom-1/3 left-1/3 w-20 h-20 bg-blue-300"></div>
-        </div>
-
-        <div className="relative z-10 w-full px-4 py-6 md:px-10 md:py-8 min-h-screen overflow-hidden">
-          {/* Main Grid Layout */}
-          <div className="homepage-grid max-w-7xl mx-auto w-full">
-            
-            {/* Left Side - Branding & Features */}
-            <div className="space-y-6 md:space-y-8 animate-slideInLeft mobile-content">
-              {/* Main Branding */}
-              <div className="text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 flex items-center justify-center lg:justify-start gap-4 animate-glow mobile-text-small">
-                  <span className="text-6xl lg:text-7xl animate-float">🏋️</span>
-                  <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    FitnessTracker
-                  </span>
-                </h1>
-                <p className="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-8 mobile-description">
-                  Transforme sua jornada fitness com tecnologia de ponta. 
-                  Monitore progresso • Alcance objetivos • Supere limites
-                </p>
-              </div>
-
-              {/* Feature Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-4">
-                <FeatureCard
-                  icon={<FaChartLine />}
-                  title="Analytics Avançado"
-                  description="Gráficos detalhados do seu progresso"
-                  delay={100}
-                />
-                
-                <FeatureCard
-                  icon={<FaBullseye />}
-                  title="IA Personalizada"
-                  description="Treinos adaptados aos seus objetivos"
-                  delay={200}
-                />
-                
-                <FeatureCard
-                  icon={<FaFire />}
-                  title="Gamificação"
-                  description="Sistema de conquistas e desafios"
-                  delay={300}
-                />
-                
-                <FeatureCard
-                  icon={<FaUsers />}
-                  title="Comunidade Ativa"
-                  description="Conecte-se com outros atletas"
-                  delay={400}
-                />
-              </div>
-
-              {/* Statistics */}
-              <div className="grid grid-cols-3 gap-3 md:gap-4 mobile-hide-stats">
-                <StatCard
-                  number="10k+"
-                  label="Atletas"
-                  icon={<FaUsers />}
-                  delay={500}
-                />
-                <StatCard
-                  number="500+"
-                  label="Exercícios"
-                  icon={<FaDumbbell />}
-                  delay={600}
-                />
-                <StatCard
-                  number="24/7"
-                  label="Suporte"
-                  icon={<FaShieldAlt />}
-                  delay={700}
-                />
-              </div>
-
-              {/* Key Benefits */}
-              <div className="hidden sm:block bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 md:p-6">
-                <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 flex items-center gap-3">
-                  <FaStar className="text-yellow-400" />
-                  <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    Por que escolher o FitnessTracker?
-                  </span>
-                </h3>
-                <div className="grid grid-cols-1 gap-2 md:gap-3">
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Interface intuitiva e moderna</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Sincronização em tempo real</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Relatórios personalizados</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-white/90">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-sm">Suporte especializado</span>
-                  </div>
-                </div>
-              </div>
+      {/* Palette Selector */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setShowPaletteSelector(!showPaletteSelector)}
+          className="p-3 rounded-full text-white shadow-lg hover:scale-110 transition-all duration-200"
+          style={{ 
+            background: palette.gradient,
+            boxShadow: palette.glow
+          }}
+        >
+          <FaPalette className="text-xl" />
+        </button>
+        
+        {showPaletteSelector && (
+          <div className="absolute right-0 mt-2 p-4 rounded-lg border border-white/20"
+               style={{ 
+                 background: palette.glass,
+                 backdropFilter: 'blur(10px)'
+               }}>
+            <h3 className="text-white font-bold mb-3">Escolha sua Paleta</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(COLOR_PALETTES).map(([name, colors]) => (
+                <button
+                  key={name}
+                  onClick={() => {
+                    setCurrentPalette(name);
+                    setShowPaletteSelector(false);
+                  }}
+                  className={`p-2 rounded text-xs font-medium transition-all duration-200 ${
+                    currentPalette === name 
+                      ? 'ring-2 ring-white' 
+                      : 'hover:scale-105'
+                  }`}
+                  style={{
+                    background: colors.gradient,
+                    color: colors.light
+                  }}
+                >
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
+                </button>
+              ))}
             </div>
+          </div>
+        )}
+      </div>
 
-            {/* Right Side - Login Form */}
-            <div className="flex justify-center lg:justify-end animate-slideInRight mobile-login-form">
-              <div className="w-full max-w-lg md:max-w-md">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 md:p-8 shadow-2xl mobile-form-padding">
-                                      {/* Form Header */}
-                    <div className="text-center mb-8 md:mb-8">
-                    <div className="flex justify-center mb-3 md:mb-4">
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <FaShieldAlt className="text-white text-xl md:text-2xl" />
-                      </div>
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
-                      <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                        Acesso Premium
-                      </span>
+      {/* Hero Section */}
+      <HeroSection
+        title="Transforme sua Jornada Fitness"
+        subtitle="Acompanhe progresso, alcance objetivos e supere limites com tecnologia de ponta"
+        backgroundImage={HERO_IMAGES.fitness}
+        palette={palette}
+        stats={[
+          { value: "10k+", label: "Usuários Ativos" },
+          { value: "4.9/5", label: "Avaliações" },
+          { value: "24/7", label: "Suporte" }
+        ]}
+      >
+        <button 
+          onClick={handleComecarAgora}
+          className="inline-flex items-center px-8 py-4 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+          style={{ 
+            background: palette.gradient,
+            boxShadow: palette.glow
+          }}
+        >
+          <FaPlay className="mr-2" />
+          Começar Agora
+        </button>
+      </HeroSection>
+
+      {/* Auth Form Section */}
+      {!globalIsAuthenticated && (
+        <section id="auth-section" className="py-20 flex items-center min-h-[70vh] relative overflow-hidden">
+          {/* Background com gradiente mais vibrante */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${palette.primary}20 0%, ${palette.secondary}30 50%, ${palette.accent}20 100%)`,
+              backdropFilter: 'blur(10px)',
+            }}
+          />
+          
+          {/* Overlay com padrão sutil */}
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, ${palette.primary} 0%, transparent 50%), radial-gradient(circle at 75% 75%, ${palette.secondary} 0%, transparent 50%)`
+            }}
+          />
+          
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                {/* Coluna de conteúdo - Mais vibrante */}
+                <div className="text-white">
+                  <div className="mb-8">
+                    <h2 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                      Junte-se a milhares de atletas
                     </h2>
-                    <p className="text-white/80 text-sm md:text-base">
-                      {isRegistering ? 'Bem-vindo de volta, atleta!' : 'Bem-vindo de volta, atleta!'}
+                    <div className="w-20 h-1 rounded-full mb-6" style={{ background: palette.gradient }}></div>
+                    <p className="text-xl text-white/90 mb-8 leading-relaxed">
+                      Acesse recursos premium, acompanhe seu progresso e conecte-se com uma comunidade global de fitness.
                     </p>
                   </div>
-
-                  {/* Login Form */}
-                  <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
-                    {isRegistering && (
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 p-4 rounded-xl backdrop-blur-sm border border-white/20 hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      <div className="p-2 rounded-full" style={{ background: palette.gradient }}>
+                        <FaCheckCircle className="text-white text-lg" />
+                      </div>
                       <div>
-                        <label className="block text-white font-medium mb-2 flex items-center gap-2">
-                          <FaUser className="text-purple-300" /> Nome
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="seu@email.com"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required={isRegistering}
-                          className="form-input"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="block text-white font-medium mb-2 flex items-center gap-2">
-                        <FaEnvelope className="text-purple-300" /> Email
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="seu@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="form-input"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-white font-medium mb-2 flex items-center gap-2">
-                        <FaLock className="text-purple-300" /> Senha
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Sua senha segura"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          className="form-input pr-12"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white"
-                        >
-                          {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
+                        <span className="font-semibold text-lg">Analytics avançado</span>
+                        <p className="text-white/70 text-sm">Acompanhe seu progresso detalhado</p>
                       </div>
                     </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="btn-gradient w-full py-4 text-lg font-bold flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? (
-                        <>
-                          <FaSpinner className="animate-spin" />
-                          <span>Carregando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <FaUser />
-                          <span>{isRegistering ? 'Acessar Plataforma' : 'Acessar Plataforma'}</span>
-                        </>
-                      )}
-                    </button>
-
-                    <div className="text-center text-white/60 text-sm">ou continue com</div>
-
-                    {/* Google Auth Button */}
-                    <button
-                      type="button"
-                      onClick={handleGoogleAuth}
-                      disabled={loading}
-                      className="w-full py-3 bg-white/10 border border-white/20 text-white rounded-lg font-medium hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <FaGoogle className="text-red-400" />
-                      {loading ? 'Conectando...' : (isRegistering ? 'Registrar com Google' : 'Continuar com Google')}
-                    </button>
-
-                    {/* Demo Login Button */}
-                    <button
-                      type="button"
-                      onClick={handleDemoLogin}
-                      className="w-full py-3 bg-orange-500/20 border border-orange-500/30 text-orange-200 rounded-lg font-medium hover:bg-orange-500/30 transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <span>🎯</span>
-                      Experimentar Demo
-                    </button>
-
-                    <div className="text-center space-y-4">
-                      <button
-                        type="button"
-                        onClick={() => setIsRegistering(!isRegistering)}
-                        className="text-white/80 hover:text-white text-sm font-medium underline transition-colors duration-300"
-                      >
-                        {isRegistering ? 
-                          '🔙 Não tem conta? Registre-se' : 
-                          '📝 Não tem conta? Registre-se'
-                        }
-                      </button>
-                      
-                      {!isRegistering && (
-                        <div>
-                          <button 
-                            type="button"
-                            className="text-white/70 hover:text-white text-sm underline transition-colors duration-300"
-                          >
-                            🔑 Esqueceu sua senha?
-                          </button>
-                        </div>
-                      )}
+                    
+                    <div className="flex items-center gap-4 p-4 rounded-xl backdrop-blur-sm border border-white/20 hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      <div className="p-2 rounded-full" style={{ background: palette.gradient }}>
+                        <FaCheckCircle className="text-white text-lg" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-lg">Treinos personalizados</span>
+                        <p className="text-white/70 text-sm">Adaptados ao seu nível e objetivos</p>
+                      </div>
                     </div>
-                  </form>
+                    
+                    <div className="flex items-center gap-4 p-4 rounded-xl backdrop-blur-sm border border-white/20 hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      <div className="p-2 rounded-full" style={{ background: palette.gradient }}>
+                        <FaCheckCircle className="text-white text-lg" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-lg">Comunidade ativa</span>
+                        <p className="text-white/70 text-sm">Conecte-se com outros atletas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Formulário - Mais vibrante e contrastante */}
+                <div className="relative">
+                  <div className="absolute -inset-4 rounded-3xl" style={{ background: palette.gradient, opacity: 0.3, filter: 'blur(20px)' }}></div>
+                  <AuthForm 
+                    onSubmit={handleSubmit}
+                    loading={loading}
+                    toast={toast}
+                    setToast={setToast}
+                    onGoogleAuth={handleGoogleAuth}
+                    palette={palette}
+                  />
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+      )}
 
-        {/* Toast Notifications */}
-        {toast && (
-          <Toast
-            type={toast.type}
-            message={toast.message}
-            onClose={() => setToast(null)}
-          />
-        )}
-      </div>
+      {/* Toast */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </>
   );
 };
